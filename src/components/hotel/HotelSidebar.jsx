@@ -344,37 +344,28 @@ export default function HotelSidebar({
     <>
 
       {/* =====================================================
-          HEADER MOBILE
+          MOBILE HEADER
           ===================================================== */}
 
-      <header className="hotel-mobile-header">
+      <header className="hotel-mobile-nav">
 
-        <div className="hotel-mobile-header__brand">
+        <div className="hotel-mobile-nav__brand">
 
           <img
             src={wakiLogo}
             alt="WAKI"
           />
 
-
-          <div className="hotel-mobile-header__hotel">
-
-            <strong>
-              {hotelName}
-            </strong>
-
-            <span>
-              {hotelLocation}
-            </span>
-
-          </div>
+          <span>
+            HOTEL
+          </span>
 
         </div>
 
 
         <button
           type="button"
-          className="hotel-mobile-header__menu"
+          className="hotel-mobile-nav__toggle"
           aria-label={
             mobileOpen
               ? 'Cerrar menú'
@@ -394,15 +385,15 @@ export default function HotelSidebar({
           {mobileOpen ? (
 
             <X
-              size={22}
-              strokeWidth={1.8}
+              size={23}
+              strokeWidth={1.9}
             />
 
           ) : (
 
             <Menu
-              size={22}
-              strokeWidth={1.8}
+              size={24}
+              strokeWidth={1.9}
             />
 
           )}
@@ -413,15 +404,15 @@ export default function HotelSidebar({
 
 
       {/* =====================================================
-          OVERLAY MOBILE
+          OVERLAY
           ===================================================== */}
 
       <button
         type="button"
         className={[
-          'hotel-mobile-overlay',
+          'hotel-mobile-drawer-overlay',
           mobileOpen
-            ? 'is-visible'
+            ? 'is-open'
             : ''
         ].join(' ')}
         aria-label="Cerrar menú"
@@ -434,7 +425,7 @@ export default function HotelSidebar({
 
 
       {/* =====================================================
-          SIDEBAR / DRAWER
+          SIDEBAR
           ===================================================== */}
 
       <aside
@@ -454,10 +445,6 @@ export default function HotelSidebar({
         <div className="hotel-sidebar-ref__top">
 
 
-          {/* =====================================================
-              LOGO
-              ===================================================== */}
-
           <div className="hotel-sidebar-ref__brand">
 
             <img
@@ -471,10 +458,6 @@ export default function HotelSidebar({
 
           </div>
 
-
-          {/* =====================================================
-              HOTEL ACTUAL
-              ===================================================== */}
 
           <div className="hotel-sidebar-ref__hotel">
 
@@ -513,10 +496,6 @@ export default function HotelSidebar({
 
           </div>
 
-
-          {/* =====================================================
-              MENÚ
-              ===================================================== */}
 
           <nav className="hotel-sidebar-ref__menu">
 
@@ -580,10 +559,6 @@ export default function HotelSidebar({
           </nav>
 
 
-          {/* =====================================================
-              AYUDA
-              ===================================================== */}
-
           <div className="hotel-sidebar-ref__help">
 
             <div className="hotel-sidebar-ref__help-icon">
@@ -620,10 +595,6 @@ export default function HotelSidebar({
 
         </div>
 
-
-        {/* =====================================================
-            PARTE INFERIOR
-            ===================================================== */}
 
         <div className="hotel-sidebar-ref__bottom">
 

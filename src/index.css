@@ -13295,3 +13295,307 @@ body {
   }
 
 }
+
+
+/* =========================================================
+   WAKI HOTEL — MOBILE NAV FIX V2
+   PEGAR AL FINAL DEL index.css
+   ========================================================= */
+
+.hotel-mobile-nav,
+.hotel-mobile-drawer-overlay {
+  display: none;
+}
+
+
+@media (max-width: 850px) {
+
+  :root {
+    --waki-mobile-nav-height: 64px;
+  }
+
+
+  /* HEADER MORADO VISIBLE */
+
+  .hotel-mobile-nav {
+    width: 100%;
+    height:
+      calc(
+        var(--waki-mobile-nav-height) +
+        env(safe-area-inset-top)
+      );
+
+    padding:
+      env(safe-area-inset-top)
+      14px
+      0;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 2000;
+
+    display: flex !important;
+
+    align-items: center;
+    justify-content: space-between;
+
+    background: #7137e8;
+
+    border-bottom:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        .16
+      );
+
+    box-shadow:
+      0
+      5px
+      18px
+      rgba(
+        50,
+        28,
+        105,
+        .14
+      );
+  }
+
+
+  .hotel-mobile-nav__brand {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+  }
+
+
+  .hotel-mobile-nav__brand img {
+    width: 76px;
+    height: auto;
+
+    display: block;
+  }
+
+
+  .hotel-mobile-nav__brand span {
+    min-height: 24px;
+
+    padding: 0 8px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    border-radius: 7px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        .16
+      );
+
+    color: #fff;
+
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+
+  .hotel-mobile-nav__toggle {
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+
+    place-items: center;
+
+    flex: 0 0 44px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        .28
+      );
+
+    border-radius: 12px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        .13
+      );
+
+    color: #fff;
+
+    cursor: pointer;
+  }
+
+
+  /* EL CONTENIDO DEJA ESPACIO PARA EL HEADER */
+
+  .hotel-portal {
+    padding-top:
+      calc(
+        var(--waki-mobile-nav-height) +
+        env(safe-area-inset-top)
+      ) !important;
+  }
+
+
+  /* SIDEBAR COMO DRAWER */
+
+  .hotel-sidebar--reference {
+    width: min(86vw, 325px) !important;
+    min-width: min(86vw, 325px) !important;
+    max-width: min(86vw, 325px) !important;
+
+    height: 100vh !important;
+    height: 100dvh !important;
+
+    padding:
+      calc(
+        18px +
+        env(safe-area-inset-top)
+      )
+      16px
+      calc(
+        15px +
+        env(safe-area-inset-bottom)
+      )
+      !important;
+
+    position: fixed !important;
+
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+
+    z-index: 2300 !important;
+
+    display: flex !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    transform:
+      translateX(-105%);
+
+    transition:
+      transform
+      .24s
+      ease;
+
+    box-shadow:
+      20px
+      0
+      45px
+      rgba(
+        24,
+        13,
+        54,
+        .24
+      );
+  }
+
+
+  .hotel-sidebar--reference.is-mobile-open {
+    transform:
+      translateX(0);
+  }
+
+
+  /* OVERLAY */
+
+  .hotel-mobile-drawer-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2200;
+
+    display: block !important;
+
+    border: 0;
+
+    background:
+      rgba(
+        22,
+        13,
+        43,
+        .52
+      );
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+      opacity
+      .22s ease,
+      visibility
+      .22s ease;
+  }
+
+
+  .hotel-mobile-drawer-overlay.is-open {
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+  }
+
+
+  /* MENU TÁCTIL */
+
+  .hotel-sidebar-ref__item {
+    min-height: 48px;
+
+    height: 48px;
+
+    font-size: 13px;
+  }
+
+
+  .hotel-sidebar-ref__logout {
+    min-height: 48px;
+  }
+
+
+  .hotel-sidebar-ref__help {
+    margin-bottom: 14px !important;
+  }
+
+
+  /* EVITA QUE REGLAS VIEJAS LO VUELVAN A OCULTAR */
+
+  .hotel-sidebar.hotel-sidebar--reference {
+    display: flex !important;
+  }
+
+}
+
+
+@media (min-width: 851px) {
+
+  .hotel-mobile-nav,
+  .hotel-mobile-drawer-overlay {
+    display: none !important;
+  }
+
+}
