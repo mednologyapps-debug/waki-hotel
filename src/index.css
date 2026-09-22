@@ -12104,3 +12104,1194 @@ body {
 .waki-qr-scanner-camera.is-active {
   min-height: 280px;
 }
+
+
+/* =========================================================
+   WAKI HOTEL — MOBILE UX CANONICAL
+   2026-09
+   Este bloque debe mantenerse AL FINAL del index.css.
+   Centraliza el comportamiento responsive y prevalece sobre
+   media queries antiguas sin romper la versión desktop.
+   ========================================================= */
+
+/* ---------- Mobile navigation elements ---------- */
+
+.hotel-mobile-header,
+.hotel-mobile-overlay {
+  display: none;
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  :root {
+    --waki-mobile-header-height: 68px;
+    --waki-mobile-page-padding: 16px;
+  }
+
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+
+  body {
+    min-height: 100dvh;
+    overscroll-behavior-x: none;
+  }
+
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+
+  button {
+    touch-action: manipulation;
+  }
+
+
+  /* =======================================================
+     MOBILE TOP BAR
+     ======================================================= */
+
+  .hotel-mobile-header {
+    width: 100%;
+    height: calc(
+      var(--waki-mobile-header-height) +
+      env(safe-area-inset-top)
+    );
+
+    padding:
+      env(safe-area-inset-top)
+      14px
+      0;
+
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 1050;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    box-sizing: border-box;
+
+    border-bottom: 1px solid rgba(48, 33, 87, .08);
+    background: rgba(255, 255, 255, .96);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+
+  .hotel-mobile-header__brand {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+  }
+
+
+  .hotel-mobile-header__brand img {
+    width: 72px;
+    height: auto;
+
+    flex: 0 0 auto;
+  }
+
+
+  .hotel-mobile-header__hotel {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  .hotel-mobile-header__hotel strong {
+    max-width: 47vw;
+
+    overflow: hidden;
+
+    color: var(--waki-text);
+
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  .hotel-mobile-header__hotel span {
+    max-width: 47vw;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: var(--waki-text-light);
+
+    font-size: 9px;
+    line-height: 1.2;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  .hotel-mobile-header__menu {
+    width: 44px;
+    height: 44px;
+
+    flex: 0 0 44px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid var(--waki-border);
+    border-radius: 12px;
+
+    background: #fff;
+    color: var(--waki-purple);
+
+    box-shadow: 0 5px 15px rgba(43, 27, 83, .06);
+  }
+
+
+  /* =======================================================
+     MOBILE DRAWER
+     ======================================================= */
+
+  .hotel-sidebar--reference {
+    --hotel-sidebar-width: min(86vw, 330px);
+
+    width: var(--hotel-sidebar-width) !important;
+    min-width: var(--hotel-sidebar-width) !important;
+    max-width: var(--hotel-sidebar-width) !important;
+
+    height: 100vh !important;
+    height: 100dvh !important;
+
+    padding:
+      calc(18px + env(safe-area-inset-top))
+      16px
+      calc(16px + env(safe-area-inset-bottom)) !important;
+
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1200 !important;
+
+    display: flex !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    transform: translateX(-104%);
+    transition: transform .24s ease;
+
+    box-shadow: 18px 0 45px rgba(30, 18, 66, .18);
+  }
+
+
+  .hotel-sidebar--reference.is-mobile-open {
+    transform: translateX(0);
+  }
+
+
+  .hotel-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1150;
+
+    display: block;
+
+    border: 0;
+
+    background: rgba(25, 16, 49, .48);
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity .22s ease;
+  }
+
+
+  .hotel-mobile-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+
+  .hotel-sidebar-ref__brand {
+    padding-right: 48px;
+  }
+
+
+  .hotel-sidebar-ref__menu {
+    gap: 5px;
+  }
+
+
+  .hotel-sidebar-ref__item {
+    min-height: 48px;
+    height: 48px;
+
+    border-radius: 11px;
+
+    font-size: 13px;
+  }
+
+
+  .hotel-sidebar-ref__help {
+    margin-bottom: 16px !important;
+  }
+
+
+  .hotel-sidebar-ref__logout {
+    min-height: 48px;
+  }
+
+
+  /* =======================================================
+     PAGE SHELL
+     ======================================================= */
+
+  .hotel-portal {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+
+    padding-top:
+      calc(
+        var(--waki-mobile-header-height) +
+        env(safe-area-inset-top)
+      );
+
+    overflow-x: hidden;
+  }
+
+
+  .hotel-dashboard,
+  .hotel-dashboard.hotel-setup-page,
+  .hotel-reservations-page,
+  .hotel-room-units-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin-left: 0 !important;
+
+    padding-left: var(--waki-mobile-page-padding) !important;
+    padding-right: var(--waki-mobile-page-padding) !important;
+
+    box-sizing: border-box;
+  }
+
+
+  .hotel-dashboard {
+    padding-top: 22px !important;
+    padding-bottom:
+      calc(42px + env(safe-area-inset-bottom)) !important;
+  }
+
+
+  .hotel-reservations-page,
+  .hotel-room-units-page {
+    padding-top: 22px !important;
+    padding-bottom:
+      calc(42px + env(safe-area-inset-bottom)) !important;
+  }
+
+
+  /* =======================================================
+     TYPOGRAPHY / HEADERS
+     ======================================================= */
+
+  .hotel-dashboard-header,
+  .hotel-reservations-header,
+  .room-detail-header,
+  .room-edit-header,
+  .room-photos-header,
+  .rate-rules-header,
+  .hotel-room-units-header,
+  .hotel-reservation-detail__header {
+    width: 100%;
+
+    align-items: stretch !important;
+    flex-direction: column !important;
+
+    gap: 14px !important;
+  }
+
+
+  .hotel-dashboard-header h1,
+  .hotel-reservations-header h1,
+  .room-detail-header h1,
+  .room-edit-header h1,
+  .room-photos-header h1,
+  .rate-rules-header h1,
+  .hotel-room-units-header h1,
+  .hotel-reservation-detail__header h1,
+  .hotel-review-header h1 {
+    font-size: clamp(25px, 7vw, 31px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -.65px !important;
+  }
+
+
+  .hotel-dashboard-header p,
+  .hotel-reservations-header p,
+  .room-detail-header p,
+  .room-edit-header p,
+  .room-photos-header p,
+  .rate-rules-header p,
+  .hotel-room-units-header p,
+  .hotel-reservation-detail__header p,
+  .hotel-review-header p {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+  }
+
+
+  .hotel-dashboard-property {
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* =======================================================
+     TOUCH TARGETS
+     ======================================================= */
+
+  .hotel-primary-button,
+  .hotel-secondary-button,
+  .hotel-outline-button,
+  .hotel-setup-primary-button,
+  .hotel-setup-secondary-button,
+  .hotel-review-edit-button,
+  .hotel-reservations-refresh {
+    min-height: 46px;
+  }
+
+
+  .hotel-icon-button,
+  .hotel-reservation-open,
+  .hotel-rate-row__actions button,
+  .rate-rule-card__actions button,
+  .room-photo-action,
+  .waki-qr-scanner-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+
+  /* =======================================================
+     IOS FORM ZOOM / FORM USABILITY
+     ======================================================= */
+
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+    font-size: 16px !important;
+  }
+
+
+  .room-form-field input,
+  .room-form-field select,
+  .hotel-setup-field > input,
+  .hotel-setup-input-icon,
+  .room-input-prefix,
+  .room-input-suffix,
+  .hotel-reservation-qr-form input[type="text"] {
+    min-height: 48px !important;
+  }
+
+
+  .hotel-setup-input-icon input {
+    font-size: 16px !important;
+  }
+
+
+  textarea {
+    line-height: 1.5;
+  }
+
+
+  /* =======================================================
+     DASHBOARD
+     ======================================================= */
+
+  .hotel-status-banner {
+    padding: 17px;
+
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    gap: 12px;
+  }
+
+
+  .hotel-status-banner__copy {
+    min-width: calc(100% - 64px);
+  }
+
+
+  .hotel-status-banner .hotel-outline-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .hotel-kpi-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 10px;
+  }
+
+
+  .hotel-kpi-card {
+    min-height: 112px;
+
+    padding: 14px;
+
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+
+  .hotel-kpi-card__content strong {
+    font-size: 23px;
+  }
+
+
+  .hotel-dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-setup-card,
+  .hotel-profile-card {
+    padding: 18px;
+  }
+
+
+  .hotel-setup-card__heading {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+
+  .hotel-setup-card__percentage {
+    text-align: left;
+  }
+
+
+  .hotel-step-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  /* =======================================================
+     ONBOARDING — SIN SCROLL HORIZONTAL
+     ======================================================= */
+
+  .hotel-setup-stepper-card,
+  .waki-onboarding-guide {
+    overflow: visible !important;
+  }
+
+
+  .hotel-setup-stepper,
+  .waki-onboarding-guide__steps {
+    min-width: 0 !important;
+
+    grid-template-columns: 1fr !important;
+
+    gap: 9px !important;
+  }
+
+
+  .waki-onboarding-guide__header,
+  .waki-onboarding-guide__progress {
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+
+  .waki-onboarding-guide__header {
+    justify-content: flex-start;
+  }
+
+
+  .waki-onboarding-guide__progress {
+    justify-content: space-between;
+  }
+
+
+  .waki-onboarding-guide__progress > div {
+    width: min(170px, 48vw);
+  }
+
+
+  .hotel-setup-step,
+  .waki-onboarding-guide__step {
+    min-height: 58px;
+
+    padding: 10px 12px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    border: 1px solid var(--waki-border);
+    border-radius: 11px;
+
+    background: #fff;
+  }
+
+
+  .hotel-setup-step__line,
+  .waki-onboarding-guide__connector {
+    display: none;
+  }
+
+
+  .hotel-setup-step strong,
+  .waki-onboarding-guide__step-copy strong {
+    margin-top: 0;
+  }
+
+
+  .hotel-setup-step p,
+  .waki-onboarding-guide__step-copy small {
+    max-width: none;
+
+    margin-top: 2px;
+  }
+
+
+  /* =======================================================
+     FORMS
+     ======================================================= */
+
+  .hotel-setup-form-grid,
+  .room-form-grid,
+  .rate-rule-time-fields {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-setup-field,
+  .hotel-setup-field--full,
+  .hotel-setup-field:nth-of-type(5),
+  .hotel-setup-field:nth-of-type(6),
+  .hotel-setup-field:nth-of-type(7),
+  .room-form-field--full {
+    grid-column: 1 / -1 !important;
+  }
+
+
+  .hotel-setup-form-footer,
+  .room-edit-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .hotel-setup-form-footer > div,
+  .room-edit-actions {
+    width: 100%;
+  }
+
+
+  .hotel-setup-form-footer button,
+  .room-edit-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  /* =======================================================
+     ROOMS
+     ======================================================= */
+
+  .hotel-room-card {
+    min-height: 0;
+
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-room-card__image {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+
+
+  .hotel-room-card__body {
+    padding: 17px;
+  }
+
+
+  .hotel-room-card__heading {
+    gap: 12px;
+  }
+
+
+  .hotel-room-card__details {
+    gap: 9px 14px;
+  }
+
+
+  .hotel-room-card__footer {
+    align-items: stretch;
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+
+  .hotel-room-card__open {
+    min-height: 44px;
+
+    justify-content: flex-start;
+  }
+
+
+  .room-detail-grid,
+  .room-edit-layout,
+  .hotel-rate-form-layout,
+  .rate-rule-form-layout,
+  .hotel-profile-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .room-detail-gallery__main {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+
+  .room-detail-gallery__thumbs {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+
+
+  .room-detail-gallery__thumb {
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+
+  .room-detail-section {
+    padding: 17px;
+  }
+
+
+  .room-rate-list {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  /* =======================================================
+     PHOTOS
+     ======================================================= */
+
+  .room-photo-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .room-photo-card__image {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+
+  .room-photo-card__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .room-photo-card__actions {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .room-photo-action {
+    justify-content: center;
+  }
+
+
+  /* =======================================================
+     RATES
+     ======================================================= */
+
+  .hotel-rate-room__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .hotel-rate-room__header .hotel-primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .hotel-rate-list {
+    padding: 0 15px;
+  }
+
+
+  .hotel-rate-row,
+  .rate-rule-card {
+    padding: 15px 0;
+
+    grid-template-columns: 1fr !important;
+
+    gap: 11px !important;
+  }
+
+
+  .hotel-rate-row__actions,
+  .rate-rule-card__actions {
+    justify-content: flex-start;
+  }
+
+
+  .rate-rule-days {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+  }
+
+
+  .rate-rule-days button {
+    min-height: 46px;
+  }
+
+
+  /* =======================================================
+     ROOM UNITS
+     ======================================================= */
+
+  .hotel-room-units-header__count {
+    width: 100%;
+
+    justify-content: space-between;
+  }
+
+
+  .hotel-room-units-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-room-units-list__heading {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+
+  /* =======================================================
+     RESERVATIONS
+     ======================================================= */
+
+  .hotel-reservations-summary {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 10px;
+  }
+
+
+  .hotel-reservation-stat {
+    min-height: 100px;
+
+    padding: 14px;
+
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 9px;
+  }
+
+
+  .hotel-reservations-toolbar {
+    padding: 12px;
+
+    align-items: stretch;
+    flex-direction: column;
+
+    gap: 11px;
+  }
+
+
+  .hotel-reservations-tabs {
+    width: 100%;
+
+    flex-wrap: nowrap;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding-bottom: 3px;
+
+    scrollbar-width: none;
+  }
+
+
+  .hotel-reservations-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .hotel-reservations-tab {
+    min-height: 42px;
+
+    flex: 0 0 auto;
+  }
+
+
+  .hotel-reservations-search {
+    width: 100%;
+    height: 46px;
+  }
+
+
+  .hotel-reservations-table-wrap {
+    width: calc(100% + 2px);
+
+    margin: 0 -1px;
+
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+
+  .hotel-reservations-table {
+    min-width: 760px;
+  }
+
+
+  /* =======================================================
+     RESERVATION DETAIL
+     ======================================================= */
+
+  .hotel-reservation-detail {
+    padding-bottom:
+      calc(58px + env(safe-area-inset-bottom));
+  }
+
+
+  .hotel-reservation-detail__status {
+    width: 100%;
+    min-width: 0;
+
+    padding: 14px 16px;
+
+    text-align: left;
+  }
+
+
+  .hotel-reservation-detail__status strong {
+    font-size: 29px;
+  }
+
+
+  .hotel-reservation-room-card {
+    padding: 20px 18px;
+
+    border-radius: 17px;
+  }
+
+
+  .hotel-reservation-room-card__copy > strong {
+    font-size: 34px;
+  }
+
+
+  .hotel-reservation-detail__grid,
+  .hotel-reservation-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-reservation-panel,
+  .hotel-reservation-qr-card {
+    padding: 17px;
+  }
+
+
+  .hotel-reservation-scan-button,
+  .waki-qr-activate-camera {
+    min-height: 50px;
+
+    font-size: 12px;
+  }
+
+
+  /* =======================================================
+     QR SCANNER MOBILE
+     ======================================================= */
+
+  .waki-qr-scanner-overlay {
+    padding:
+      calc(10px + env(safe-area-inset-top))
+      10px
+      calc(10px + env(safe-area-inset-bottom));
+
+    align-items: end;
+  }
+
+
+  .waki-qr-scanner-modal {
+    width: 100%;
+    max-width: 520px;
+
+    max-height:
+      calc(
+        100dvh -
+        env(safe-area-inset-top) -
+        env(safe-area-inset-bottom) -
+        20px
+      );
+
+    overflow-y: auto;
+
+    padding: 17px;
+
+    border-radius: 21px;
+  }
+
+
+  .waki-qr-scanner-camera {
+    width: 100%;
+    min-height: 0 !important;
+    aspect-ratio: 1 / 1;
+  }
+
+
+  .waki-qr-scanner-guide {
+    width: min(66vw, 235px);
+    height: min(66vw, 235px);
+  }
+
+
+  /* =======================================================
+     REVIEW
+     ======================================================= */
+
+  .hotel-review-summary,
+  .hotel-review-info-grid,
+  .hotel-review-rate-list {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-review-room {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-review-room__image {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+
+  .hotel-review-section {
+    padding: 17px;
+  }
+
+
+  .hotel-review-section__heading,
+  .hotel-review-submit,
+  .hotel-onboarding-page-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .hotel-review-edit-button,
+  .hotel-review-submit__button,
+  .hotel-onboarding-page-footer .hotel-setup-primary-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* =======================================================
+     GLOBAL LOADER
+     ======================================================= */
+
+  .waki-global-loader--fullscreen {
+    min-height: 100dvh;
+  }
+
+
+  .waki-global-loader__content {
+    width: min(92vw, 390px);
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  :root {
+    --waki-mobile-page-padding: 13px;
+  }
+
+
+  .hotel-mobile-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+
+  .hotel-mobile-header__brand img {
+    width: 66px;
+  }
+
+
+  .hotel-mobile-header__hotel strong {
+    max-width: 42vw;
+  }
+
+
+  .hotel-mobile-header__hotel span {
+    max-width: 42vw;
+  }
+
+
+  .hotel-dashboard,
+  .hotel-dashboard.hotel-setup-page,
+  .hotel-reservations-page,
+  .hotel-room-units-page {
+    padding-top: 18px !important;
+  }
+
+
+  .hotel-kpi-grid,
+  .hotel-reservations-summary {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+
+  .hotel-kpi-card,
+  .hotel-reservation-stat {
+    padding: 12px;
+  }
+
+
+  .hotel-kpi-card__icon,
+  .hotel-reservation-stat__icon {
+    width: 39px;
+    height: 39px;
+
+    flex-basis: 39px;
+  }
+
+
+  .hotel-setup-card,
+  .hotel-profile-card,
+  .room-detail-section,
+  .hotel-reservation-panel,
+  .hotel-reservation-qr-card,
+  .hotel-review-section {
+    padding: 15px;
+  }
+
+
+  .hotel-reservation-room-card__decoration {
+    right: 14px;
+  }
+
+
+  .room-detail-gallery__thumbs {
+    gap: 6px;
+    padding: 9px;
+  }
+
+
+  .rate-rule-days {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+  }
+
+
+  .waki-qr-scanner-modal__header h2 {
+    font-size: 18px;
+  }
+
+}
+
+
+/* =========================================================
+   EXTRA SMALL
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .hotel-kpi-grid,
+  .hotel-reservations-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+
+  .hotel-mobile-header__hotel span {
+    display: none;
+  }
+
+
+  .hotel-mobile-header__hotel strong {
+    max-width: 38vw;
+  }
+
+}

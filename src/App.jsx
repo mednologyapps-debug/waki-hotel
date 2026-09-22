@@ -4,16 +4,19 @@ import {
   Routes
 } from 'react-router-dom'
 
-import HotelReservationDetailPage
-  from './pages/HotelReservationDetailPage'
-
-import HotelRoomUnitsPage
-  from './pages/HotelRoomUnitsPage'
-
 import './App.css'
 
 import ProtectedHotelRoute
   from './components/ProtectedHotelRoute'
+
+import HotelReservationDetailPage
+  from './pages/HotelReservationDetailPage'
+
+import WakiLoaderDemoPage
+  from './pages/WakiLoaderDemoPage'
+
+import HotelRoomUnitsPage
+  from './pages/HotelRoomUnitsPage'
 
 import HotelReservationsPage
   from './pages/HotelReservationsPage'
@@ -61,6 +64,17 @@ import HotelReviewPage
   from './pages/HotelReviewPage'
 
 
+function ProtectedPage({
+  children
+}) {
+  return (
+    <ProtectedHotelRoute>
+      {children}
+    </ProtectedHotelRoute>
+  )
+}
+
+
 export default function App() {
   return (
     <Routes>
@@ -80,27 +94,6 @@ export default function App() {
         }
       />
 
-      <Route
-  path="/habitaciones/:roomId/unidades"
-  element={
-    <HotelRoomUnitsPage />
-  }
-/>
-
-      <Route
-  path="/reservas"
-  element={
-    <HotelReservationsPage />
-  }
-/>
-
-<Route
-  path="/reservas/:reservationId"
-  element={
-    <HotelReservationDetailPage />
-  }
-/>
-
 
       {/* =====================================================
           LOGIN
@@ -115,17 +108,51 @@ export default function App() {
 
 
       {/* =====================================================
+          DEMO TEMPORAL DEL LOADER
+          ===================================================== */}
+
+      <Route
+        path="/loader-video"
+        element={
+          <WakiLoaderDemoPage />
+        }
+      />
+
+
+      {/* =====================================================
           DASHBOARD
           ===================================================== */}
 
       <Route
         path="/dashboard"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelDashboardPage />
+          </ProtectedPage>
+        }
+      />
 
-          </ProtectedHotelRoute>
+
+      {/* =====================================================
+          RESERVAS
+          ===================================================== */}
+
+      <Route
+        path="/reservas"
+        element={
+          <ProtectedPage>
+            <HotelReservationsPage />
+          </ProtectedPage>
+        }
+      />
+
+
+      <Route
+        path="/reservas/:reservationId"
+        element={
+          <ProtectedPage>
+            <HotelReservationDetailPage />
+          </ProtectedPage>
         }
       />
 
@@ -137,11 +164,9 @@ export default function App() {
       <Route
         path="/habitaciones"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRoomsPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -149,11 +174,19 @@ export default function App() {
       <Route
         path="/habitaciones/nueva"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRoomCreatePage />
+          </ProtectedPage>
+        }
+      />
 
-          </ProtectedHotelRoute>
+
+      <Route
+        path="/habitaciones/:roomId/unidades"
+        element={
+          <ProtectedPage>
+            <HotelRoomUnitsPage />
+          </ProtectedPage>
         }
       />
 
@@ -161,11 +194,9 @@ export default function App() {
       <Route
         path="/habitaciones/:roomId/editar"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRoomEditPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -173,11 +204,9 @@ export default function App() {
       <Route
         path="/habitaciones/:roomId/fotos"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRoomPhotosPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -185,11 +214,9 @@ export default function App() {
       <Route
         path="/habitaciones/:roomId"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRoomDetailPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -201,11 +228,9 @@ export default function App() {
       <Route
         path="/tarifas"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRatesPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -213,11 +238,9 @@ export default function App() {
       <Route
         path="/tarifas/nueva"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRateCreatePage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -225,11 +248,9 @@ export default function App() {
       <Route
         path="/tarifas/:rateId/editar"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRateEditPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -237,11 +258,9 @@ export default function App() {
       <Route
         path="/tarifas/:rateId/reglas"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelRateRulesPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -249,13 +268,13 @@ export default function App() {
       <Route
         path="/tarifas/:rateId/reglas/nueva"
         element={
-          <ProtectedHotelRoute>
+          <ProtectedPage>
 
             <HotelRateRuleFormPage
               mode="create"
             />
 
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -263,13 +282,13 @@ export default function App() {
       <Route
         path="/tarifas/:rateId/reglas/:ruleId/editar"
         element={
-          <ProtectedHotelRoute>
+          <ProtectedPage>
 
             <HotelRateRuleFormPage
               mode="edit"
             />
 
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
@@ -281,27 +300,19 @@ export default function App() {
       <Route
         path="/mi-hotel"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelProfilePage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 
 
-      {/* =====================================================
-          REVISIÓN FINAL
-          ===================================================== */}
-
       <Route
         path="/mi-hotel/revision"
         element={
-          <ProtectedHotelRoute>
-
+          <ProtectedPage>
             <HotelReviewPage />
-
-          </ProtectedHotelRoute>
+          </ProtectedPage>
         }
       />
 

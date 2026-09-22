@@ -6,7 +6,9 @@ import {
   Headphones,
   LayoutDashboard,
   LogOut,
-  UsersRound
+  Menu,
+  UsersRound,
+  X
 } from 'lucide-react'
 
 import {
@@ -49,6 +51,7 @@ const menuItems = [
     label: 'Reservas',
     icon: CalendarDays,
     route: '/reservas',
+    disabled: false
   },
   {
     key: 'habitaciones',
@@ -85,10 +88,58 @@ export default function HotelSidebar({
   const [hotelImage, setHotelImage] =
     useState(null)
 
+  const [mobileOpen, setMobileOpen] =
+    useState(false)
+
 
   useEffect(() => {
     loadHotelImage()
   }, [])
+
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      document.body.style.overflow =
+        ''
+
+      return undefined
+    }
+
+
+    document.body.style.overflow =
+      'hidden'
+
+
+    function handleEscape(
+      event
+    ) {
+      if (
+        event.key ===
+        'Escape'
+      ) {
+        setMobileOpen(
+          false
+        )
+      }
+    }
+
+
+    window.addEventListener(
+      'keydown',
+      handleEscape
+    )
+
+
+    return () => {
+      document.body.style.overflow =
+        ''
+
+      window.removeEventListener(
+        'keydown',
+        handleEscape
+      )
+    }
+  }, [mobileOpen])
 
 
   async function loadHotelImage() {
@@ -257,7 +308,24 @@ export default function HotelSidebar({
   }
 
 
+  function goTo(
+    route
+  ) {
+    setMobileOpen(
+      false
+    )
+
+    navigate(
+      route
+    )
+  }
+
+
   async function handleLogout() {
+    setMobileOpen(
+      false
+    )
+
     await supabase
       .auth
       .signOut()
@@ -273,63 +341,23 @@ export default function HotelSidebar({
 
 
   return (
-    <aside
-      className="hotel-sidebar hotel-sidebar--reference"
-      style={{
-        '--waki-sidebar-background':
-          `url(${wakiSidebarBackground})`
-      }}
-    >
+    <>
 
-      <div className="hotel-sidebar-ref__top">
+      {/* =====================================================
+          HEADER MOBILE
+          ===================================================== */}
 
+      <header className="hotel-mobile-header">
 
-        {/* =====================================================
-            LOGO
-            ===================================================== */}
-
-        <div className="hotel-sidebar-ref__brand">
+        <div className="hotel-mobile-header__brand">
 
           <img
             src={wakiLogo}
             alt="WAKI"
           />
 
-          <span>
-            HOTEL
-          </span>
 
-        </div>
-
-
-        {/* =====================================================
-            HOTEL ACTUAL
-            ===================================================== */}
-
-        <div className="hotel-sidebar-ref__hotel">
-
-          <div className="hotel-sidebar-ref__hotel-image">
-
-            {hotelImage ? (
-
-              <img
-                src={hotelImage}
-                alt={hotelName}
-              />
-
-            ) : (
-
-              <Building2
-                size={23}
-                strokeWidth={1.7}
-              />
-
-            )}
-
-          </div>
-
-
-          <div className="hotel-sidebar-ref__hotel-copy">
+          <div className="hotel-mobile-header__hotel">
 
             <strong>
               {hotelName}
@@ -344,142 +372,284 @@ export default function HotelSidebar({
         </div>
 
 
-        {/* =====================================================
-            MENÚ
-            ===================================================== */}
+        <button
+          type="button"
+          className="hotel-mobile-header__menu"
+          aria-label={
+            mobileOpen
+              ? 'Cerrar menú'
+              : 'Abrir menú'
+          }
+          aria-expanded={
+            mobileOpen
+          }
+          onClick={() =>
+            setMobileOpen(
+              (current) =>
+                !current
+            )
+          }
+        >
 
-        <nav className="hotel-sidebar-ref__menu">
+          {mobileOpen ? (
 
-          {menuItems.map(
-            (item) => {
+            <X
+              size={22}
+              strokeWidth={1.8}
+            />
 
-              const Icon =
-                item.icon
+          ) : (
 
+            <Menu
+              size={22}
+              strokeWidth={1.8}
+            />
 
-              return (
-                <button
-                  key={
-                    item.key
-                  }
-                  type="button"
-                  disabled={
-                    item.disabled
-                  }
-                  className={[
-                    'hotel-sidebar-ref__item',
-
-                    activeKey ===
-                    item.key
-                      ? 'is-active'
-                      : '',
-
-                    item.disabled
-                      ? 'is-disabled'
-                      : ''
-                  ].join(' ')}
-                  onClick={() => {
-
-                    if (
-                      item.disabled
-                    ) {
-                      return
-                    }
-
-
-                    navigate(
-                      item.route
-                    )
-                  }}
-                >
-
-                  <Icon
-                    size={21}
-                    strokeWidth={1.7}
-                  />
-
-                  <span>
-                    {item.label}
-                  </span>
-
-                </button>
-              )
-            }
           )}
 
-        </nav>
+        </button>
+
+      </header>
 
 
-        {/* =====================================================
-            AYUDA
-            AHORA VA JUSTO DEBAJO DE EQUIPO
-            ===================================================== */}
+      {/* =====================================================
+          OVERLAY MOBILE
+          ===================================================== */}
 
-        <div className="hotel-sidebar-ref__help">
+      <button
+        type="button"
+        className={[
+          'hotel-mobile-overlay',
+          mobileOpen
+            ? 'is-visible'
+            : ''
+        ].join(' ')}
+        aria-label="Cerrar menú"
+        onClick={() =>
+          setMobileOpen(
+            false
+          )
+        }
+      />
 
-          <div className="hotel-sidebar-ref__help-icon">
 
-            <Headphones
-              size={21}
-              strokeWidth={1.7}
+      {/* =====================================================
+          SIDEBAR / DRAWER
+          ===================================================== */}
+
+      <aside
+        className={[
+          'hotel-sidebar',
+          'hotel-sidebar--reference',
+          mobileOpen
+            ? 'is-mobile-open'
+            : ''
+        ].join(' ')}
+        style={{
+          '--waki-sidebar-background':
+            `url(${wakiSidebarBackground})`
+        }}
+      >
+
+        <div className="hotel-sidebar-ref__top">
+
+
+          {/* =====================================================
+              LOGO
+              ===================================================== */}
+
+          <div className="hotel-sidebar-ref__brand">
+
+            <img
+              src={wakiLogo}
+              alt="WAKI"
             />
+
+            <span>
+              HOTEL
+            </span>
 
           </div>
 
 
-          <div className="hotel-sidebar-ref__help-copy">
+          {/* =====================================================
+              HOTEL ACTUAL
+              ===================================================== */}
 
-            <strong>
-              ¿Necesitas ayuda?
-            </strong>
+          <div className="hotel-sidebar-ref__hotel">
 
-            <p>
-              Nuestro equipo está listo
-              para ayudarte
-            </p>
+            <div className="hotel-sidebar-ref__hotel-image">
+
+              {hotelImage ? (
+
+                <img
+                  src={hotelImage}
+                  alt={hotelName}
+                />
+
+              ) : (
+
+                <Building2
+                  size={23}
+                  strokeWidth={1.7}
+                />
+
+              )}
+
+            </div>
 
 
-            <button
-              type="button"
-            >
-              Contactar soporte
-            </button>
+            <div className="hotel-sidebar-ref__hotel-copy">
+
+              <strong>
+                {hotelName}
+              </strong>
+
+              <span>
+                {hotelLocation}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          {/* =====================================================
+              MENÚ
+              ===================================================== */}
+
+          <nav className="hotel-sidebar-ref__menu">
+
+            {menuItems.map(
+              (item) => {
+
+                const Icon =
+                  item.icon
+
+
+                return (
+                  <button
+                    key={
+                      item.key
+                    }
+                    type="button"
+                    disabled={
+                      item.disabled
+                    }
+                    className={[
+                      'hotel-sidebar-ref__item',
+
+                      activeKey ===
+                      item.key
+                        ? 'is-active'
+                        : '',
+
+                      item.disabled
+                        ? 'is-disabled'
+                        : ''
+                    ].join(' ')}
+                    onClick={() => {
+
+                      if (
+                        item.disabled
+                      ) {
+                        return
+                      }
+
+
+                      goTo(
+                        item.route
+                      )
+                    }}
+                  >
+
+                    <Icon
+                      size={21}
+                      strokeWidth={1.7}
+                    />
+
+                    <span>
+                      {item.label}
+                    </span>
+
+                  </button>
+                )
+              }
+            )}
+
+          </nav>
+
+
+          {/* =====================================================
+              AYUDA
+              ===================================================== */}
+
+          <div className="hotel-sidebar-ref__help">
+
+            <div className="hotel-sidebar-ref__help-icon">
+
+              <Headphones
+                size={21}
+                strokeWidth={1.7}
+              />
+
+            </div>
+
+
+            <div className="hotel-sidebar-ref__help-copy">
+
+              <strong>
+                ¿Necesitas ayuda?
+              </strong>
+
+              <p>
+                Nuestro equipo está listo
+                para ayudarte
+              </p>
+
+
+              <button
+                type="button"
+              >
+                Contactar soporte
+              </button>
+
+            </div>
 
           </div>
 
         </div>
 
-      </div>
 
+        {/* =====================================================
+            PARTE INFERIOR
+            ===================================================== */}
 
-      {/* =====================================================
-          PARTE INFERIOR
-          SOLO CERRAR SESIÓN
-          ===================================================== */}
+        <div className="hotel-sidebar-ref__bottom">
 
-      <div className="hotel-sidebar-ref__bottom">
+          <button
+            type="button"
+            className="hotel-sidebar-ref__logout"
+            onClick={
+              handleLogout
+            }
+          >
 
-        <button
-          type="button"
-          className="hotel-sidebar-ref__logout"
-          onClick={
-            handleLogout
-          }
-        >
+            <LogOut
+              size={20}
+              strokeWidth={1.7}
+            />
 
-          <LogOut
-            size={20}
-            strokeWidth={1.7}
-          />
+            <span>
+              Cerrar sesión
+            </span>
 
-          <span>
-            Cerrar sesión
-          </span>
+          </button>
 
-        </button>
+        </div>
 
-      </div>
+      </aside>
 
-    </aside>
+    </>
   )
 }
