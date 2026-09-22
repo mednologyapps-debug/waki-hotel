@@ -1,0 +1,968 @@
+/* =========================================================
+   WAKI HOTEL
+   LOGIN
+   ========================================================= */
+
+
+.waki-hotel-login {
+  min-height: 100vh;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(550px, 45%)
+    minmax(620px, 55%);
+
+  background: #ffffff;
+
+  color: #1d1728;
+}
+
+
+/* =========================================================
+   PANEL IZQUIERDO
+   ========================================================= */
+
+.waki-hotel-login__left {
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    70px
+    70px
+    55px;
+
+  background:
+    #f7f3ff;
+
+  border-right:
+    1px solid
+    rgba(
+      102,
+      61,
+      210,
+      0.06
+    );
+}
+
+
+/* CÍRCULOS DECORATIVOS */
+
+.waki-hotel-login__decor-circle {
+  position: absolute;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      113,
+      55,
+      232,
+      0.035
+    );
+}
+
+.waki-hotel-login__decor-circle--top {
+  width: 330px;
+  height: 330px;
+
+  top: -205px;
+  left: -205px;
+}
+
+.waki-hotel-login__decor-circle--bottom {
+  width: 400px;
+  height: 400px;
+
+  bottom: -265px;
+  left: -245px;
+}
+
+
+/* CONTENIDO CENTRAL */
+
+.waki-hotel-login__left-content {
+  position: relative;
+
+  z-index: 2;
+
+  width: 100%;
+
+  max-width: 620px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+
+  transform:
+    translateY(-10px);
+}
+
+
+/* MASCOTA */
+
+.waki-hotel-login__mascot-wrapper {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 340px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.waki-hotel-login__mascot-wrapper::before {
+  content: "";
+
+  position: absolute;
+
+  width: 235px;
+  height: 235px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      117,
+      70,
+      229,
+      0.1
+    );
+
+  filter:
+    blur(2px);
+}
+
+.waki-hotel-login__mascot {
+  position: relative;
+
+  z-index: 2;
+
+  width: 260px;
+  height: auto;
+
+  object-fit: contain;
+}
+
+
+/* TEXTO */
+
+.waki-hotel-login__welcome {
+  margin-top: 24px;
+}
+
+.waki-hotel-login__welcome h1 {
+  margin: 0;
+
+  color:
+    #1b1526;
+
+  font-size:
+    clamp(
+      38px,
+      3vw,
+      52px
+    );
+
+  line-height: 1.04;
+
+  font-weight: 700;
+
+  letter-spacing:
+    -1.8px;
+}
+
+.waki-hotel-login__welcome p {
+  margin:
+    18px
+    auto
+    0;
+
+  max-width: 510px;
+
+  color:
+    #82788d;
+
+  font-size: 17px;
+
+  line-height: 1.6;
+
+  font-weight: 400;
+}
+
+
+/* SPARKLES */
+
+.waki-hotel-login__sparkle {
+  position: absolute;
+
+  z-index: 3;
+
+  color:
+    #9870ef;
+
+  line-height: 1;
+}
+
+.waki-hotel-login__sparkle--one {
+  top: 20%;
+  left: 21%;
+
+  font-size: 24px;
+}
+
+.waki-hotel-login__sparkle--two {
+  top: 51%;
+  right: 18%;
+
+  font-size: 21px;
+}
+
+
+/* COPYRIGHT */
+
+.waki-hotel-login__copyright {
+  position: absolute;
+
+  z-index: 3;
+
+  left: 0;
+  right: 0;
+  bottom: 32px;
+
+  margin: 0;
+
+  text-align: center;
+
+  color:
+    #aaa1b0;
+
+  font-size: 12px;
+
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   PANEL DERECHO
+   ========================================================= */
+
+.waki-hotel-login__right {
+  position: relative;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  padding:
+    55px
+    50px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at 93% 5%,
+      rgba(
+        113,
+        55,
+        232,
+        0.025
+      ),
+      transparent 24%
+    ),
+    #ffffff;
+}
+
+
+/* =========================================================
+   TARJETA
+   ========================================================= */
+
+.waki-hotel-login-card {
+  width:
+    min(
+      550px,
+      100%
+    );
+
+  padding:
+    58px
+    58px
+    45px;
+
+  border:
+    1px solid
+    #e3ddeb;
+
+  border-radius:
+    21px;
+
+  background:
+    #ffffff;
+
+  box-shadow:
+    0
+    28px
+    70px
+    rgba(
+      57,
+      40,
+      78,
+      0.065
+    );
+}
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.waki-hotel-login-card__brand {
+  min-height: 72px;
+
+  margin-bottom: 31px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.waki-hotel-login-card__logo {
+  width: 150px;
+  height: auto;
+
+  display: block;
+
+  object-fit: contain;
+
+  /*
+   * IMPORTANTE:
+   * NO FILTER.
+   *
+   * De esta manera no modificamos
+   * los colores ni deformamos
+   * la llama original de WAKI.
+   */
+  filter: none;
+}
+
+.waki-hotel-login-card__hotel-badge {
+  min-height: 24px;
+
+  padding:
+    0
+    9px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+
+  background:
+    #eee7ff;
+
+  color:
+    #7137e8;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.7px;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.waki-hotel-login-card__heading {
+  margin-bottom: 37px;
+
+  text-align: center;
+}
+
+.waki-hotel-login-card__heading h2 {
+  margin: 0;
+
+  color:
+    #1b1425;
+
+  font-size: 36px;
+
+  line-height: 1;
+
+  font-weight: 700;
+
+  letter-spacing:
+    -1.2px;
+}
+
+.waki-hotel-login-card__heading p {
+  margin:
+    14px
+    0
+    0;
+
+  color:
+    #948a9c;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   FORMULARIO
+   ========================================================= */
+
+.waki-hotel-login-form {
+  width: 100%;
+}
+
+.waki-hotel-login-field {
+  display: block;
+
+  margin-bottom: 25px;
+}
+
+.waki-hotel-login-field > span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color:
+    #302638;
+
+  font-size: 13px;
+
+  font-weight: 500;
+}
+
+.waki-hotel-login-field__control {
+  width: 100%;
+
+  min-height: 59px;
+
+  padding:
+    0
+    17px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  border:
+    1px solid
+    #dcd5e4;
+
+  border-radius:
+    12px;
+
+  background:
+    #ffffff;
+
+  color:
+    #9b93a0;
+
+  transition:
+    border-color
+    0.2s ease,
+    box-shadow
+    0.2s ease,
+    background
+    0.2s ease;
+}
+
+.waki-hotel-login-field__control:focus-within {
+  border-color:
+    #9569eb;
+
+  background:
+    #fff;
+
+  box-shadow:
+    0
+    0
+    0
+    4px
+    rgba(
+      113,
+      55,
+      232,
+      0.055
+    );
+}
+
+.waki-hotel-login-field__control input {
+  min-width: 0;
+
+  flex: 1;
+
+  border: 0;
+
+  outline: 0;
+
+  background:
+    transparent;
+
+  color:
+    #2e2534;
+
+  font-family:
+    "Outfit",
+    sans-serif;
+
+  font-size: 14px;
+
+  font-weight: 400;
+}
+
+.waki-hotel-login-field__control input::placeholder {
+  color:
+    #aca3b2;
+}
+
+
+/* =========================================================
+   VER CONTRASEÑA
+   ========================================================= */
+
+.waki-hotel-password-button {
+  width: 35px;
+  height: 35px;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background:
+    transparent;
+
+  color:
+    #9c93a3;
+
+  cursor: pointer;
+
+  transition:
+    color
+    0.2s ease,
+    background
+    0.2s ease;
+}
+
+.waki-hotel-password-button:hover {
+  color:
+    #7137e8;
+
+  background:
+    #f7f3ff;
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.waki-hotel-login-error {
+  margin:
+    -5px
+    0
+    19px;
+
+  padding:
+    12px
+    14px;
+
+  border:
+    1px solid
+    #efd9dc;
+
+  border-radius:
+    9px;
+
+  background:
+    #fff8f9;
+
+  color:
+    #9d5660;
+
+  font-size:
+    12px;
+
+  line-height:
+    1.45;
+}
+
+
+/* =========================================================
+   BOTÓN
+   ========================================================= */
+
+.waki-hotel-login-submit {
+  width: 100%;
+
+  min-height: 57px;
+
+  margin-top: 3px;
+
+  border: 0;
+
+  border-radius:
+    11px;
+
+  background:
+    #7137e8;
+
+  color:
+    #ffffff;
+
+  font-family:
+    "Outfit",
+    sans-serif;
+
+  font-size:
+    14px;
+
+  font-weight:
+    600;
+
+  cursor:
+    pointer;
+
+  transition:
+    background
+    0.2s ease,
+    transform
+    0.15s ease,
+    box-shadow
+    0.2s ease;
+}
+
+.waki-hotel-login-submit:hover:not(:disabled) {
+  background:
+    #6230d1;
+
+  box-shadow:
+    0
+    10px
+    25px
+    rgba(
+      113,
+      55,
+      232,
+      0.16
+    );
+}
+
+.waki-hotel-login-submit:active:not(:disabled) {
+  transform:
+    translateY(1px);
+}
+
+.waki-hotel-login-submit:disabled {
+  opacity:
+    0.6;
+
+  cursor:
+    default;
+}
+
+
+/* =========================================================
+   SEGURIDAD
+   ========================================================= */
+
+.waki-hotel-login-card__security {
+  margin-top:
+    28px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    8px;
+
+  color:
+    #9d95a2;
+
+  font-size:
+    11px;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.waki-hotel-auth-loading {
+  min-height:
+    100vh;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    15px;
+
+  background:
+    #f7f3ff;
+
+  color:
+    #7e7488;
+
+  font-family:
+    "Outfit",
+    sans-serif;
+}
+
+.waki-hotel-auth-loading p {
+  margin:
+    0;
+
+  font-size:
+    14px;
+}
+
+.waki-hotel-auth-spinner {
+  width:
+    40px;
+
+  height:
+    40px;
+
+  border:
+    3px solid
+    #e7dffa;
+
+  border-top-color:
+    #7137e8;
+
+  border-radius:
+    50%;
+
+  animation:
+    wakiHotelSpinner
+    0.8s
+    linear
+    infinite;
+}
+
+@keyframes wakiHotelSpinner {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (
+  max-width: 1180px
+) {
+
+  .waki-hotel-login {
+    grid-template-columns:
+      0.9fr
+      1.1fr;
+  }
+
+  .waki-hotel-login__left {
+    padding:
+      55px
+      42px
+      45px;
+  }
+
+  .waki-hotel-login__mascot {
+    width:
+      225px;
+  }
+
+  .waki-hotel-login__welcome h1 {
+    font-size:
+      40px;
+  }
+
+  .waki-hotel-login-card {
+    width:
+      min(
+        510px,
+        100%
+      );
+
+    padding:
+      50px
+      45px
+      42px;
+  }
+
+}
+
+
+@media (
+  max-width: 900px
+) {
+
+  .waki-hotel-login {
+    display:
+      block;
+  }
+
+  .waki-hotel-login__left {
+    min-height:
+      650px;
+  }
+
+  .waki-hotel-login__right {
+    min-height:
+      auto;
+
+    padding:
+      70px
+      25px;
+  }
+
+}
+
+
+@media (
+  max-width: 560px
+) {
+
+  .waki-hotel-login__left {
+    min-height:
+      570px;
+
+    padding:
+      40px
+      22px
+      50px;
+  }
+
+  .waki-hotel-login__mascot-wrapper {
+    min-height:
+      285px;
+  }
+
+  .waki-hotel-login__mascot {
+    width:
+      190px;
+  }
+
+  .waki-hotel-login__mascot-wrapper::before {
+    width:
+      180px;
+
+    height:
+      180px;
+  }
+
+  .waki-hotel-login__welcome h1 {
+    font-size:
+      34px;
+
+    letter-spacing:
+      -1px;
+  }
+
+  .waki-hotel-login__welcome p {
+    font-size:
+      14px;
+  }
+
+  .waki-hotel-login__copyright {
+    bottom:
+      20px;
+
+    font-size:
+      10px;
+  }
+
+  .waki-hotel-login__right {
+    padding:
+      45px
+      18px;
+  }
+
+  .waki-hotel-login-card {
+    padding:
+      40px
+      23px
+      33px;
+
+    border-radius:
+      18px;
+  }
+
+  .waki-hotel-login-card__brand {
+    margin-bottom:
+      27px;
+  }
+
+  .waki-hotel-login-card__logo {
+    width:
+      135px;
+  }
+
+  .waki-hotel-login-card__heading h2 {
+    font-size:
+      31px;
+  }
+
+}
