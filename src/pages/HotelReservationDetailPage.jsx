@@ -94,6 +94,12 @@ export default function HotelReservationDetailPage() {
   const [cameraError, setCameraError] =
     useState('')
 
+  const [cameraStarted, setCameraStarted] =
+    useState(false)
+
+  const [cameraStarting, setCameraStarting] =
+    useState(false)
+
   const scannerRef =
     useRef(null)
 
@@ -177,268 +183,234 @@ export default function HotelReservationDetailPage() {
 
 
   /* =========================================================
-     ESCÁNER QR — CICLO DE VIDA
+     ESCÁNER QR — MODO MÓVIL SEGURO
      ========================================================= */
 
   useEffect(() => {
-    if (!scannerOpen) {
-      return undefined
+    return () => {
+      stopQrScanner()
+    }
+  }, [])
+
+
+  async function startQrScanner() {
+    if (
+      cameraStarting ||
+      cameraStarted
+    ) {
+      return
     }
 
 
-    let cancelled =
-      false
+    try {
+      setCameraStarting(true)
+      setCameraError('')
+      setErrorMessage('')
+
+      scanLockedRef.current =
+        false
 
 
-    const startScanner =
-      async () => {
-        try {
-          setCameraError('')
-
-          scanLockedRef.current =
-            false
+      const cameras =
+        await Html5Qrcode
+          .getCameras()
 
 
-          /*
-           * Esperamos un instante para asegurar que
-           * <div id="waki-hotel-qr-reader" /> ya exista
-           * en el DOM antes de inicializar html5-qrcode.
-           */
-          await new Promise(
-            (resolve) =>
-              window.setTimeout(
-                resolve,
-                180
-              )
-          )
-
-
-          if (cancelled) {
-            return
-          }
-
-
-          /*
-           * Pedimos la lista real de cámaras.
-           *
-           * Esto es más robusto que usar solamente:
-           * { facingMode: 'environment' }
-           *
-           * En laptops normalmente solo existe una cámara
-           * frontal y el constraint "environment" puede fallar.
-           */
-          const cameras =
-            await Html5Qrcode
-              .getCameras()
-
-
-          if (
-            !cameras ||
-            cameras.length === 0
-          ) {
-            throw new Error(
-              'No encontramos ninguna cámara disponible en este dispositivo.'
-            )
-          }
-
-
-          /*
-           * Si hay varias cámaras tratamos de elegir
-           * una trasera. Si no, usamos la primera.
-           */
-          const preferredCamera =
-            cameras.find(
-              (camera) => {
-                const label =
-                  (
-                    camera.label ||
-                    ''
-                  )
-                    .toLowerCase()
-
-
-                return (
-                  label.includes('back') ||
-                  label.includes('rear') ||
-                  label.includes('environment') ||
-                  label.includes('trasera')
-                )
-              }
-            ) ||
-            cameras[0]
-
-
-          if (cancelled) {
-            return
-          }
-
-
-          const scanner =
-            new Html5Qrcode(
-              'waki-hotel-qr-reader'
-            )
-
-
-          scannerRef.current =
-            scanner
-
-
-          await scanner.start(
-            preferredCamera.id,
-            {
-              fps:
-                10,
-
-              qrbox: (
-                viewfinderWidth,
-                viewfinderHeight
-              ) => {
-                const minEdge =
-                  Math.min(
-                    viewfinderWidth,
-                    viewfinderHeight
-                  )
-
-
-                const size =
-                  Math.floor(
-                    minEdge * .72
-                  )
-
-
-                return {
-                  width:
-                    size,
-
-                  height:
-                    size
-                }
-              }
-            },
-            async (
-              decodedText
-            ) => {
-              if (
-                scanLockedRef.current
-              ) {
-                return
-              }
-
-
-              scanLockedRef.current =
-                true
-
-
-              await handleQrDetected(
-                decodedText
-              )
-            },
-            () => {
-              /*
-               * Los errores de lectura por frame son normales
-               * mientras todavía no hay un QR frente a la cámara.
-               */
-            }
-          )
-
-        } catch (error) {
-          console.error(
-            'Error iniciando cámara QR:',
-            error
-          )
-
-
-          const rawMessage =
-            String(
-              error?.message ||
-              error ||
-              ''
-            )
-
-
-          if (
-            rawMessage.includes(
-              'Permission'
-            ) ||
-            rawMessage.includes(
-              'NotAllowedError'
-            )
-          ) {
-            setCameraError(
-              'Chrome tiene bloqueado el acceso a la cámara. Haz clic en el icono junto a localhost, permite Cámara y vuelve a intentarlo.'
-            )
-
-          } else if (
-            rawMessage.includes(
-              'NotFoundError'
-            ) ||
-            rawMessage.includes(
-              'DevicesNotFoundError'
-            )
-          ) {
-            setCameraError(
-              'No encontramos una cámara disponible en este dispositivo.'
-            )
-
-          } else if (
-            rawMessage.includes(
-              'NotReadableError'
-            ) ||
-            rawMessage.includes(
-              'TrackStartError'
-            )
-          ) {
-            setCameraError(
-              'La cámara está siendo utilizada por otra aplicación. Cierra Zoom, Teams u otra app que pueda estar usando la cámara e inténtalo nuevamente.'
-            )
-
-          } else {
-            setCameraError(
-              rawMessage ||
-              'No pudimos acceder a la cámara. Verifica el permiso del navegador o usa el código manual.'
-            )
-          }
-        }
+      if (
+        !cameras ||
+        cameras.length === 0
+      ) {
+        throw new Error(
+          'No encontramos ninguna cámara disponible en este dispositivo.'
+        )
       }
 
 
-    startScanner()
+      const preferredCamera =
+        cameras.find(
+          (camera) => {
+            const label =
+              (
+                camera.label ||
+                ''
+              )
+                .toLowerCase()
 
 
-    return () => {
-      cancelled =
-        true
+            return (
+              label.includes('back') ||
+              label.includes('rear') ||
+              label.includes('environment') ||
+              label.includes('trasera')
+            )
+          }
+        ) ||
+        cameras[
+          cameras.length - 1
+        ] ||
+        cameras[0]
+
+
+      const readerElement =
+        document.getElementById(
+          'waki-hotel-qr-reader'
+        )
+
+
+      if (!readerElement) {
+        throw new Error(
+          'No encontramos el visor de cámara.'
+        )
+      }
 
 
       const scanner =
-        scannerRef.current
+        new Html5Qrcode(
+          'waki-hotel-qr-reader'
+        )
 
 
       scannerRef.current =
-        null
+        scanner
 
 
-      if (!scanner) {
-        return
+      await scanner.start(
+        preferredCamera.id,
+        {
+          fps:
+            10,
+
+          qrbox: (
+            viewfinderWidth,
+            viewfinderHeight
+          ) => {
+            const minEdge =
+              Math.min(
+                viewfinderWidth,
+                viewfinderHeight
+              )
+
+
+            const size =
+              Math.floor(
+                minEdge * .72
+              )
+
+
+            return {
+              width:
+                size,
+
+              height:
+                size
+            }
+          }
+        },
+        async (
+          decodedText
+        ) => {
+          if (
+            scanLockedRef.current
+          ) {
+            return
+          }
+
+
+          scanLockedRef.current =
+            true
+
+
+          await handleQrDetected(
+            decodedText
+          )
+        },
+        () => {}
+      )
+
+
+      setCameraStarted(
+        true
+      )
+
+    } catch (error) {
+      console.error(
+        'Error iniciando cámara QR:',
+        error
+      )
+
+
+      const rawMessage =
+        String(
+          error?.message ||
+          error ||
+          ''
+        )
+
+
+      if (
+        rawMessage.includes(
+          'Permission'
+        ) ||
+        rawMessage.includes(
+          'NotAllowedError'
+        ) ||
+        rawMessage.includes(
+          'permission'
+        )
+      ) {
+        setCameraError(
+          'El navegador bloqueó la cámara. En los permisos del sitio activa Cámara para hotel.wakipe.com y vuelve a intentarlo.'
+        )
+
+      } else if (
+        rawMessage.includes(
+          'NotFoundError'
+        ) ||
+        rawMessage.includes(
+          'DevicesNotFoundError'
+        )
+      ) {
+        setCameraError(
+          'No encontramos una cámara disponible en este dispositivo.'
+        )
+
+      } else if (
+        rawMessage.includes(
+          'NotReadableError'
+        ) ||
+        rawMessage.includes(
+          'TrackStartError'
+        )
+      ) {
+        setCameraError(
+          'La cámara está siendo utilizada por otra aplicación. Cierra otra app que pueda estar usando la cámara e inténtalo nuevamente.'
+        )
+
+      } else if (
+        rawMessage.includes(
+          'secure'
+        ) ||
+        rawMessage.includes(
+          'HTTPS'
+        )
+      ) {
+        setCameraError(
+          'La cámara requiere una conexión HTTPS segura.'
+        )
+
+      } else {
+        setCameraError(
+          rawMessage ||
+          'No pudimos acceder a la cámara. Revisa los permisos del navegador y vuelve a intentarlo.'
+        )
       }
 
-
-      /*
-       * No hacemos await en el cleanup de React.
-       * Intentamos detenerlo de forma segura.
-       */
-      scanner
-        .stop()
-        .catch(() => {})
-        .finally(() => {
-          try {
-            scanner.clear()
-          } catch {
-            // Sin acción necesaria.
-          }
-        })
+    } finally {
+      setCameraStarting(
+        false
+      )
     }
-  }, [scannerOpen])
+  }
 
 
   async function stopQrScanner() {
@@ -451,25 +423,27 @@ export default function HotelReservationDetailPage() {
 
 
     if (!scanner) {
+      setCameraStarted(
+        false
+      )
+
       return
     }
 
 
     try {
       await scanner.stop()
-    } catch {
-      /*
-       * Puede ocurrir si React desmontó el lector
-       * justo antes de que terminara de iniciar.
-       */
-    }
+    } catch {}
 
 
     try {
       scanner.clear()
-    } catch {
-      // No requiere acción adicional.
-    }
+    } catch {}
+
+
+    setCameraStarted(
+      false
+    )
   }
 
 
@@ -512,12 +486,7 @@ export default function HotelReservationDetailPage() {
         return tokenFromQuery.trim()
       }
 
-    } catch {
-      /*
-       * Si no es una URL, asumimos que el QR contiene
-       * directamente el token esperado por Supabase.
-       */
-    }
+    } catch {}
 
 
     return cleanValue
@@ -1996,6 +1965,7 @@ export default function HotelReservationDetailPage() {
                 }
                 onClick={() => {
                   setCameraError('')
+                  setCameraStarted(false)
                   setScannerOpen(true)
                 }}
               >
