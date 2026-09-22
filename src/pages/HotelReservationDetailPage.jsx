@@ -91,14 +91,14 @@ export default function HotelReservationDetailPage() {
   const [scannerOpen, setScannerOpen] =
     useState(false)
 
-  const [cameraError, setCameraError] =
-    useState('')
-
   const [cameraStarted, setCameraStarted] =
     useState(false)
 
   const [cameraStarting, setCameraStarting] =
     useState(false)
+
+  const [cameraError, setCameraError] =
+    useState('')
 
   const scannerRef =
     useRef(null)
@@ -183,7 +183,7 @@ export default function HotelReservationDetailPage() {
 
 
   /* =========================================================
-     ESCÁNER QR — MODO MÓVIL SEGURO
+     ESCÁNER QR
      ========================================================= */
 
   useEffect(() => {
@@ -194,131 +194,83 @@ export default function HotelReservationDetailPage() {
 
 
   async function startQrScanner() {
-    if (
-      cameraStarting ||
-      cameraStarted
-    ) {
+    if (cameraStarting || cameraStarted) {
       return
     }
-
 
     try {
       setCameraStarting(true)
       setCameraError('')
       setErrorMessage('')
+      scanLockedRef.current = false
 
-      scanLockedRef.current =
-        false
+      const readerElement =
+        document.getElementById('waki-hotel-qr-reader')
 
+      if (!readerElement) {
+        throw new Error('No encontramos el visor de cámara.')
+      }
+
+      readerElement.innerHTML = ''
 
       const cameras =
-        await Html5Qrcode
-          .getCameras()
+        await Html5Qrcode.getCameras()
 
-
-      if (
-        !cameras ||
-        cameras.length === 0
-      ) {
+      if (!cameras || cameras.length === 0) {
         throw new Error(
           'No encontramos ninguna cámara disponible en este dispositivo.'
         )
       }
 
-
       const preferredCamera =
-        cameras.find(
-          (camera) => {
-            const label =
-              (
-                camera.label ||
-                ''
-              )
-                .toLowerCase()
+        cameras.find((camera) => {
+          const label =
+            (camera.label || '').toLowerCase()
 
-
-            return (
-              label.includes('back') ||
-              label.includes('rear') ||
-              label.includes('environment') ||
-              label.includes('trasera')
-            )
-          }
-        ) ||
-        cameras[
-          cameras.length - 1
-        ] ||
+          return (
+            label.includes('back') ||
+            label.includes('rear') ||
+            label.includes('environment') ||
+            label.includes('trasera')
+          )
+        }) ||
+        cameras[cameras.length - 1] ||
         cameras[0]
 
-
-      const readerElement =
-        document.getElementById(
-          'waki-hotel-qr-reader'
-        )
-
-
-      if (!readerElement) {
-        throw new Error(
-          'No encontramos el visor de cámara.'
-        )
-      }
-
-
       const scanner =
-        new Html5Qrcode(
-          'waki-hotel-qr-reader'
-        )
+        new Html5Qrcode('waki-hotel-qr-reader')
 
-
-      scannerRef.current =
-        scanner
-
+      scannerRef.current = scanner
 
       await scanner.start(
         preferredCamera.id,
         {
-          fps:
-            10,
-
-          qrbox: (
-            viewfinderWidth,
-            viewfinderHeight
-          ) => {
+          fps: 10,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
             const minEdge =
               Math.min(
                 viewfinderWidth,
                 viewfinderHeight
               )
 
-
             const size =
-              Math.floor(
-                minEdge * .72
+              Math.max(
+                180,
+                Math.floor(minEdge * 0.72)
               )
 
-
             return {
-              width:
-                size,
-
-              height:
-                size
+              width: size,
+              height: size
             }
           }
         },
-        async (
-          decodedText
-        ) => {
-          if (
-            scanLockedRef.current
-          ) {
+        async (decodedText) => {
+          if (scanLockedRef.current) {
             return
           }
 
-
-          scanLockedRef.current =
-            true
-
+          scanLockedRef.current = true
 
           await handleQrDetected(
             decodedText
@@ -327,17 +279,13 @@ export default function HotelReservationDetailPage() {
         () => {}
       )
 
-
-      setCameraStarted(
-        true
-      )
+      setCameraStarted(true)
 
     } catch (error) {
       console.error(
         'Error iniciando cámara QR:',
         error
       )
-
 
       const rawMessage =
         String(
@@ -346,69 +294,37 @@ export default function HotelReservationDetailPage() {
           ''
         )
 
-
       if (
-        rawMessage.includes(
-          'Permission'
-        ) ||
-        rawMessage.includes(
-          'NotAllowedError'
-        ) ||
-        rawMessage.includes(
-          'permission'
-        )
+        rawMessage.includes('Permission') ||
+        rawMessage.includes('NotAllowedError') ||
+        rawMessage.includes('permission')
       ) {
         setCameraError(
-          'El navegador bloqueó la cámara. En los permisos del sitio activa Cámara para hotel.wakipe.com y vuelve a intentarlo.'
+          'El navegador bloqueó la cámara. Activa Cámara para hotel.wakipe.com en los permisos del sitio y vuelve a intentarlo.'
         )
-
       } else if (
-        rawMessage.includes(
-          'NotFoundError'
-        ) ||
-        rawMessage.includes(
-          'DevicesNotFoundError'
-        )
+        rawMessage.includes('NotFoundError') ||
+        rawMessage.includes('DevicesNotFoundError')
       ) {
         setCameraError(
           'No encontramos una cámara disponible en este dispositivo.'
         )
-
       } else if (
-        rawMessage.includes(
-          'NotReadableError'
-        ) ||
-        rawMessage.includes(
-          'TrackStartError'
-        )
+        rawMessage.includes('NotReadableError') ||
+        rawMessage.includes('TrackStartError')
       ) {
         setCameraError(
-          'La cámara está siendo utilizada por otra aplicación. Cierra otra app que pueda estar usando la cámara e inténtalo nuevamente.'
+          'La cámara está siendo utilizada por otra aplicación.'
         )
-
-      } else if (
-        rawMessage.includes(
-          'secure'
-        ) ||
-        rawMessage.includes(
-          'HTTPS'
-        )
-      ) {
-        setCameraError(
-          'La cámara requiere una conexión HTTPS segura.'
-        )
-
       } else {
         setCameraError(
           rawMessage ||
-          'No pudimos acceder a la cámara. Revisa los permisos del navegador y vuelve a intentarlo.'
+          'No pudimos iniciar la cámara. Revisa los permisos del navegador y vuelve a intentarlo.'
         )
       }
 
     } finally {
-      setCameraStarting(
-        false
-      )
+      setCameraStarting(false)
     }
   }
 
@@ -417,125 +333,73 @@ export default function HotelReservationDetailPage() {
     const scanner =
       scannerRef.current
 
-
-    scannerRef.current =
-      null
-
+    scannerRef.current = null
 
     if (!scanner) {
-      setCameraStarted(
-        false
-      )
-
+      setCameraStarted(false)
       return
     }
-
 
     try {
       await scanner.stop()
     } catch {}
 
-
     try {
       scanner.clear()
     } catch {}
 
-
-    setCameraStarted(
-      false
-    )
+    setCameraStarted(false)
   }
 
 
-  function normalizeQrValue(
-    value
-  ) {
+  function normalizeQrValue(value) {
     const cleanValue =
-      String(
-        value ||
-        ''
-      )
-        .trim()
-
+      String(value || '').trim()
 
     if (!cleanValue) {
       return ''
     }
 
-
     try {
       const url =
-        new URL(
-          cleanValue
-        )
-
+        new URL(cleanValue)
 
       const tokenFromQuery =
-        url.searchParams.get(
-          'qr_token'
-        ) ||
-        url.searchParams.get(
-          'token'
-        ) ||
-        url.searchParams.get(
-          'qr'
-        )
-
+        url.searchParams.get('qr_token') ||
+        url.searchParams.get('token') ||
+        url.searchParams.get('qr')
 
       if (tokenFromQuery) {
         return tokenFromQuery.trim()
       }
-
     } catch {}
-
 
     return cleanValue
   }
 
 
-  async function handleQrDetected(
-    decodedText
-  ) {
+  async function handleQrDetected(decodedText) {
     const cleanToken =
-      normalizeQrValue(
-        decodedText
-      )
-
+      normalizeQrValue(decodedText)
 
     if (!cleanToken) {
-      scanLockedRef.current =
-        false
-
+      scanLockedRef.current = false
       return
     }
 
-
-    setQrToken(
-      cleanToken
-    )
-
+    setQrToken(cleanToken)
 
     await stopQrScanner()
 
+    setScannerOpen(false)
 
-    setScannerOpen(
-      false
-    )
-
-
-    await verifyAccessToken(
-      cleanToken
-    )
+    await verifyAccessToken(cleanToken)
   }
 
 
   async function closeScanner() {
     await stopQrScanner()
-
-    setScannerOpen(
-      false
-    )
-
+    setScannerOpen(false)
     setCameraError('')
   }
 
@@ -1143,51 +1007,36 @@ export default function HotelReservationDetailPage() {
      VERIFICAR QR
      ========================================================= */
 
-  async function verifyAccessToken(
-    token
-  ) {
+  async function verifyAccessToken(token) {
     const cleanToken =
-      normalizeQrValue(
-        token
-      )
-
+      normalizeQrValue(token)
 
     if (!cleanToken) {
       setErrorMessage(
         'Ingresa o escanea el código QR de la reserva.'
       )
-
       return
     }
 
-
     try {
       setVerifying(true)
-
       setErrorMessage('')
       setSuccessMessage('')
 
-
-      const {
-        error
-      } =
-        await supabase
-          .rpc(
-            'hotel_verify_reservation_access',
-            {
-              target_qr_token:
-                cleanToken,
-
-              target_documents_verified:
-                documentsVerified
-            }
-          )
-
+      const { error } =
+        await supabase.rpc(
+          'hotel_verify_reservation_access',
+          {
+            target_qr_token:
+              cleanToken,
+            target_documents_verified:
+              documentsVerified
+          }
+        )
 
       if (error) {
         throw error
       }
-
 
       setSuccessMessage(
         documentsVerified
@@ -1195,20 +1044,15 @@ export default function HotelReservationDetailPage() {
           : 'Acceso verificado correctamente.'
       )
 
-
       setQrToken('')
 
-
-      await loadReservation(
-        false
-      )
+      await loadReservation(false)
 
     } catch (error) {
       console.error(
         'Error verificando QR:',
         error
       )
-
 
       setErrorMessage(
         error?.message ||
@@ -1217,18 +1061,13 @@ export default function HotelReservationDetailPage() {
 
     } finally {
       setVerifying(false)
-
-      scanLockedRef.current =
-        false
+      scanLockedRef.current = false
     }
   }
 
 
-  async function verifyQr(
-    event
-  ) {
+  async function verifyQr(event) {
     event.preventDefault()
-
 
     await verifyAccessToken(
       qrToken
@@ -2079,6 +1918,168 @@ export default function HotelReservationDetailPage() {
             </section>
           )
         }
+
+        {/* =================================================
+            MODAL ESCÁNER QR
+            ================================================= */}
+
+        {scannerOpen && (
+
+          <div
+            className="waki-qr-scanner-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Escanear QR de reserva"
+          >
+
+            <div className="waki-qr-scanner-modal">
+
+              <div className="waki-qr-scanner-modal__header">
+
+                <div>
+
+                  <span>
+                    WAKI CHECK-IN
+                  </span>
+
+                  <h2>
+                    Escanear QR
+                  </h2>
+
+                  <p>
+                    Apunta la cámara al código que aparece
+                    en el teléfono del huésped.
+                  </p>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  className="waki-qr-scanner-close"
+                  onClick={
+                    closeScanner
+                  }
+                  aria-label="Cerrar escáner"
+                >
+
+                  <X
+                    size={20}
+                    strokeWidth={1.8}
+                  />
+
+                </button>
+
+              </div>
+
+
+              {!cameraStarted && (
+
+                <button
+                  type="button"
+                  className="waki-qr-activate-camera"
+                  disabled={
+                    cameraStarting
+                  }
+                  onClick={
+                    startQrScanner
+                  }
+                >
+
+                  <Camera
+                    size={19}
+                    strokeWidth={1.8}
+                  />
+
+                  {
+                    cameraStarting
+                      ? 'Activando cámara...'
+                      : 'Activar cámara'
+                  }
+
+                </button>
+
+              )}
+
+
+              <div
+                className={
+                  `waki-qr-scanner-camera ${
+                    cameraStarted
+                      ? 'is-active'
+                      : 'is-inactive'
+                  }`
+                }
+              >
+
+                <div
+                  id="waki-hotel-qr-reader"
+                />
+
+
+                {cameraStarted && (
+
+                  <div className="waki-qr-scanner-guide">
+
+                    <span className="corner corner--tl" />
+                    <span className="corner corner--tr" />
+                    <span className="corner corner--bl" />
+                    <span className="corner corner--br" />
+
+                    <div className="waki-qr-scanner-line" />
+
+                  </div>
+
+                )}
+
+              </div>
+
+
+              {cameraError && (
+
+                <div className="waki-qr-scanner-error">
+                  {cameraError}
+                </div>
+
+              )}
+
+
+              <label className="hotel-reservation-checkbox waki-qr-documents-check">
+
+                <input
+                  type="checkbox"
+                  checked={
+                    documentsVerified
+                  }
+                  disabled={
+                    verifying
+                  }
+                  onChange={(event) =>
+                    setDocumentsVerified(
+                      event.target.checked
+                    )
+                  }
+                />
+
+                <span>
+                  También confirmé visualmente los
+                  documentos del huésped
+                </span>
+
+              </label>
+
+
+              <p className="waki-qr-scanner-note">
+                Escanear el QR valida el acceso, pero no
+                modifica la hora de inicio ni de término
+                de la reserva.
+              </p>
+
+            </div>
+
+          </div>
+
+        )}
 
       </main>
 
