@@ -13,6 +13,7 @@ import {
 
 import {
   useEffect,
+  useMemo,
   useState
 } from 'react'
 
@@ -37,42 +38,55 @@ const menuItems = [
     label: 'Resumen',
     icon: LayoutDashboard,
     route: '/dashboard',
-    disabled: false
+    roles: [
+      'admin'
+    ]
   },
   {
     key: 'hotel',
     label: 'Mi hotel',
     icon: Building2,
     route: '/mi-hotel',
-    disabled: false
+    roles: [
+      'admin'
+    ]
   },
   {
     key: 'reservas',
     label: 'Reservas',
     icon: CalendarDays,
     route: '/reservas',
-    disabled: false
+    roles: [
+      'admin',
+      'reception'
+    ]
   },
   {
     key: 'habitaciones',
     label: 'Habitaciones',
     icon: BedDouble,
     route: '/habitaciones',
-    disabled: false
+    roles: [
+      'admin'
+    ]
   },
   {
     key: 'tarifas',
     label: 'Tarifas',
     icon: CircleDollarSign,
     route: '/tarifas',
-    disabled: false
+    roles: [
+      'admin'
+    ]
   },
   {
     key: 'equipo',
     label: 'Equipo',
     icon: UsersRound,
     route: '/equipo',
-    disabled: true
+    roles: [
+      'admin'
+    ]
   }
 ]
 
@@ -88,12 +102,28 @@ export default function HotelSidebar({
   const [hotelImage, setHotelImage] =
     useState(null)
 
+  const [staffRole, setStaffRole] =
+    useState('admin')
+
   const [mobileOpen, setMobileOpen] =
     useState(false)
 
 
+  const visibleMenuItems =
+    useMemo(
+      () =>
+        menuItems.filter(
+          (item) =>
+            item.roles.includes(
+              staffRole
+            )
+        ),
+      [staffRole]
+    )
+
+
   useEffect(() => {
-    loadHotelImage()
+    loadSidebarData()
   }, [])
 
 
@@ -142,7 +172,7 @@ export default function HotelSidebar({
   }, [mobileOpen])
 
 
-  async function loadHotelImage() {
+  async function loadSidebarData() {
     try {
       const {
         data: {
@@ -160,32 +190,37 @@ export default function HotelSidebar({
 
 
       const {
-        data: staffData,
-        error: staffError
+        data: accessData,
+        error: accessError
       } =
         await supabase
-          .from('hotel_staff')
-          .select(`
-            hotel_id
-          `)
-          .eq(
-            'user_id',
-            session.user.id
+          .rpc(
+            'get_my_hotel_access'
           )
-          .eq(
-            'is_active',
-            true
-          )
-          .limit(1)
-          .maybeSingle()
 
 
-      if (
-        staffError ||
-        !staffData?.hotel_id
-      ) {
+      if (accessError) {
+        throw accessError
+      }
+
+
+      const access =
+        Array.isArray(
+          accessData
+        )
+          ? accessData[0]
+          : null
+
+
+      if (!access?.hotel_id) {
         return
       }
+
+
+      setStaffRole(
+        access.staff_role ||
+        'admin'
+      )
 
 
       const {
@@ -207,7 +242,7 @@ export default function HotelSidebar({
           `)
           .eq(
             'hotel_id',
-            staffData.hotel_id
+            access.hotel_id
           )
           .eq(
             'is_active',
@@ -239,7 +274,8 @@ export default function HotelSidebar({
 
                   roomDisplayOrder:
                     Number(
-                      room.display_order || 0
+                      room.display_order ||
+                      0
                     )
                 })
               )
@@ -283,10 +319,12 @@ export default function HotelSidebar({
 
           return (
             Number(
-              a.display_order || 0
+              a.display_order ||
+              0
             ) -
             Number(
-              b.display_order || 0
+              b.display_order ||
+              0
             )
           )
         }
@@ -301,7 +339,7 @@ export default function HotelSidebar({
 
     } catch (error) {
       console.error(
-        'Error cargando imagen del hotel:',
+        'Error cargando sidebar:',
         error
       )
     }
@@ -342,10 +380,6 @@ export default function HotelSidebar({
 
   return (
     <>
-
-      {/* =====================================================
-          MOBILE HEADER
-          ===================================================== */}
 
       <header className="hotel-mobile-nav">
 
@@ -403,10 +437,6 @@ export default function HotelSidebar({
       </header>
 
 
-      {/* =====================================================
-          OVERLAY
-          ===================================================== */}
-
       <button
         type="button"
         className={[
@@ -424,10 +454,6 @@ export default function HotelSidebar({
       />
 
 
-      {/* =====================================================
-          SIDEBAR
-          ===================================================== */}
-
       <aside
         className={[
           'hotel-sidebar',
@@ -443,7 +469,6 @@ export default function HotelSidebar({
       >
 
         <div className="hotel-sidebar-ref__top">
-
 
           <div className="hotel-sidebar-ref__brand">
 
@@ -499,7 +524,7 @@ export default function HotelSidebar({
 
           <nav className="hotel-sidebar-ref__menu">
 
-            {menuItems.map(
+            {visibleMenuItems.map(
               (item) => {
 
                 const Icon =
@@ -512,34 +537,19 @@ export default function HotelSidebar({
                       item.key
                     }
                     type="button"
-                    disabled={
-                      item.disabled
-                    }
                     className={[
                       'hotel-sidebar-ref__item',
 
                       activeKey ===
                       item.key
                         ? 'is-active'
-                        : '',
-
-                      item.disabled
-                        ? 'is-disabled'
                         : ''
                     ].join(' ')}
-                    onClick={() => {
-
-                      if (
-                        item.disabled
-                      ) {
-                        return
-                      }
-
-
+                    onClick={() =>
                       goTo(
                         item.route
                       )
-                    }}
+                    }
                   >
 
                     <Icon

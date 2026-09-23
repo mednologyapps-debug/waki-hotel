@@ -63,12 +63,28 @@ import HotelProfilePage
 import HotelReviewPage
   from './pages/HotelReviewPage'
 
+import HotelTeamPage
+  from './pages/HotelTeamPage'
+
+import HotelTeamActivationPage
+  from './pages/HotelTeamActivationPage'
+
+import HotelScanPlaceholderPage
+  from './pages/HotelScanPlaceholderPage'
+
 
 function ProtectedPage({
-  children
+  children,
+  roles = [
+    'admin'
+  ]
 }) {
   return (
-    <ProtectedHotelRoute>
+    <ProtectedHotelRoute
+      allowedRoles={
+        roles
+      }
+    >
       {children}
     </ProtectedHotelRoute>
   )
@@ -78,11 +94,6 @@ function ProtectedPage({
 export default function App() {
   return (
     <Routes>
-
-
-      {/* =====================================================
-          INICIO
-          ===================================================== */}
 
       <Route
         path="/"
@@ -95,10 +106,6 @@ export default function App() {
       />
 
 
-      {/* =====================================================
-          LOGIN
-          ===================================================== */}
-
       <Route
         path="/login"
         element={
@@ -107,9 +114,13 @@ export default function App() {
       />
 
 
-      {/* =====================================================
-          DEMO TEMPORAL DEL LOADER
-          ===================================================== */}
+      <Route
+        path="/equipo/activar"
+        element={
+          <HotelTeamActivationPage />
+        }
+      />
+
 
       <Route
         path="/loader-video"
@@ -118,10 +129,6 @@ export default function App() {
         }
       />
 
-
-      {/* =====================================================
-          DASHBOARD
-          ===================================================== */}
 
       <Route
         path="/dashboard"
@@ -133,14 +140,15 @@ export default function App() {
       />
 
 
-      {/* =====================================================
-          RESERVAS
-          ===================================================== */}
-
       <Route
         path="/reservas"
         element={
-          <ProtectedPage>
+          <ProtectedPage
+            roles={[
+              'admin',
+              'reception'
+            ]}
+          >
             <HotelReservationsPage />
           </ProtectedPage>
         }
@@ -150,16 +158,17 @@ export default function App() {
       <Route
         path="/reservas/:reservationId"
         element={
-          <ProtectedPage>
+          <ProtectedPage
+            roles={[
+              'admin',
+              'reception'
+            ]}
+          >
             <HotelReservationDetailPage />
           </ProtectedPage>
         }
       />
 
-
-      {/* =====================================================
-          HABITACIONES
-          ===================================================== */}
 
       <Route
         path="/habitaciones"
@@ -220,10 +229,6 @@ export default function App() {
         }
       />
 
-
-      {/* =====================================================
-          TARIFAS
-          ===================================================== */}
 
       <Route
         path="/tarifas"
@@ -293,10 +298,6 @@ export default function App() {
       />
 
 
-      {/* =====================================================
-          MI HOTEL
-          ===================================================== */}
-
       <Route
         path="/mi-hotel"
         element={
@@ -317,9 +318,29 @@ export default function App() {
       />
 
 
-      {/* =====================================================
-          FALLBACK
-          ===================================================== */}
+      <Route
+        path="/equipo"
+        element={
+          <ProtectedPage>
+            <HotelTeamPage />
+          </ProtectedPage>
+        }
+      />
+
+
+      <Route
+        path="/scan"
+        element={
+          <ProtectedPage
+            roles={[
+              'scanner'
+            ]}
+          >
+            <HotelScanPlaceholderPage />
+          </ProtectedPage>
+        }
+      />
+
 
       <Route
         path="*"
@@ -330,7 +351,6 @@ export default function App() {
           />
         }
       />
-
 
     </Routes>
   )
