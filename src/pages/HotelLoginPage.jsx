@@ -27,58 +27,164 @@ export default function HotelLoginPage() {
     checkExistingSession()
   }, [])
 
+
+  /* =========================================================
+     RUTA SEGÚN ROL INTERNO DEL HOTEL
+     ========================================================= */
+
+  function redirectByStaffRole(staffRole) {
+    if (staffRole === 'admin') {
+      navigate('/dashboard', {
+        replace: true
+      })
+
+      return
+    }
+
+    if (staffRole === 'reception') {
+      navigate('/reservas', {
+        replace: true
+      })
+
+      return
+    }
+
+    if (staffRole === 'scanner') {
+      navigate('/scan', {
+        replace: true
+      })
+
+      return
+    }
+
+    throw new Error(
+      'Tu cuenta no tiene un rol válido dentro del hotel.'
+    )
+  }
+
+
+  /* =========================================================
+     VALIDAR ACCESO DEL USUARIO
+     ========================================================= */
+
+  async function getHotelAccessForCurrentUser() {
+    const {
+      data: accessData,
+      error: accessError
+    } = await supabase
+      .rpc(
+        'get_my_hotel_access'
+      )
+
+    if (accessError) {
+      throw accessError
+    }
+
+    const accessRows =
+      Array.isArray(accessData)
+        ? accessData
+        : []
+
+    const activeAccess =
+      accessRows[0] || null
+
+    if (
+      !activeAccess?.hotel_id ||
+      !activeAccess?.staff_role
+    ) {
+      throw new Error(
+        'Tu cuenta todavía no tiene un acceso activo a un hotel.'
+      )
+    }
+
+    return activeAccess
+  }
+
+
+  /* =========================================================
+     SESIÓN EXISTENTE
+     ========================================================= */
+
   async function checkExistingSession() {
     try {
       const {
-        data: { session }
-      } = await supabase.auth.getSession()
+        data: { session },
+        error: sessionError
+      } = await supabase
+        .auth
+        .getSession()
+
+      if (sessionError) {
+        throw sessionError
+      }
 
       if (!session?.user) {
         setCheckingSession(false)
         return
       }
 
-      const { data: profile } = await supabase
+      const {
+        data: profile,
+        error: profileError
+      } = await supabase
         .from('profiles')
-        .select('role, account_status')
-        .eq('id', session.user.id)
+        .select(`
+          role,
+          account_status
+        `)
+        .eq(
+          'id',
+          session.user.id
+        )
         .maybeSingle()
+
+      if (profileError) {
+        throw profileError
+      }
 
       if (
         profile?.role !== 'hotel' ||
         profile?.account_status !== 'active'
       ) {
-        await supabase.auth.signOut()
+        await supabase
+          .auth
+          .signOut()
+
         setCheckingSession(false)
+
         return
       }
 
-      const { data: hotelStaff } = await supabase
-        .from('hotel_staff')
-        .select('hotel_id, is_active')
-        .eq('user_id', session.user.id)
-        .eq('is_active', true)
-        .limit(1)
-        .maybeSingle()
+      const access =
+        await getHotelAccessForCurrentUser()
 
-      if (!hotelStaff?.hotel_id) {
-        await supabase.auth.signOut()
-        setCheckingSession(false)
-        return
-      }
+      redirectByStaffRole(
+        access.staff_role
+      )
 
-      navigate('/dashboard', {
-        replace: true
-      })
     } catch (error) {
       console.error(
         'Error verificando sesión:',
         error
       )
 
+      await supabase
+        .auth
+        .signOut()
+
+      setErrorMessage(
+        error?.message ||
+        'No pudimos validar tu acceso a WAKI Hotel.'
+      )
+
       setCheckingSession(false)
     }
   }
+
+
+  /* =========================================================
+     LOGIN
+     ========================================================= */
 
   async function handleLogin(event) {
     event.preventDefault()
@@ -98,10 +204,16 @@ export default function HotelLoginPage() {
       const {
         data: authData,
         error: authError
-      } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password
-      })
+      } = await supabase
+        .auth
+        .signInWithPassword({
+          email:
+            email
+              .trim()
+              .toLowerCase(),
+
+          password
+        })
 
       if (authError) {
         throw authError
@@ -115,8 +227,9 @@ export default function HotelLoginPage() {
 
       /*
        * 1. Validamos que realmente sea
-       * una cuenta de hotel.
+       * una cuenta activa del portal hotel.
        */
+
       const {
         data: profile,
         error: profileError
@@ -127,7 +240,10 @@ export default function HotelLoginPage() {
           role,
           account_status
         `)
-        .eq('id', authData.user.id)
+        .eq(
+          'id',
+          authData.user.id
+        )
         .maybeSingle()
 
       if (profileError) {
@@ -135,7 +251,9 @@ export default function HotelLoginPage() {
       }
 
       if (!profile) {
-        await supabase.auth.signOut()
+        await supabase
+          .auth
+          .signOut()
 
         setErrorMessage(
           'No encontramos un perfil asociado a esta cuenta.'
@@ -145,7 +263,9 @@ export default function HotelLoginPage() {
       }
 
       if (profile.role !== 'hotel') {
-        await supabase.auth.signOut()
+        await supabase
+          .auth
+          .signOut()
 
         setErrorMessage(
           'Esta cuenta no pertenece al portal de hoteles WAKI.'
@@ -154,8 +274,13 @@ export default function HotelLoginPage() {
         return
       }
 
-      if (profile.account_status !== 'active') {
-        await supabase.auth.signOut()
+      if (
+        profile.account_status !==
+        'active'
+      ) {
+        await supabase
+          .auth
+          .signOut()
 
         setErrorMessage(
           'Tu cuenta no se encuentra activa. Contacta con WAKI.'
@@ -165,46 +290,50 @@ export default function HotelLoginPage() {
       }
 
       /*
-       * 2. Validamos que tenga una sede
-       * asignada en hotel_staff.
+       * 2. Obtenemos la sede y el rol real
+       * desde hotel_staff.
+       *
+       * admin     -> /dashboard
+       * reception -> /reservas
+       * scanner   -> /scan
        */
-      const {
-        data: hotelStaff,
-        error: staffError
-      } = await supabase
-        .from('hotel_staff')
-        .select(`
-          hotel_id,
-          staff_role,
-          is_active
-        `)
-        .eq('user_id', authData.user.id)
-        .eq('is_active', true)
-        .limit(1)
-        .maybeSingle()
 
-      if (staffError) {
-        throw staffError
-      }
+      const access =
+        await getHotelAccessForCurrentUser()
 
-      if (!hotelStaff?.hotel_id) {
-        await supabase.auth.signOut()
+      redirectByStaffRole(
+        access.staff_role
+      )
 
-        setErrorMessage(
-          'Tu cuenta todavía no tiene un hotel asignado.'
-        )
-
-        return
-      }
-
-      navigate('/dashboard', {
-        replace: true
-      })
     } catch (error) {
       console.error(
         'Error al iniciar sesión:',
         error
       )
+
+      /*
+       * Si Auth llegó a iniciar sesión pero
+       * falló la autorización interna, no
+       * dejamos una sesión equivocada activa.
+       */
+
+      const {
+        data: {
+          session
+        }
+      } = await supabase
+        .auth
+        .getSession()
+
+      if (
+        session &&
+        error?.message !==
+          'Invalid login credentials'
+      ) {
+        await supabase
+          .auth
+          .signOut()
+      }
 
       if (
         error?.message ===
@@ -219,10 +348,12 @@ export default function HotelLoginPage() {
             'No se pudo iniciar sesión. Inténtalo nuevamente.'
         )
       }
+
     } finally {
       setLoading(false)
     }
   }
+
 
   if (checkingSession) {
     return (
