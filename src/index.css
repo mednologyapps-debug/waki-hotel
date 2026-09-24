@@ -16810,3 +16810,50 @@ body {
   }
 
 }
+
+/* =========================================================
+   WAKI SCANNER — HTML5-QRCODE / SAFARI
+   Agregar al FINAL de index.css
+   ========================================================= */
+
+#waki-dedicated-qr-reader {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  background: #16111e !important;
+}
+
+#waki-dedicated-qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+
+  display: block !important;
+
+  object-fit: cover !important;
+
+  border-radius: 18px !important;
+}
+
+#waki-dedicated-qr-reader img,
+#waki-dedicated-qr-reader__dashboard,
+#waki-dedicated-qr-reader__dashboard_section,
+#waki-dedicated-qr-reader__header_message,
+#waki-dedicated-qr-reader__status_span {
+  display: none !important;
+}
+
+.waki-scan-camera__reader {
+  position: absolute;
+  inset: 0;
+}
+
+.waki-scan-camera__reader > div {
+  border: 0 !important;
+}
+
+.waki-scan-camera__reader
+#qr-shaded-region {
+  border-color:
+    rgba(12, 8, 18, .48) !important;
+}
+

@@ -23,6 +23,10 @@ import {
   supabase
 } from '../lib/supabase'
 
+import {
+  Html5Qrcode
+} from 'html5-qrcode'
+
 import wakiLogo
   from '../assets/waki_logo_full.png'
 
@@ -61,16 +65,7 @@ const STATUS_COPY = {
 
 
 export default function HotelScanPlaceholderPage() {
-  const videoRef =
-    useRef(null)
-
-  const streamRef =
-    useRef(null)
-
-  const scanLoopRef =
-    useRef(null)
-
-  const detectorRef =
+  const scannerRef =
     useRef(null)
 
   const scanLockedRef =
@@ -295,63 +290,75 @@ export default function HotelScanPlaceholderPage() {
         )
       }
 
-      if (
-        !('BarcodeDetector' in window)
-      ) {
-        throw new Error(
-          'El lector QR automático no está disponible en este navegador. Puedes pegar el código manualmente.'
+      await stopCamera()
+
+      const scanner =
+        new Html5Qrcode(
+          'waki-dedicated-qr-reader'
         )
-      }
 
-      detectorRef.current =
-        new window.BarcodeDetector({
-          formats: [
-            'qr_code'
-          ]
-        })
-
-      const stream =
-        await navigator
-          .mediaDevices
-          .getUserMedia({
-            video: {
-              facingMode: {
-                ideal:
-                  'environment'
-              },
-
-              width: {
-                ideal: 1280
-              },
-
-              height: {
-                ideal: 1280
-              }
-            },
-
-            audio: false
-          })
-
-      streamRef.current =
-        stream
-
-      if (
-        videoRef.current
-      ) {
-        videoRef.current.srcObject =
-          stream
-
-        await videoRef.current.play()
-      }
+      scannerRef.current =
+        scanner
 
       scanLockedRef.current =
         false
 
+      await scanner.start(
+        {
+          facingMode:
+            'environment'
+        },
+        {
+          fps: 10,
+
+          qrbox: (
+            viewfinderWidth,
+            viewfinderHeight
+          ) => {
+            const edge =
+              Math.floor(
+                Math.min(
+                  viewfinderWidth,
+                  viewfinderHeight
+                ) * 0.68
+              )
+
+            return {
+              width: edge,
+              height: edge
+            }
+          },
+
+          aspectRatio: 1
+        },
+        async (
+          decodedText
+        ) => {
+          if (
+            scanLockedRef.current
+          ) {
+            return
+          }
+
+          scanLockedRef.current =
+            true
+
+          await handleDetectedToken(
+            decodedText
+          )
+        },
+        () => {
+          /*
+           * html5-qrcode llama este callback
+           * mientras busca un QR.
+           * No mostramos esos intentos como error.
+           */
+        }
+      )
+
       setCameraActive(
         true
       )
-
-      runScanLoop()
 
     } catch (error) {
       console.error(
@@ -359,7 +366,7 @@ export default function HotelScanPlaceholderPage() {
         error
       )
 
-      stopCamera()
+      await stopCamera()
 
       setErrorMessage(
         getCameraErrorMessage(
@@ -376,131 +383,94 @@ export default function HotelScanPlaceholderPage() {
   function getCameraErrorMessage(
     error
   ) {
+    const message =
+      String(
+        error?.message ||
+        error ||
+        ''
+      )
+
     if (
       error?.name ===
-      'NotAllowedError'
+        'NotAllowedError' ||
+      message
+        .toLowerCase()
+        .includes(
+          'permission'
+        ) ||
+      message
+        .toLowerCase()
+        .includes(
+          'notallowed'
+        )
     ) {
       return (
-        'No tenemos permiso para usar la cámara. Habilítala en la configuración del navegador.'
+        'No tenemos permiso para usar la cámara. En Safari, abre Ajustes > Safari > Cámara y permite el acceso para WAKI.'
       )
     }
 
     if (
       error?.name ===
-      'NotFoundError'
+        'NotFoundError' ||
+      message
+        .toLowerCase()
+        .includes(
+          'notfound'
+        )
     ) {
       return (
         'No encontramos una cámara disponible en este dispositivo.'
       )
     }
 
+    if (
+      message
+        .toLowerCase()
+        .includes(
+          'secure'
+        )
+    ) {
+      return (
+        'La cámara requiere una conexión segura. Abre WAKI desde https://hotel.wakipe.com.'
+      )
+    }
+
     return (
-      error?.message ||
+      message ||
       'No pudimos iniciar la cámara.'
     )
   }
 
 
-  function runScanLoop() {
-    const scanFrame =
-      async () => {
+  async function stopCamera() {
+    const scanner =
+      scannerRef.current
+
+    if (scanner) {
+      try {
         if (
-          !cameraActive &&
-          !streamRef.current
+          scanner.getState &&
+          scanner.getState() !== 1
         ) {
-          return
+          await scanner.stop()
         }
-
-        if (
-          scanLockedRef.current
-        ) {
-          return
-        }
-
-        const video =
-          videoRef.current
-
-        const detector =
-          detectorRef.current
-
-        if (
-          video &&
-          detector &&
-          video.readyState >= 2
-        ) {
-          try {
-            const codes =
-              await detector.detect(
-                video
-              )
-
-            const firstCode =
-              codes?.[0]?.rawValue
-
-            if (
-              firstCode
-            ) {
-              scanLockedRef.current =
-                true
-
-              await handleDetectedToken(
-                firstCode
-              )
-
-              return
-            }
-
-          } catch (error) {
-            console.error(
-              'Error leyendo QR:',
-              error
-            )
-          }
-        }
-
-        scanLoopRef.current =
-          window.requestAnimationFrame(
-            scanFrame
-          )
+      } catch (error) {
+        console.warn(
+          'No fue necesario detener la cámara:',
+          error
+        )
       }
 
-    scanLoopRef.current =
-      window.requestAnimationFrame(
-        scanFrame
-      )
-  }
-
-
-  function stopCamera() {
-    if (
-      scanLoopRef.current
-    ) {
-      window.cancelAnimationFrame(
-        scanLoopRef.current
-      )
-
-      scanLoopRef.current =
-        null
-    }
-
-    if (
-      streamRef.current
-    ) {
-      streamRef.current
-        .getTracks()
-        .forEach(
-          (track) =>
-            track.stop()
+      try {
+        await scanner.clear()
+      } catch (error) {
+        console.warn(
+          'No fue necesario limpiar el lector:',
+          error
         )
+      }
 
-      streamRef.current =
-        null
-    }
-
-    if (
-      videoRef.current
-    ) {
-      videoRef.current.srcObject =
+      scannerRef.current =
         null
     }
 
@@ -525,7 +495,7 @@ export default function HotelScanPlaceholderPage() {
       return
     }
 
-    stopCamera()
+    await stopCamera()
 
     setQrToken(
       cleanToken
@@ -725,7 +695,7 @@ export default function HotelScanPlaceholderPage() {
 
 
   function resetScanner() {
-    stopCamera()
+    void stopCamera()
 
     setQrToken('')
     setPreview(null)
@@ -739,7 +709,7 @@ export default function HotelScanPlaceholderPage() {
 
 
   async function handleLogout() {
-    stopCamera()
+    await stopCamera()
 
     await supabase
       .auth
@@ -944,10 +914,9 @@ export default function HotelScanPlaceholderPage() {
 
             <div className="waki-scan-camera">
 
-              <video
-                ref={videoRef}
-                muted
-                playsInline
+              <div
+                id="waki-dedicated-qr-reader"
+                className="waki-scan-camera__reader"
               />
 
 
