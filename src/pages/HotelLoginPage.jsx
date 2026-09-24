@@ -558,6 +558,21 @@ export default function HotelLoginPage() {
             </label>
 
 
+            <div className="waki-hotel-forgot-row">
+
+              <button
+                type="button"
+                className="waki-hotel-forgot-button"
+                onClick={() =>
+                  navigate('/recuperar-contrasena')
+                }
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+
+            </div>
+
+
             {/* ERROR */}
 
             {errorMessage && (

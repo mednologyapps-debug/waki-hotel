@@ -24,6 +24,12 @@ import HotelReservationsPage
 import HotelLoginPage
   from './pages/HotelLoginPage'
 
+import HotelRecoverPasswordPage
+  from './pages/HotelRecoverPasswordPage'
+
+import HotelResetPasswordPage
+  from './pages/HotelResetPasswordPage'
+
 import HotelDashboardPage
   from './pages/HotelDashboardPage'
 
@@ -110,6 +116,22 @@ export default function App() {
         path="/login"
         element={
           <HotelLoginPage />
+        }
+      />
+
+
+      <Route
+        path="/recuperar-contrasena"
+        element={
+          <HotelRecoverPasswordPage />
+        }
+      />
+
+
+      <Route
+        path="/restablecer-contrasena"
+        element={
+          <HotelResetPasswordPage />
         }
       />
 
@@ -333,6 +355,8 @@ export default function App() {
         element={
           <ProtectedPage
             roles={[
+              'admin',
+              'reception',
               'scanner'
             ]}
           >
