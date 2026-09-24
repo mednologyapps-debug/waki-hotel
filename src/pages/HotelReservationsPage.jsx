@@ -54,6 +54,9 @@ export default function HotelReservationsPage() {
   const [reservations, setReservations] =
     useState([])
 
+  const [extensionSummaries, setExtensionSummaries] =
+    useState({})
+
   const [search, setSearch] =
     useState('')
 
@@ -124,6 +127,23 @@ export default function HotelReservationsPage() {
               `hotel_id=eq.${hotelId}`
           },
           () => {
+            loadReservationRows(
+              hotelId
+            )
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'reservation_extensions'
+          },
+          () => {
+            loadExtensionSummaries(
+              hotelId
+            )
+
             loadReservationRows(
               hotelId
             )
@@ -293,6 +313,10 @@ export default function HotelReservationsPage() {
         staffData.hotel_id
       )
 
+      await loadExtensionSummaries(
+        staffData.hotel_id
+      )
+
     } catch (error) {
       console.error(
         'Error cargando reservas:',
@@ -384,6 +408,95 @@ export default function HotelReservationsPage() {
     setReservations(
       data || []
     )
+  }
+
+
+  /* =========================================================
+     RESUMEN DE EXTENSIONES
+     ========================================================= */
+
+  async function loadExtensionSummaries(
+    targetHotelId
+  ) {
+    const {
+      data,
+      error
+    } =
+      await supabase.rpc(
+        'hotel_get_reservation_extension_summaries',
+        {
+          target_hotel_id:
+            targetHotelId
+        }
+      )
+
+
+    if (error) {
+      console.error(
+        'Error cargando resumen de extensiones:',
+        error
+      )
+
+      return
+    }
+
+
+    const map = {}
+
+    ;(
+      Array.isArray(data)
+        ? data
+        : []
+    ).forEach(
+      (item) => {
+        map[
+          item.reservation_id
+        ] =
+          item
+      }
+    )
+
+
+    setExtensionSummaries(
+      map
+    )
+  }
+
+
+  function formatExtensionDuration(
+    minutes
+  ) {
+    const totalMinutes =
+      Number(
+        minutes ||
+        0
+      )
+
+    const hours =
+      Math.floor(
+        totalMinutes /
+        60
+      )
+
+    const remaining =
+      totalMinutes %
+      60
+
+
+    if (
+      hours > 0 &&
+      remaining > 0
+    ) {
+      return `${hours} h ${remaining} min`
+    }
+
+
+    if (hours > 0) {
+      return `${hours} h`
+    }
+
+
+    return `${remaining} min`
   }
 
 
@@ -1270,6 +1383,12 @@ export default function HotelReservationsPage() {
                     )
 
 
+                  const extensionSummary =
+                    extensionSummaries[
+                      reservation.id
+                    ]
+
+
                   return (
                     <article
                       key={
@@ -1396,6 +1515,26 @@ export default function HotelReservationsPage() {
                             )
                           }
                         </small>
+
+
+                        {extensionSummary && (
+
+                          <span className="hotel-live-extension-badge">
+
+                            +{
+                              formatExtensionDuration(
+                                extensionSummary
+                                  .total_extension_minutes
+                              )
+                            }
+
+                            <small>
+                              extendida
+                            </small>
+
+                          </span>
+
+                        )}
 
                       </div>
 

@@ -71,6 +71,9 @@ export default function HotelReservationDetailPage() {
   const [reservation, setReservation] =
     useState(null)
 
+  const [extensions, setExtensions] =
+    useState([])
+
   const [currentTime, setCurrentTime] =
     useState(
       new Date()
@@ -165,6 +168,25 @@ export default function HotelReservationDetailPage() {
               `id=eq.${reservationId}`
           },
           () => {
+            loadReservation(
+              false
+            )
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'reservation_extensions',
+            filter:
+              `reservation_id=eq.${reservationId}`
+          },
+          () => {
+            loadExtensions(
+              false
+            )
+
             loadReservation(
               false
             )
@@ -555,6 +577,10 @@ export default function HotelReservationDetailPage() {
         staffData.hotel_id
       )
 
+      await loadExtensions(
+        false
+      )
+
     } catch (error) {
       console.error(
         'Error cargando detalle de reserva:',
@@ -693,6 +719,144 @@ export default function HotelReservationDetailPage() {
         setLoading(false)
       }
     }
+  }
+
+
+  /* =========================================================
+     CARGAR EXTENSIONES
+     ========================================================= */
+
+  async function loadExtensions(
+    showLoader = false
+  ) {
+    try {
+      if (showLoader) {
+        setLoading(true)
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          'hotel_get_reservation_extensions',
+          {
+            target_reservation_id:
+              reservationId
+          }
+        )
+
+
+      if (error) {
+        throw error
+      }
+
+
+      const normalizedExtensions =
+        Array.isArray(data)
+          ? data
+          : []
+
+
+      setExtensions(
+        normalizedExtensions
+      )
+
+    } catch (error) {
+      console.error(
+        'Error cargando extensiones:',
+        error
+      )
+
+
+      setErrorMessage(
+        error?.message ||
+        'No pudimos cargar las extensiones de esta reserva.'
+      )
+
+    } finally {
+      if (showLoader) {
+        setLoading(false)
+      }
+    }
+  }
+
+
+  function extensionStatusLabel(
+    status
+  ) {
+    switch (status) {
+      case 'paid':
+        return 'Pagada'
+
+      case 'pending_payment':
+        return 'Pendiente de pago'
+
+      case 'expired':
+        return 'Vencida'
+
+      case 'failed':
+        return 'Fallida'
+
+      case 'cancelled':
+        return 'Cancelada'
+
+      default:
+        return status || '—'
+    }
+  }
+
+
+  function extensionStatusClass(
+    status
+  ) {
+    if (status === 'paid') {
+      return 'is-success'
+    }
+
+    if (status === 'pending_payment') {
+      return 'is-pending'
+    }
+
+    return 'is-muted'
+  }
+
+
+  function formatDuration(
+    minutes
+  ) {
+    const totalMinutes =
+      Number(
+        minutes ||
+        0
+      )
+
+    const hours =
+      Math.floor(
+        totalMinutes /
+        60
+      )
+
+    const remainingMinutes =
+      totalMinutes %
+      60
+
+
+    if (
+      hours > 0 &&
+      remainingMinutes > 0
+    ) {
+      return `${hours} h ${remainingMinutes} min`
+    }
+
+
+    if (hours > 0) {
+      return `${hours} h`
+    }
+
+
+    return `${remainingMinutes} min`
   }
 
 
@@ -1086,6 +1250,62 @@ export default function HotelReservationDetailPage() {
     ]
       .filter(Boolean)
       .join(', ')
+
+
+  const paidExtensions =
+    useMemo(
+      () =>
+        extensions.filter(
+          (extension) =>
+            extension.status ===
+            'paid'
+        ),
+      [
+        extensions
+      ]
+    )
+
+
+  const totalExtendedMinutes =
+    useMemo(
+      () =>
+        paidExtensions.reduce(
+          (
+            total,
+            extension
+          ) =>
+            total +
+            Number(
+              extension.duration_minutes ||
+              0
+            ),
+          0
+        ),
+      [
+        paidExtensions
+      ]
+    )
+
+
+  const totalExtensionAmount =
+    useMemo(
+      () =>
+        paidExtensions.reduce(
+          (
+            total,
+            extension
+          ) =>
+            total +
+            Number(
+              extension.amount ||
+              0
+            ),
+          0
+        ),
+      [
+        paidExtensions
+      ]
+    )
 
 
   /* =========================================================
@@ -1751,6 +1971,212 @@ export default function HotelReservationDetailPage() {
           </section>
 
         </div>
+
+
+        {/* =================================================
+            EXTENSIONES DE ESTADÍA
+            ================================================= */}
+
+        {extensions.length > 0 && (
+
+          <section className="hotel-reservation-extensions">
+
+            <div className="hotel-reservation-extensions__header">
+
+              <div>
+
+                <span className="hotel-dashboard-eyebrow">
+                  EXTENSIONES
+                </span>
+
+                <h2>
+                  Historial de ampliaciones
+                </h2>
+
+                <p>
+                  Cambios aplicados al horario original de esta reserva.
+                </p>
+
+              </div>
+
+
+              {paidExtensions.length > 0 && (
+
+                <div className="hotel-reservation-extensions__summary">
+
+                  <div>
+
+                    <span>
+                      Tiempo agregado
+                    </span>
+
+                    <strong>
+                      +{formatDuration(
+                        totalExtendedMinutes
+                      )}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Importe adicional
+                    </span>
+
+                    <strong>
+                      {formatPrice(
+                        totalExtensionAmount,
+                        reservation.currency
+                      )}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              )}
+
+            </div>
+
+
+            <div className="hotel-reservation-extensions__list">
+
+              {extensions.map(
+                (
+                  extension,
+                  index
+                ) => (
+
+                  <article
+                    key={extension.id}
+                    className={
+                      `hotel-reservation-extension-card ${
+                        extension.status === 'paid' &&
+                        index === 0
+                          ? 'is-latest-paid'
+                          : ''
+                      }`
+                    }
+                  >
+
+                    <div className="hotel-reservation-extension-card__top">
+
+                      <div className="hotel-reservation-extension-card__duration">
+
+                        <Clock3
+                          size={18}
+                          strokeWidth={1.8}
+                        />
+
+                        <div>
+
+                          <span>
+                            EXTENSIÓN
+                          </span>
+
+                          <strong>
+                            +{formatDuration(
+                              extension.duration_minutes
+                            )}
+                          </strong>
+
+                        </div>
+
+                      </div>
+
+
+                      <span
+                        className={
+                          `hotel-reservation-extension-status ${
+                            extensionStatusClass(
+                              extension.status
+                            )
+                          }`
+                        }
+                      >
+                        {extensionStatusLabel(
+                          extension.status
+                        )}
+                      </span>
+
+                    </div>
+
+
+                    <div className="hotel-reservation-extension-card__times">
+
+                      <div>
+
+                        <span>
+                          Salida anterior
+                        </span>
+
+                        <strong>
+                          {formatTime(
+                            extension.original_end_at
+                          )}
+                        </strong>
+
+                      </div>
+
+
+                      <div className="is-new-time">
+
+                        <span>
+                          Nueva salida
+                        </span>
+
+                        <strong>
+                          {formatTime(
+                            extension.new_end_at
+                          )}
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+
+                    <div className="hotel-reservation-extension-card__footer">
+
+                      <span>
+                        {extension.rate_plan_name ||
+                          'Ampliación de estadía'}
+                      </span>
+
+                      <strong>
+                        {formatPrice(
+                          extension.amount,
+                          extension.currency
+                        )}
+                      </strong>
+
+                    </div>
+
+
+                    {extension.paid_at && (
+
+                      <small>
+                        Pagada el {formatDate(
+                          extension.paid_at
+                        )} a las {formatTime(
+                          extension.paid_at
+                        )}
+                      </small>
+
+                    )}
+
+                  </article>
+
+                )
+              )}
+
+            </div>
+
+          </section>
+
+        )}
 
 
         {/* =================================================

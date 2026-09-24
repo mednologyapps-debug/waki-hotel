@@ -16857,3 +16857,283 @@ body {
     rgba(12, 8, 18, .48) !important;
 }
 
+
+/* =========================================================
+   WAKI HOTEL — EXTENSIONES DE ESTADÍA
+   ========================================================= */
+
+.hotel-reservation-extensions {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid #e9e3f1;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.hotel-reservation-extensions__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 18px;
+}
+
+.hotel-reservation-extensions__header h2 {
+  margin: 4px 0 5px;
+  color: #211a46;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.25px;
+}
+
+.hotel-reservation-extensions__header p {
+  margin: 0;
+  color: #8a8394;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.hotel-reservation-extensions__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.hotel-reservation-extensions__summary > div {
+  min-width: 130px;
+  padding: 11px 13px;
+  border: 1px solid #e3d8fa;
+  border-radius: 12px;
+  background: #faf7ff;
+}
+
+.hotel-reservation-extensions__summary span {
+  display: block;
+  color: #8d849b;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .55px;
+}
+
+.hotel-reservation-extensions__summary strong {
+  display: block;
+  margin-top: 3px;
+  color: #7137e8;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.hotel-reservation-extensions__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hotel-reservation-extension-card {
+  position: relative;
+  padding: 16px;
+  border: 1px solid #ece7f1;
+  border-radius: 15px;
+  background: #fcfbfd;
+}
+
+.hotel-reservation-extension-card.is-latest-paid {
+  border-color: #d8c9fa;
+  background: #fbf8ff;
+  box-shadow: 0 8px 24px rgba(83, 50, 145, .06);
+}
+
+.hotel-reservation-extension-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hotel-reservation-extension-card__duration {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #7137e8;
+}
+
+.hotel-reservation-extension-card__duration > div {
+  min-width: 0;
+}
+
+.hotel-reservation-extension-card__duration span {
+  display: block;
+  color: #9a92a4;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .55px;
+}
+
+.hotel-reservation-extension-card__duration strong {
+  display: block;
+  margin-top: 2px;
+  color: #262044;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hotel-reservation-extension-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hotel-reservation-extension-status.is-success {
+  background: #eaf8ef;
+  color: #2f8050;
+}
+
+.hotel-reservation-extension-status.is-pending {
+  background: #fff6df;
+  color: #996d0a;
+}
+
+.hotel-reservation-extension-status.is-muted {
+  background: #f0eef2;
+  color: #837d8a;
+}
+
+.hotel-reservation-extension-card__times {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hotel-reservation-extension-card__times > div {
+  padding: 10px 11px;
+  border-radius: 10px;
+  background: #f5f3f7;
+}
+
+.hotel-reservation-extension-card__times > div.is-new-time {
+  background: #f2ebff;
+}
+
+.hotel-reservation-extension-card__times span {
+  display: block;
+  color: #928a9d;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.hotel-reservation-extension-card__times strong {
+  display: block;
+  margin-top: 3px;
+  color: #2b2541;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hotel-reservation-extension-card__times .is-new-time strong {
+  color: #7137e8;
+}
+
+.hotel-reservation-extension-card__footer {
+  margin-top: 12px;
+  padding-top: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #ece8f0;
+}
+
+.hotel-reservation-extension-card__footer span {
+  min-width: 0;
+  color: #777080;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.hotel-reservation-extension-card__footer strong {
+  flex: 0 0 auto;
+  color: #2a2344;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.hotel-reservation-extension-card > small {
+  display: block;
+  margin-top: 8px;
+  color: #a19aa9;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1050px) {
+  .hotel-reservation-extensions__header {
+    flex-direction: column;
+  }
+
+  .hotel-reservation-extensions__summary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .hotel-reservation-extensions {
+    padding: 16px;
+  }
+
+  .hotel-reservation-extensions__list {
+    grid-template-columns: 1fr;
+  }
+
+  .hotel-reservation-extensions__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .hotel-reservation-extension-card__times {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   WAKI HOTEL — BADGE DE EXTENSIÓN EN RESERVAS
+   ========================================================= */
+
+.hotel-live-extension-badge {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #dacdfa;
+  border-radius: 999px;
+  background: #f5efff;
+  color: #7137e8;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.hotel-live-extension-badge small {
+  color: #8e83a1;
+  font-size: 8px;
+  font-weight: 650;
+}
+
+.hotel-live-reservation-card:has(.hotel-live-extension-badge) {
+  border-color: #dfd4f6;
+}
+
+@media (max-width: 760px) {
+  .hotel-live-extension-badge {
+    margin-top: 5px;
+  }
+}
