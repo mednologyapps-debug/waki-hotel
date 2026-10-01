@@ -20,12 +20,19 @@ import {
   useState
 } from 'react'
 
+import {
+  useNavigate
+} from 'react-router-dom'
+
 import HotelSidebar from '../components/hotel/HotelSidebar'
 
 import { supabase } from '../lib/supabase'
 
 
 export default function HotelDashboardPage() {
+  const navigate =
+    useNavigate()
+
   const [loading, setLoading] =
     useState(true)
 
@@ -40,6 +47,9 @@ export default function HotelDashboardPage() {
 
   const [roomTypes, setRoomTypes] =
     useState([])
+
+  const [onboarding, setOnboarding] =
+    useState(null)
 
 
   useEffect(() => {
@@ -182,52 +192,74 @@ export default function HotelDashboardPage() {
 
 
       /* =========================================
-         HABITACIONES
+         ONBOARDING + HABITACIONES
       ========================================= */
 
-      const {
-        data: roomsData,
-        error: roomsError
-      } = await supabase
-        .from('room_types')
-        .select(`
-          id,
-          name,
-          inventory_count,
-          is_active,
-          display_order,
+      const [
+        onboardingResult,
+        roomsResult
+      ] = await Promise.all([
 
-          rate_plans (
-            id,
-            is_active
-          ),
-
-          room_type_images (
-            id,
-            image_url,
-            is_cover,
-            display_order
-          )
-        `)
-        .eq(
-          'hotel_id',
-          hotelStaff.hotel_id
-        )
-        .order(
-          'display_order',
+        supabase.rpc(
+          'get_hotel_onboarding_status',
           {
-            ascending: true
+            target_hotel_id:
+              hotelStaff.hotel_id
           }
-        )
+        ),
+
+        supabase
+          .from('room_types')
+          .select(`
+            id,
+            name,
+            inventory_count,
+            is_active,
+            display_order,
+
+            rate_plans (
+              id,
+              is_active
+            ),
+
+            room_type_images (
+              id,
+              image_url,
+              is_cover,
+              display_order
+            )
+          `)
+          .eq(
+            'hotel_id',
+            hotelStaff.hotel_id
+          )
+          .order(
+            'display_order',
+            {
+              ascending: true
+            }
+          )
+
+      ])
 
 
-      if (roomsError) {
-        throw roomsError
+      if (onboardingResult.error) {
+        throw onboardingResult.error
       }
 
 
+      if (roomsResult.error) {
+        throw roomsResult.error
+      }
+
+
+      setOnboarding(
+        onboardingResult.data
+      )
+
+
       setRoomTypes(
-        roomsData || []
+        roomsResult.data || []
       )
 
     } catch (error) {
@@ -332,59 +364,188 @@ export default function HotelDashboardPage() {
 
 
   /* =========================================
+     PRIMERA HABITACIÓN ACTIVA
+  ========================================= */
+
+  const firstActiveRoomId =
+    useMemo(
+      () =>
+        roomTypes.find(
+          (room) =>
+            room.is_active === true
+        )?.id || null,
+      [roomTypes]
+    )
+
+
+  /* =========================================
      PROGRESO
   ========================================= */
 
   const setup = useMemo(() => {
     const hotelComplete =
       Boolean(
-        hotel?.name &&
-        hotel?.district
+        onboarding?.info_complete
       )
 
 
     const roomsComplete =
-      stats.roomTypeCount > 0
+      Boolean(
+        onboarding?.rooms_complete
+      )
+
+
+    const photosComplete =
+      Boolean(
+        onboarding?.photos_complete
+      )
 
 
     const ratesComplete =
-      stats.rateCount > 0
+      Boolean(
+        onboarding?.rates_complete
+      )
 
 
+    /*
+     * El quinto paso representa haber enviado
+     * el hotel a revisión.
+     */
     const reviewComplete =
-      hotel?.approval_status ===
-      'approved'
+      [
+        'pending_review',
+        'approved'
+      ].includes(
+        hotel?.approval_status
+      )
 
 
     const steps = [
-      hotelComplete,
-      roomsComplete,
-      ratesComplete,
-      reviewComplete
+      {
+        key: 'hotel',
+        complete: hotelComplete
+      },
+      {
+        key: 'rooms',
+        complete: roomsComplete
+      },
+      {
+        key: 'photos',
+        complete: photosComplete
+      },
+      {
+        key: 'rates',
+        complete: ratesComplete
+      },
+      {
+        key: 'review',
+        complete: reviewComplete
+      }
     ]
 
 
     const completed =
-      steps.filter(Boolean).length
+      steps.filter(
+        (step) =>
+          step.complete
+      ).length
+
+
+    const currentPending =
+      steps.find(
+        (step) =>
+          !step.complete
+      )
 
 
     return {
       hotelComplete,
       roomsComplete,
+      photosComplete,
       ratesComplete,
       reviewComplete,
+      completed,
       percentage:
-        Math.round(
-          (
-            completed /
-            steps.length
-          ) * 100
-        )
+        completed * 20,
+      currentPendingKey:
+        currentPending?.key ||
+        null
     }
+
   }, [
-    hotel,
-    stats
+    onboarding,
+    hotel
   ])
+
+
+  /* =========================================
+     NAVEGACIÓN ONBOARDING
+  ========================================= */
+
+  function navigateToSetupStep(
+    stepKey
+  ) {
+    switch (stepKey) {
+      case 'hotel':
+        navigate(
+          '/mi-hotel'
+        )
+        break
+
+
+      case 'rooms':
+        navigate(
+          '/habitaciones'
+        )
+        break
+
+
+      case 'photos':
+        if (firstActiveRoomId) {
+          navigate(
+            `/habitaciones/${firstActiveRoomId}/fotos`
+          )
+        } else {
+          navigate(
+            '/habitaciones'
+          )
+        }
+
+        break
+
+
+      case 'rates':
+        navigate(
+          '/tarifas'
+        )
+        break
+
+
+      case 'review':
+        navigate(
+          '/mi-hotel/revision'
+        )
+        break
+
+
+      default:
+        break
+    }
+  }
+
+
+  function continueSetup() {
+    if (
+      !setup.currentPendingKey
+    ) {
+      return
+    }
+
+
+    navigateToSetupStep(
+      setup.currentPendingKey
+    )
+  }
 
 
   /* =========================================
@@ -421,13 +582,13 @@ export default function HotelDashboardPage() {
   ========================================= */
 
   if (loading) {
-  return (
-    <WakiGlobalLoader
-      title="Preparando tu resumen..."
-      subtitle="Cargando la operación de tu hotel"
-    />
-  )
-}
+    return (
+      <WakiGlobalLoader
+        title="Preparando tu resumen..."
+        subtitle="Cargando la operación de tu hotel"
+      />
+    )
+  }
 
 
   return (
@@ -556,7 +717,8 @@ export default function HotelDashboardPage() {
             </strong>
 
             <p>
-              {hotel?.approval_status === 'approved'
+              {hotel?.approval_status ===
+              'approved'
                 ? 'Tu hotel está publicado y disponible para operar en WAKI.'
                 : 'Completa la configuración para continuar con el proceso de publicación.'
               }
@@ -568,6 +730,11 @@ export default function HotelDashboardPage() {
           <button
             type="button"
             className="hotel-outline-button"
+            onClick={() =>
+              navigate(
+                '/mi-hotel/revision'
+              )
+            }
           >
             Ver estado
           </button>
@@ -758,51 +925,94 @@ export default function HotelDashboardPage() {
                 complete={
                   setup.hotelComplete
                 }
+                onClick={() =>
+                  navigateToSetupStep(
+                    'hotel'
+                  )
+                }
               />
 
               <SetupStep
                 number="2"
                 title="Habitaciones"
-                description="Tipos, inventario y fotografías."
+                description="Configura los tipos de habitación de tu hotel."
                 complete={
                   setup.roomsComplete
+                }
+                onClick={() =>
+                  navigateToSetupStep(
+                    'rooms'
+                  )
                 }
               />
 
               <SetupStep
                 number="3"
-                title="Tarifas"
-                description="Duraciones y precios."
+                title="Fotografías"
+                description="Agrega fotografías a tus habitaciones."
                 complete={
-                  setup.ratesComplete
+                  setup.photosComplete
+                }
+                onClick={() =>
+                  navigateToSetupStep(
+                    'photos'
+                  )
                 }
               />
 
               <SetupStep
                 number="4"
+                title="Tarifas"
+                description="Configura duraciones y precios."
+                complete={
+                  setup.ratesComplete
+                }
+                onClick={() =>
+                  navigateToSetupStep(
+                    'rates'
+                  )
+                }
+              />
+
+              <SetupStep
+                number="5"
                 title="Revisión"
                 description="Revisa y envía tu información a WAKI."
                 complete={
                   setup.reviewComplete
+                }
+                onClick={() =>
+                  navigateToSetupStep(
+                    'review'
+                  )
                 }
               />
 
             </div>
 
 
-            <button
-              type="button"
-              className="hotel-primary-button"
-            >
+            {setup.currentPendingKey &&
+              hotel?.approval_status !==
+                'suspended' && (
 
-              Continuar configuración
+              <button
+                type="button"
+                className="hotel-primary-button"
+                onClick={
+                  continueSetup
+                }
+              >
 
-              <ArrowRight
-                size={18}
-                strokeWidth={1.8}
-              />
+                Continuar configuración
 
-            </button>
+                <ArrowRight
+                  size={18}
+                  strokeWidth={1.8}
+                />
+
+              </button>
+
+            )}
 
           </article>
 
@@ -915,9 +1125,23 @@ export default function HotelDashboardPage() {
               </strong>
 
               <p>
-                Revisa tus habitaciones,
-                fotografías y tarifas para
-                mantener tu oferta actualizada.
+                {setup.currentPendingKey ===
+                'hotel'
+                  ? 'Completa la información general, contacto y ubicación de tu hotel.'
+                  : setup.currentPendingKey ===
+                    'rooms'
+                    ? 'Agrega al menos un tipo de habitación activo.'
+                    : setup.currentPendingKey ===
+                      'photos'
+                      ? 'Agrega fotografías a todas tus habitaciones activas.'
+                      : setup.currentPendingKey ===
+                        'rates'
+                        ? 'Configura al menos una tarifa activa para cada habitación.'
+                        : setup.currentPendingKey ===
+                          'review'
+                          ? 'Revisa la información y envía tu hotel a evaluación.'
+                          : 'Tu configuración principal está completa.'
+                }
               </p>
 
             </div>
@@ -941,11 +1165,13 @@ function SetupStep({
   number,
   title,
   description,
-  complete
+  complete,
+  onClick
 }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className={[
         'hotel-step',
         complete

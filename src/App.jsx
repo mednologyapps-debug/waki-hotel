@@ -81,14 +81,21 @@ import HotelScanPlaceholderPage
 
 function ProtectedPage({
   children,
+
   roles = [
     'admin'
-  ]
+  ],
+
+  requireApprovedHotel =
+    false
 }) {
   return (
     <ProtectedHotelRoute
       allowedRoles={
         roles
+      }
+      requireApprovedHotel={
+        requireApprovedHotel
       }
     >
       {children}
@@ -170,6 +177,7 @@ export default function App() {
               'admin',
               'reception'
             ]}
+            requireApprovedHotel
           >
             <HotelReservationsPage />
           </ProtectedPage>
@@ -185,6 +193,7 @@ export default function App() {
               'admin',
               'reception'
             ]}
+            requireApprovedHotel
           >
             <HotelReservationDetailPage />
           </ProtectedPage>
@@ -359,6 +368,7 @@ export default function App() {
               'reception',
               'scanner'
             ]}
+            requireApprovedHotel
           >
             <HotelScanPlaceholderPage />
           </ProtectedPage>

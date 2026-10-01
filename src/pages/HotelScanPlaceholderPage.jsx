@@ -50,6 +50,12 @@ const STATUS_COPY = {
       'El código QR ya expiró y no puede utilizarse para registrar el acceso.'
   },
 
+  ended: {
+    title: 'Reserva finalizada',
+    message:
+      'El horario de esta reserva ya terminó y no puede registrarse un nuevo acceso.'
+  },
+
   not_paid: {
     title: 'Pago pendiente',
     message:
@@ -70,7 +76,6 @@ export default function HotelScanPlaceholderPage() {
 
   const scanLockedRef =
     useRef(false)
-
 
   const [loading, setLoading] =
     useState(true)
@@ -128,9 +133,10 @@ export default function HotelScanPlaceholderPage() {
           session
         },
         error: sessionError
-      } = await supabase
-        .auth
-        .getSession()
+      } =
+        await supabase
+          .auth
+          .getSession()
 
       if (sessionError) {
         throw sessionError
@@ -147,17 +153,18 @@ export default function HotelScanPlaceholderPage() {
       const {
         data: profileData,
         error: profileError
-      } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name
-        `)
-        .eq(
-          'id',
-          session.user.id
-        )
-        .maybeSingle()
+      } =
+        await supabase
+          .from('profiles')
+          .select(`
+            id,
+            full_name
+          `)
+          .eq(
+            'id',
+            session.user.id
+          )
+          .maybeSingle()
 
       if (profileError) {
         throw profileError
@@ -170,10 +177,11 @@ export default function HotelScanPlaceholderPage() {
       const {
         data: accessData,
         error: accessError
-      } = await supabase
-        .rpc(
-          'get_my_hotel_access'
-        )
+      } =
+        await supabase
+          .rpc(
+            'get_my_hotel_access'
+          )
 
       if (accessError) {
         throw accessError
@@ -205,19 +213,20 @@ export default function HotelScanPlaceholderPage() {
       const {
         data: hotelData,
         error: hotelError
-      } = await supabase
-        .from('hotels')
-        .select(`
-          id,
-          name,
-          district,
-          province
-        `)
-        .eq(
-          'id',
-          access.hotel_id
-        )
-        .maybeSingle()
+      } =
+        await supabase
+          .from('hotels')
+          .select(`
+            id,
+            name,
+            district,
+            province
+          `)
+          .eq(
+            'id',
+            access.hotel_id
+          )
+          .maybeSingle()
 
       if (hotelError) {
         throw hotelError
@@ -250,13 +259,14 @@ export default function HotelScanPlaceholderPage() {
     const {
       data,
       error
-    } = await supabase
-      .rpc(
-        'get_my_recent_hotel_scans',
-        {
-          target_limit: 5
-        }
-      )
+    } =
+      await supabase
+        .rpc(
+          'get_my_recent_hotel_scans',
+          {
+            target_limit: 5
+          }
+        )
 
     if (error) {
       console.error(
@@ -533,14 +543,15 @@ export default function HotelScanPlaceholderPage() {
       const {
         data,
         error
-      } = await supabase
-        .rpc(
-          'hotel_preview_reservation_by_qr',
-          {
-            target_qr_token:
-              cleanToken
-          }
-        )
+      } =
+        await supabase
+          .rpc(
+            'hotel_preview_reservation_by_qr',
+            {
+              target_qr_token:
+                cleanToken
+            }
+          )
 
       if (error) {
         throw error
@@ -595,17 +606,18 @@ export default function HotelScanPlaceholderPage() {
       const {
         data,
         error
-      } = await supabase
-        .rpc(
-          'hotel_verify_reservation_access_safe',
-          {
-            target_qr_token:
-              qrToken.trim(),
+      } =
+        await supabase
+          .rpc(
+            'hotel_verify_reservation_access_safe',
+            {
+              target_qr_token:
+                qrToken.trim(),
 
-            target_documents_verified:
-              true
-          }
-        )
+              target_documents_verified:
+                true
+            }
+          )
 
       if (error) {
         throw error
@@ -664,6 +676,16 @@ export default function HotelScanPlaceholderPage() {
     ) {
       return (
         'Este código QR ya expiró.'
+      )
+    }
+
+    if (
+      message.includes(
+        'RESERVATION_ALREADY_ENDED'
+      )
+    ) {
+      return (
+        'El horario de esta reserva ya terminó y no puede registrarse el acceso.'
       )
     }
 
@@ -827,6 +849,7 @@ export default function HotelScanPlaceholderPage() {
         <div className="waki-scan-user">
 
           <div>
+
             <strong>
               {profile?.full_name ||
                 'Equipo WAKI'}
@@ -836,6 +859,7 @@ export default function HotelScanPlaceholderPage() {
               {hotel?.name ||
                 'Hotel'}
             </span>
+
           </div>
 
 
@@ -846,10 +870,12 @@ export default function HotelScanPlaceholderPage() {
             }
             aria-label="Cerrar sesión"
           >
+
             <LogOut
               size={18}
               strokeWidth={1.8}
             />
+
           </button>
 
         </div>
@@ -878,6 +904,7 @@ export default function HotelScanPlaceholderPage() {
 
 
         {errorMessage && (
+
           <div className="waki-scan-alert is-error">
 
             <XCircle
@@ -890,10 +917,12 @@ export default function HotelScanPlaceholderPage() {
             </span>
 
           </div>
+
         )}
 
 
         {successMessage && (
+
           <div className="waki-scan-alert is-success">
 
             <CheckCircle2
@@ -906,10 +935,12 @@ export default function HotelScanPlaceholderPage() {
             </span>
 
           </div>
+
         )}
 
 
         {!preview && (
+
           <section className="waki-scan-card">
 
             <div className="waki-scan-camera">
@@ -921,9 +952,11 @@ export default function HotelScanPlaceholderPage() {
 
 
               {!cameraActive && (
+
                 <div className="waki-scan-camera__empty">
 
                   <div>
+
                     <QrCode
                       size={39}
                       strokeWidth={1.45}
@@ -936,13 +969,16 @@ export default function HotelScanPlaceholderPage() {
                     <span>
                       Activa la cámara para leer el QR
                     </span>
+
                   </div>
 
                 </div>
+
               )}
 
 
               {cameraActive && (
+
                 <div className="waki-scan-frame">
 
                   <span className="corner corner--tl" />
@@ -953,6 +989,7 @@ export default function HotelScanPlaceholderPage() {
                   <span className="waki-scan-line" />
 
                 </div>
+
               )}
 
             </div>
@@ -973,15 +1010,19 @@ export default function HotelScanPlaceholderPage() {
             >
 
               {cameraActive ? (
+
                 <XCircle
                   size={19}
                   strokeWidth={1.8}
                 />
+
               ) : (
+
                 <Camera
                   size={19}
                   strokeWidth={1.8}
                 />
+
               )}
 
               {cameraStarting
@@ -994,9 +1035,11 @@ export default function HotelScanPlaceholderPage() {
 
 
             <div className="waki-scan-divider">
+
               <span>
                 o ingresa el código manualmente
               </span>
+
             </div>
 
 
@@ -1026,18 +1069,22 @@ export default function HotelScanPlaceholderPage() {
                   previewQr()
                 }
               >
+
                 {verifying
                   ? 'Validando...'
                   : 'Validar'}
+
               </button>
 
             </div>
 
           </section>
+
         )}
 
 
         {preview && (
+
           <section
             className={[
               'waki-scan-result',
@@ -1054,20 +1101,26 @@ export default function HotelScanPlaceholderPage() {
               <div className="waki-scan-result__status-icon">
 
                 {isVerified ? (
+
                   <BadgeCheck
                     size={28}
                     strokeWidth={1.8}
                   />
+
                 ) : isValid ? (
+
                   <ShieldCheck
                     size={27}
                     strokeWidth={1.8}
                   />
+
                 ) : (
+
                   <XCircle
                     size={27}
                     strokeWidth={1.8}
                   />
+
                 )}
 
               </div>
@@ -1096,6 +1149,7 @@ export default function HotelScanPlaceholderPage() {
             <div className="waki-scan-reservation">
 
               <div>
+
                 <span>
                   Huésped
                 </span>
@@ -1104,10 +1158,12 @@ export default function HotelScanPlaceholderPage() {
                   {preview.guest_name ||
                     '—'}
                 </strong>
+
               </div>
 
 
               <div>
+
                 <span>
                   Habitación
                 </span>
@@ -1120,14 +1176,18 @@ export default function HotelScanPlaceholderPage() {
 
                 {preview.room_unit_name &&
                   preview.room_type_name && (
+
                     <small>
                       {preview.room_type_name}
                     </small>
+
                   )}
+
               </div>
 
 
               <div>
+
                 <span>
                   Horario
                 </span>
@@ -1144,12 +1204,14 @@ export default function HotelScanPlaceholderPage() {
                     preview.start_at
                   )}
                 </small>
+
               </div>
 
             </div>
 
 
             {isValid && (
+
               <>
 
                 <label className="waki-scan-documents">
@@ -1177,6 +1239,7 @@ export default function HotelScanPlaceholderPage() {
                     />
 
                     <span>
+
                       <strong>
                         Documentos verificados
                       </strong>
@@ -1186,6 +1249,7 @@ export default function HotelScanPlaceholderPage() {
                         los documentos del huésped.
                         WAKI no almacena una copia.
                       </small>
+
                     </span>
 
                   </div>
@@ -1217,10 +1281,12 @@ export default function HotelScanPlaceholderPage() {
                 </button>
 
               </>
+
             )}
 
 
             {isVerified && (
+
               <div className="waki-scan-verified-detail">
 
                 <CheckCircle2
@@ -1229,6 +1295,7 @@ export default function HotelScanPlaceholderPage() {
                 />
 
                 <div>
+
                   <strong>
                     Ingreso registrado
                   </strong>
@@ -1238,9 +1305,11 @@ export default function HotelScanPlaceholderPage() {
                       preview.access_verified_at
                     )}
                   </span>
+
                 </div>
 
               </div>
+
             )}
 
 
@@ -1262,6 +1331,7 @@ export default function HotelScanPlaceholderPage() {
             </button>
 
           </section>
+
         )}
 
 
@@ -1277,6 +1347,7 @@ export default function HotelScanPlaceholderPage() {
               />
 
               <div>
+
                 <span>
                   ACTIVIDAD
                 </span>
@@ -1284,6 +1355,7 @@ export default function HotelScanPlaceholderPage() {
                 <h2>
                   Mis últimos accesos
                 </h2>
+
               </div>
 
             </div>
@@ -1292,6 +1364,7 @@ export default function HotelScanPlaceholderPage() {
 
 
           {recentScans.length === 0 ? (
+
             <div className="waki-scan-recent__empty">
 
               <ScanLine
@@ -1304,11 +1377,14 @@ export default function HotelScanPlaceholderPage() {
               </p>
 
             </div>
+
           ) : (
+
             <div className="waki-scan-recent__list">
 
               {recentScans.map(
                 (item) => (
+
                   <article
                     key={
                       item.reservation_id
@@ -1329,6 +1405,7 @@ export default function HotelScanPlaceholderPage() {
                     <div className="waki-scan-recent__copy">
 
                       <div>
+
                         <strong>
                           {item.guest_name ||
                             item.booking_code}
@@ -1337,6 +1414,7 @@ export default function HotelScanPlaceholderPage() {
                         <span>
                           {item.booking_code}
                         </span>
+
                       </div>
 
                       <small>
@@ -1353,18 +1431,22 @@ export default function HotelScanPlaceholderPage() {
 
 
                     {item.documents_verified && (
+
                       <FileCheck2
                         size={17}
                         strokeWidth={1.7}
                         className="waki-scan-recent__doc"
                       />
+
                     )}
 
                   </article>
+
                 )
               )}
 
             </div>
+
           )}
 
         </section>

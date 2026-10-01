@@ -59,7 +59,8 @@ const menuItems = [
     roles: [
       'admin',
       'reception'
-    ]
+    ],
+    requiresApprovedHotel: true
   },
   {
     key: 'habitaciones',
@@ -104,6 +105,12 @@ export default function HotelSidebar({
 
   const [staffRole, setStaffRole] =
     useState('admin')
+
+  const [
+    hotelApprovalStatus,
+    setHotelApprovalStatus
+  ] =
+    useState(null)
 
   const [mobileOpen, setMobileOpen] =
     useState(false)
@@ -169,6 +176,7 @@ export default function HotelSidebar({
         handleEscape
       )
     }
+
   }, [mobileOpen])
 
 
@@ -223,46 +231,82 @@ export default function HotelSidebar({
       )
 
 
-      const {
-        data: roomsData,
-        error: roomsError
-      } =
-        await supabase
-          .from('room_types')
-          .select(`
-            id,
-            display_order,
+      /* =========================================
+         HOTEL + HABITACIONES
+      ========================================= */
 
-            room_type_images (
+      const [
+        hotelResult,
+        roomsResult
+      ] =
+        await Promise.all([
+
+          supabase
+            .from('hotels')
+            .select(`
               id,
-              image_url,
-              is_cover,
-              display_order
+              approval_status
+            `)
+            .eq(
+              'id',
+              access.hotel_id
             )
-          `)
-          .eq(
-            'hotel_id',
-            access.hotel_id
-          )
-          .eq(
-            'is_active',
-            true
-          )
-          .order(
-            'display_order',
-            {
-              ascending: true
-            }
-          )
+            .maybeSingle(),
+
+          supabase
+            .from('room_types')
+            .select(`
+              id,
+              display_order,
+
+              room_type_images (
+                id,
+                image_url,
+                is_cover,
+                display_order
+              )
+            `)
+            .eq(
+              'hotel_id',
+              access.hotel_id
+            )
+            .eq(
+              'is_active',
+              true
+            )
+            .order(
+              'display_order',
+              {
+                ascending: true
+              }
+            )
+
+        ])
 
 
-      if (roomsError) {
-        throw roomsError
+      if (hotelResult.error) {
+        throw hotelResult.error
       }
 
 
+      if (roomsResult.error) {
+        throw roomsResult.error
+      }
+
+
+      setHotelApprovalStatus(
+        hotelResult.data
+          ?.approval_status ||
+        null
+      )
+
+
+      const roomsData =
+        roomsResult.data || []
+
+
       const images =
-        (roomsData || [])
+        roomsData
           .flatMap(
             (room) =>
               (
@@ -347,11 +391,18 @@ export default function HotelSidebar({
 
 
   function goTo(
-    route
+    route,
+    disabled = false
   ) {
+    if (disabled) {
+      return
+    }
+
+
     setMobileOpen(
       false
     )
+
 
     navigate(
       route
@@ -363,6 +414,7 @@ export default function HotelSidebar({
     setMobileOpen(
       false
     )
+
 
     await supabase
       .auth
@@ -441,6 +493,7 @@ export default function HotelSidebar({
         type="button"
         className={[
           'hotel-mobile-drawer-overlay',
+
           mobileOpen
             ? 'is-open'
             : ''
@@ -458,6 +511,7 @@ export default function HotelSidebar({
         className={[
           'hotel-sidebar',
           'hotel-sidebar--reference',
+
           mobileOpen
             ? 'is-mobile-open'
             : ''
@@ -531,23 +585,44 @@ export default function HotelSidebar({
                   item.icon
 
 
+                const disabled =
+                  Boolean(
+                    item.requiresApprovedHotel
+                  ) &&
+                  hotelApprovalStatus !==
+                    'approved'
+
+
                 return (
                   <button
                     key={
                       item.key
                     }
                     type="button"
+                    disabled={
+                      disabled
+                    }
+                    title={
+                      disabled
+                        ? 'Disponible cuando el hotel esté aprobado'
+                        : undefined
+                    }
                     className={[
                       'hotel-sidebar-ref__item',
 
                       activeKey ===
                       item.key
                         ? 'is-active'
+                        : '',
+
+                      disabled
+                        ? 'is-disabled'
                         : ''
                     ].join(' ')}
                     onClick={() =>
                       goTo(
-                        item.route
+                        item.route,
+                        disabled
                       )
                     }
                   >

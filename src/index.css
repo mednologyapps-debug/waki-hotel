@@ -17137,3 +17137,1265 @@ body {
     margin-top: 5px;
   }
 }
+
+/* =========================================================
+   RESERVAS BLOQUEADAS
+   PORTAL HOTEL
+   ========================================================= */
+
+.hotel-locked-page {
+  width: calc(100% - 250px);
+  max-width: none;
+  min-width: 0;
+  min-height: 100vh;
+
+  margin:
+    0
+    0
+    0
+    250px;
+
+  padding:
+    34px
+    38px
+    48px;
+
+  box-sizing: border-box;
+
+  background:
+    var(
+      --waki-background,
+      #faf9fe
+    );
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.hotel-locked-header {
+  width: 100%;
+
+  margin-bottom: 22px;
+}
+
+
+.hotel-locked-header h1 {
+  margin:
+    5px
+    0
+    5px;
+
+  color:
+    var(
+      --waki-text,
+      #170f36
+    );
+
+  font-size:
+    clamp(
+      28px,
+      2.4vw,
+      36px
+    );
+
+  line-height: 1.08;
+
+  font-weight: 600;
+
+  letter-spacing:
+    -.025em;
+}
+
+
+.hotel-locked-header p {
+  max-width: 620px;
+
+  margin: 0;
+
+  color:
+    var(
+      --waki-text-light,
+      #8b8498
+    );
+
+  font-size: 11px;
+
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   CARD PRINCIPAL
+   ========================================================= */
+
+.hotel-locked-card {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 330px;
+
+  padding:
+    36px
+    38px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(
+      220px,
+      .72fr
+    )
+    minmax(
+      0,
+      1.28fr
+    );
+
+  align-items: center;
+
+  gap: 52px;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    var(
+      --waki-border,
+      #ece7f2
+    );
+
+  border-radius:
+    22px;
+
+  background:
+    #fff;
+
+  box-shadow:
+    0
+    15px
+    45px
+    rgba(
+      58,
+      37,
+      91,
+      .055
+    );
+}
+
+
+.hotel-locked-card::before {
+  content: '';
+
+  position: absolute;
+
+  width: 340px;
+  height: 340px;
+
+  top: -190px;
+  right: -110px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      113,
+      55,
+      232,
+      .055
+    );
+
+  pointer-events: none;
+}
+
+
+.hotel-locked-card::after {
+  content: '';
+
+  position: absolute;
+
+  width: 240px;
+  height: 240px;
+
+  left: -125px;
+  bottom: -150px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      113,
+      55,
+      232,
+      .035
+    );
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   VISUAL
+   ========================================================= */
+
+.hotel-locked-card__visual {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 245px;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    #e7ddfa;
+
+  border-radius:
+    20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f3edff 0%,
+      #faf8ff 50%,
+      #f0e8ff 100%
+    );
+}
+
+
+.hotel-locked-card__visual::before {
+  content: '';
+
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      113,
+      55,
+      232,
+      .08
+    );
+
+  transform:
+    translate(
+      -38px,
+      34px
+    );
+}
+
+
+.hotel-locked-card__calendar {
+  position: relative;
+  z-index: 2;
+
+  width: 112px;
+  height: 112px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid
+    rgba(
+      113,
+      55,
+      232,
+      .14
+    );
+
+  border-radius:
+    28px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .82
+    );
+
+  color:
+    var(
+      --waki-purple,
+      #7137e8
+    );
+
+  box-shadow:
+    0
+    18px
+    40px
+    rgba(
+      83,
+      45,
+      153,
+      .10
+    );
+
+  backdrop-filter:
+    blur(12px);
+}
+
+
+.hotel-locked-card__icon {
+  position: absolute;
+  z-index: 3;
+
+  width: 50px;
+  height: 50px;
+
+  right:
+    calc(
+      50% - 77px
+    );
+
+  bottom:
+    calc(
+      50% - 74px
+    );
+
+  display: grid;
+  place-items: center;
+
+  border:
+    5px solid
+    #f5f0ff;
+
+  border-radius:
+    50%;
+
+  background:
+    var(
+      --waki-purple,
+      #7137e8
+    );
+
+  color:
+    #fff;
+
+  box-shadow:
+    0
+    10px
+    24px
+    rgba(
+      113,
+      55,
+      232,
+      .25
+    );
+}
+
+
+/* =========================================================
+   CONTENIDO
+   ========================================================= */
+
+.hotel-locked-card__content {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  max-width: 640px;
+  min-width: 0;
+}
+
+
+.hotel-locked-card__eyebrow {
+  display: inline-flex;
+
+  margin-bottom: 8px;
+
+  color:
+    var(
+      --waki-purple,
+      #7137e8
+    );
+
+  font-size: 9px;
+
+  line-height: 1;
+
+  font-weight: 700;
+
+  letter-spacing:
+    .085em;
+}
+
+
+.hotel-locked-card__content h2 {
+  margin:
+    0
+    0
+    9px;
+
+  color:
+    var(
+      --waki-text,
+      #170f36
+    );
+
+  font-size:
+    clamp(
+      25px,
+      2vw,
+      32px
+    );
+
+  line-height: 1.1;
+
+  font-weight: 600;
+
+  letter-spacing:
+    -.025em;
+}
+
+
+.hotel-locked-card__content > p {
+  max-width: 590px;
+
+  margin:
+    0
+    0
+    20px;
+
+  color:
+    var(
+      --waki-text-soft,
+      #6f687c
+    );
+
+  font-size: 11px;
+
+  line-height: 1.65;
+}
+
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+
+.hotel-locked-status {
+  width: 100%;
+  min-width: 0;
+  min-height: 68px;
+
+  margin-bottom: 11px;
+
+  padding:
+    12px
+    14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    #e4daf7;
+
+  border-radius:
+    13px;
+
+  background:
+    #faf8ff;
+}
+
+
+.hotel-locked-status__icon {
+  width: 39px;
+  height: 39px;
+
+  flex:
+    0
+    0
+    39px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius:
+    11px;
+
+  background:
+    #eee7ff;
+
+  color:
+    var(
+      --waki-purple,
+      #7137e8
+    );
+}
+
+
+.hotel-locked-status span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color:
+    var(
+      --waki-text-light,
+      #8b8498
+    );
+
+  font-size: 9px;
+}
+
+
+.hotel-locked-status strong {
+  display: block;
+
+  color:
+    var(
+      --waki-text,
+      #170f36
+    );
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   INFO
+   ========================================================= */
+
+.hotel-locked-info {
+  width: 100%;
+  min-width: 0;
+
+  padding:
+    12px
+    14px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  box-sizing: border-box;
+
+  border-radius:
+    12px;
+
+  background:
+    #f5f1fc;
+}
+
+
+.hotel-locked-info svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+
+  color:
+    var(
+      --waki-purple,
+      #7137e8
+    );
+}
+
+
+.hotel-locked-info p {
+  margin: 0;
+
+  color:
+    var(
+      --waki-text-soft,
+      #6f687c
+    );
+
+  font-size: 10px;
+
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
+
+.hotel-locked-actions {
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+
+.hotel-locked-primary,
+.hotel-locked-secondary {
+  min-height: 44px;
+
+  padding:
+    0
+    18px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+
+.hotel-locked-primary {
+  min-width: 195px;
+}
+
+
+.hotel-locked-secondary {
+  min-width: 145px;
+}
+
+
+/* =========================================================
+   PASOS
+   ========================================================= */
+
+.hotel-locked-steps {
+  width: 100%;
+  min-width: 0;
+
+  margin-top: 18px;
+
+  padding:
+    24px
+    26px
+    25px;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    var(
+      --waki-border,
+      #ece7f2
+    );
+
+  border-radius:
+    19px;
+
+  background:
+    #fff;
+
+  box-shadow:
+    0
+    10px
+    30px
+    rgba(
+      58,
+      37,
+      91,
+      .035
+    );
+}
+
+
+.hotel-locked-steps__heading {
+  margin-bottom: 17px;
+}
+
+
+.hotel-locked-steps__heading h2 {
+  margin:
+    4px
+    0
+    0;
+
+  color:
+    var(
+      --waki-text,
+      #170f36
+    );
+
+  font-size: 17px;
+
+  line-height: 1.25;
+
+  font-weight: 600;
+}
+
+
+.hotel-locked-steps__grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 10px;
+}
+
+
+.hotel-locked-steps__grid article {
+  min-width: 0;
+
+  padding:
+    15px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid
+    #eee8f3;
+
+  border-radius:
+    13px;
+
+  background:
+    #fcfbfe;
+}
+
+
+.hotel-locked-steps__grid article > span {
+  width: 30px;
+  height: 30px;
+
+  flex:
+    0
+    0
+    30px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius:
+    9px;
+
+  background:
+    var(
+      --waki-purple-soft,
+      #eee7ff
+    );
+
+  color:
+    var(
+      --waki-purple,
+      #7137e8
+    );
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+.hotel-locked-steps__grid article strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color:
+    var(
+      --waki-text,
+      #170f36
+    );
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+
+.hotel-locked-steps__grid article p {
+  margin: 0;
+
+  color:
+    var(
+      --waki-text-light,
+      #8b8498
+    );
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   PANTALLAS MEDIANAS
+   Sidebar de WAKI pasa a 220px
+   ========================================================= */
+
+@media (max-width: 1100px) and (min-width: 851px) {
+
+  .hotel-locked-page {
+    width:
+      calc(
+        100% -
+        220px
+      );
+
+    margin-left:
+      220px;
+
+    padding:
+      28px
+      26px
+      40px;
+  }
+
+
+  .hotel-locked-card {
+    grid-template-columns:
+      minmax(
+        180px,
+        .62fr
+      )
+      minmax(
+        0,
+        1.38fr
+      );
+
+    gap: 28px;
+
+    padding:
+      28px;
+  }
+
+
+  .hotel-locked-card__visual {
+    min-height: 220px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   Sidebar deja de ocupar espacio permanente
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  .hotel-locked-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    min-height:
+      calc(
+        100dvh -
+        var(
+          --waki-mobile-nav-height,
+          64px
+        )
+      );
+
+    margin-left:
+      0 !important;
+
+    padding:
+      22px
+      16px
+      calc(
+        32px +
+        env(
+          safe-area-inset-bottom
+        )
+      )
+      !important;
+
+    box-sizing:
+      border-box !important;
+
+    overflow-x:
+      hidden;
+  }
+
+
+  .hotel-locked-header {
+    margin-bottom: 16px;
+  }
+
+
+  .hotel-locked-header h1 {
+    font-size: 29px;
+  }
+
+
+  .hotel-locked-header p {
+    font-size: 11px;
+  }
+
+
+  .hotel-locked-card {
+    min-height: 0;
+
+    padding:
+      18px;
+
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      );
+
+    gap: 21px;
+
+    border-radius:
+      18px;
+  }
+
+
+  .hotel-locked-card__visual {
+    min-height: 190px;
+
+    border-radius:
+      16px;
+  }
+
+
+  .hotel-locked-card__calendar {
+    width: 92px;
+    height: 92px;
+
+    border-radius:
+      23px;
+  }
+
+
+  .hotel-locked-card__calendar svg {
+    width: 46px;
+    height: 46px;
+  }
+
+
+  .hotel-locked-card__icon {
+    width: 45px;
+    height: 45px;
+
+    right:
+      calc(
+        50% - 65px
+      );
+
+    bottom:
+      calc(
+        50% - 61px
+      );
+
+    border-width: 4px;
+  }
+
+
+  .hotel-locked-card__icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+
+  .hotel-locked-card__content h2 {
+    font-size: 25px;
+  }
+
+
+  .hotel-locked-card__content > p {
+    font-size: 11px;
+  }
+
+
+  .hotel-locked-status {
+    min-height: 65px;
+  }
+
+
+  .hotel-locked-info p {
+    font-size: 10px;
+  }
+
+
+  .hotel-locked-actions {
+    display: grid;
+
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      );
+
+    gap: 9px;
+  }
+
+
+  .hotel-locked-primary,
+  .hotel-locked-secondary {
+    width: 100%;
+
+    min-height: 47px;
+  }
+
+
+  .hotel-locked-steps {
+    margin-top: 14px;
+
+    padding:
+      19px
+      16px;
+
+    border-radius:
+      17px;
+  }
+
+
+  .hotel-locked-steps__grid {
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      );
+  }
+
+
+  .hotel-locked-steps__grid article {
+    padding: 14px;
+  }
+
+
+  .hotel-locked-steps__grid article strong {
+    font-size: 12px;
+  }
+
+
+  .hotel-locked-steps__grid article p {
+    font-size: 10px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  .hotel-locked-page {
+    padding-left:
+      12px !important;
+
+    padding-right:
+      12px !important;
+  }
+
+
+  .hotel-locked-header h1 {
+    font-size: 26px;
+  }
+
+
+  .hotel-locked-card {
+    padding: 15px;
+  }
+
+
+  .hotel-locked-card__content h2 {
+    font-size: 23px;
+  }
+
+}
+
+/* =========================================================
+   WAKI HOTEL — RESERVAS BLOQUEADAS
+   NUEVA ILUSTRACIÓN waki_no_reservas.png
+   Override final para ProtectedHotelRoute.jsx
+   ========================================================= */
+
+/*
+  El JSX nuevo usa:
+  .hotel-locked-card__visual
+  .hotel-locked-card__illustration
+
+  Los elementos anteriores:
+  .hotel-locked-card__calendar
+  .hotel-locked-card__icon
+  ya no se renderizan.
+*/
+
+.hotel-locked-card__visual {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 300px;
+
+  padding: 28px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  border: 0;
+  border-radius: 0;
+
+  background: transparent;
+}
+
+
+/* Desactiva el círculo decorativo de la ilustración anterior */
+
+.hotel-locked-card__visual::before {
+  content: none;
+  display: none;
+}
+
+
+/* Imagen PNG nueva */
+
+.hotel-locked-card__illustration {
+  display: block;
+
+  width: min(
+    100%,
+    440px
+  );
+
+  max-width: 440px;
+  height: auto;
+  max-height: 315px;
+
+  margin: 0 auto;
+
+  object-fit: contain;
+  object-position: center;
+
+  user-select: none;
+}
+
+
+/* =========================================================
+   RESERVAS BLOQUEADAS — PANTALLAS MEDIANAS
+   ========================================================= */
+
+@media (
+  max-width: 1100px
+) and (
+  min-width: 851px
+) {
+
+  .hotel-locked-card__visual {
+    min-height: 260px;
+
+    padding:
+      22px
+      18px;
+  }
+
+
+  .hotel-locked-card__illustration {
+    width:
+      min(
+        100%,
+        380px
+      );
+
+    max-width: 380px;
+    max-height: 275px;
+  }
+
+}
+
+
+/* =========================================================
+   RESERVAS BLOQUEADAS — TABLET / MOBILE
+   ========================================================= */
+
+@media (
+  max-width: 850px
+) {
+
+  .hotel-locked-card__visual {
+    min-height: 230px;
+
+    padding:
+      22px
+      16px;
+
+    border-radius: 0;
+  }
+
+
+  .hotel-locked-card__illustration {
+    width:
+      min(
+        100%,
+        340px
+      );
+
+    max-width: 340px;
+    max-height: 250px;
+  }
+
+}
+
+
+/* =========================================================
+   RESERVAS BLOQUEADAS — MOBILE PEQUEÑO
+   ========================================================= */
+
+@media (
+  max-width: 560px
+) {
+
+  .hotel-locked-card__visual {
+    min-height: 205px;
+
+    padding:
+      18px
+      10px;
+  }
+
+
+  .hotel-locked-card__illustration {
+    width:
+      min(
+        100%,
+        290px
+      );
+
+    max-width: 290px;
+    max-height: 220px;
+  }
+
+}
+

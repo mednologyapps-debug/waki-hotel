@@ -227,6 +227,21 @@ export default function HotelTeamActivationPage() {
       }
 
 
+      if (
+        access?.staff_role ===
+        'scanner'
+      ) {
+        navigate(
+          '/scan',
+          {
+            replace: true
+          }
+        )
+
+        return
+      }
+
+
       navigate(
         '/login',
         {
