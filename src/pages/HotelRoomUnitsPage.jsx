@@ -33,6 +33,51 @@ import {
 } from '../lib/supabase'
 
 
+/* =========================================================
+   ERROR DE CÓDIGO DUPLICADO
+   ========================================================= */
+
+function isDuplicateRoomUnitError(error) {
+  const message =
+    String(
+      error?.message ||
+      ''
+    )
+
+  const details =
+    String(
+      error?.details ||
+      ''
+    )
+
+  const hint =
+    String(
+      error?.hint ||
+      ''
+    )
+
+  return (
+    error?.code === '23505' ||
+    message.includes(
+      'ROOM_UNIT_CODE_ALREADY_EXISTS_IN_HOTEL'
+    ) ||
+    details.includes(
+      'ROOM_UNIT_CODE_ALREADY_EXISTS_IN_HOTEL'
+    ) ||
+    hint.includes(
+      'ROOM_UNIT_CODE_ALREADY_EXISTS_IN_HOTEL'
+    )
+  )
+}
+
+
+function duplicateRoomUnitMessage() {
+  return (
+    'Ya existe una habitación con este número o código en tu hotel.'
+  )
+}
+
+
 export default function HotelRoomUnitsPage() {
   const navigate =
     useNavigate()
@@ -53,13 +98,22 @@ export default function HotelRoomUnitsPage() {
   const [saving, setSaving] =
     useState(false)
 
-  const [actionLoadingId, setActionLoadingId] =
+  const [
+    actionLoadingId,
+    setActionLoadingId
+  ] =
     useState(null)
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage
+  ] =
     useState('')
 
-  const [successMessage, setSuccessMessage] =
+  const [
+    successMessage,
+    setSuccessMessage
+  ] =
     useState('')
 
   const [profile, setProfile] =
@@ -102,10 +156,6 @@ export default function HotelRoomUnitsPage() {
     })
 
 
-  /* =========================================================
-     CARGA INICIAL
-     ========================================================= */
-
   useEffect(() => {
     loadInitialData()
   }, [roomId])
@@ -120,7 +170,6 @@ export default function HotelRoomUnitsPage() {
       return undefined
     }
 
-
     const timeout =
       window.setTimeout(
         () => {
@@ -128,7 +177,6 @@ export default function HotelRoomUnitsPage() {
         },
         3500
       )
-
 
     return () => {
       window.clearTimeout(
@@ -140,19 +188,15 @@ export default function HotelRoomUnitsPage() {
 
   /* =========================================================
      CARGA INICIAL
-     SOLO AQUÍ MOSTRAMOS LOADER DE PÁGINA COMPLETA
      ========================================================= */
 
   async function loadInitialData() {
     try {
       setLoading(true)
-
       setErrorMessage('')
 
 
-      /* =====================================================
-         SESIÓN
-         ===================================================== */
+      /* SESIÓN */
 
       const {
         data: {
@@ -164,11 +208,9 @@ export default function HotelRoomUnitsPage() {
           .auth
           .getSession()
 
-
       if (sessionError) {
         throw sessionError
       }
-
 
       if (!session?.user) {
         throw new Error(
@@ -177,9 +219,7 @@ export default function HotelRoomUnitsPage() {
       }
 
 
-      /* =====================================================
-         PERFIL
-         ===================================================== */
+      /* PERFIL */
 
       const {
         data: profileData,
@@ -197,20 +237,16 @@ export default function HotelRoomUnitsPage() {
           )
           .maybeSingle()
 
-
       if (profileError) {
         throw profileError
       }
-
 
       setProfile(
         profileData
       )
 
 
-      /* =====================================================
-         HOTEL STAFF
-         ===================================================== */
+      /* HOTEL STAFF */
 
       const {
         data: staffData,
@@ -232,11 +268,9 @@ export default function HotelRoomUnitsPage() {
           .limit(1)
           .maybeSingle()
 
-
       if (staffError) {
         throw staffError
       }
-
 
       if (!staffData?.hotel_id) {
         throw new Error(
@@ -245,9 +279,7 @@ export default function HotelRoomUnitsPage() {
       }
 
 
-      /* =====================================================
-         HOTEL
-         ===================================================== */
+      /* HOTEL */
 
       const {
         data: hotelData,
@@ -267,11 +299,9 @@ export default function HotelRoomUnitsPage() {
           )
           .maybeSingle()
 
-
       if (hotelError) {
         throw hotelError
       }
-
 
       if (!hotelData) {
         throw new Error(
@@ -279,15 +309,12 @@ export default function HotelRoomUnitsPage() {
         )
       }
 
-
       setHotel(
         hotelData
       )
 
 
-      /* =====================================================
-         TIPO DE HABITACIÓN
-         ===================================================== */
+      /* TIPO DE HABITACIÓN */
 
       const {
         data: roomData,
@@ -313,11 +340,9 @@ export default function HotelRoomUnitsPage() {
           )
           .maybeSingle()
 
-
       if (roomError) {
         throw roomError
       }
-
 
       if (!roomData) {
         throw new Error(
@@ -325,15 +350,12 @@ export default function HotelRoomUnitsPage() {
         )
       }
 
-
       setRoom(
         roomData
       )
 
 
-      /* =====================================================
-         HABITACIONES FÍSICAS
-         ===================================================== */
+      /* HABITACIONES FÍSICAS */
 
       const {
         data: unitsData,
@@ -370,11 +392,9 @@ export default function HotelRoomUnitsPage() {
             }
           )
 
-
       if (unitsError) {
         throw unitsError
       }
-
 
       setUnits(
         unitsData || []
@@ -385,7 +405,6 @@ export default function HotelRoomUnitsPage() {
         'Error cargando unidades:',
         error
       )
-
 
       setErrorMessage(
         error?.message ||
@@ -400,19 +419,14 @@ export default function HotelRoomUnitsPage() {
 
   /* =========================================================
      CREAR HABITACIÓN FÍSICA
-     SIN RECARGAR LA PÁGINA
      ========================================================= */
 
-  async function createUnit(
-    event
-  ) {
+  async function createUnit(event) {
     event.preventDefault()
-
 
     const unitCode =
       form.unit_code
         .trim()
-
 
     if (!unitCode) {
       setErrorMessage(
@@ -422,13 +436,10 @@ export default function HotelRoomUnitsPage() {
       return
     }
 
-
     try {
       setSaving(true)
-
       setErrorMessage('')
       setSuccessMessage('')
-
 
       const nextOrder =
         units.length > 0
@@ -442,7 +453,6 @@ export default function HotelRoomUnitsPage() {
               )
             ) + 1
           : 1
-
 
       const {
         data: createdUnit,
@@ -490,14 +500,14 @@ export default function HotelRoomUnitsPage() {
           `)
           .single()
 
-
       if (error) {
         if (
-          error.code ===
-          '23505'
+          isDuplicateRoomUnitError(
+            error
+          )
         ) {
           throw new Error(
-            'Ya existe una habitación con ese número o código.'
+            duplicateRoomUnitMessage()
           )
         }
 
@@ -505,9 +515,7 @@ export default function HotelRoomUnitsPage() {
       }
 
 
-      /* =====================================================
-         ACTUALIZAR SOLO STATE LOCAL
-         ===================================================== */
+      /* ACTUALIZAR STATE LOCAL */
 
       setUnits(
         (currentUnits) =>
@@ -529,6 +537,12 @@ export default function HotelRoomUnitsPage() {
       )
 
 
+      /*
+       * Solo actualizamos la vista.
+       * El backend mantiene inventory_count
+       * derivado desde room_units.
+       */
+
       setRoom(
         (currentRoom) =>
           currentRoom
@@ -544,13 +558,11 @@ export default function HotelRoomUnitsPage() {
             : currentRoom
       )
 
-
       setForm({
         unit_code: '',
         display_name: '',
         floor: ''
       })
-
 
       setSuccessMessage(
         `Habitación ${createdUnit.unit_code} agregada correctamente.`
@@ -562,10 +574,15 @@ export default function HotelRoomUnitsPage() {
         error
       )
 
-
       setErrorMessage(
-        error?.message ||
-        'No pudimos agregar la habitación física.'
+        isDuplicateRoomUnitError(
+          error
+        )
+          ? duplicateRoomUnitMessage()
+          : (
+              error?.message ||
+              'No pudimos agregar la habitación física.'
+            )
       )
 
     } finally {
@@ -578,13 +595,10 @@ export default function HotelRoomUnitsPage() {
      INICIAR EDICIÓN
      ========================================================= */
 
-  function startEditing(
-    unit
-  ) {
+  function startEditing(unit) {
     setEditingId(
       unit.id
     )
-
 
     setEditForm({
       unit_code:
@@ -600,7 +614,6 @@ export default function HotelRoomUnitsPage() {
         ''
     })
 
-
     setErrorMessage('')
     setSuccessMessage('')
   }
@@ -615,7 +628,6 @@ export default function HotelRoomUnitsPage() {
       null
     )
 
-
     setEditForm({
       unit_code: '',
       display_name: '',
@@ -626,16 +638,12 @@ export default function HotelRoomUnitsPage() {
 
   /* =========================================================
      GUARDAR EDICIÓN
-     SIN RECARGAR TODA LA PÁGINA
      ========================================================= */
 
-  async function saveUnit(
-    unit
-  ) {
+  async function saveUnit(unit) {
     const unitCode =
       editForm.unit_code
         .trim()
-
 
     if (!unitCode) {
       setErrorMessage(
@@ -645,7 +653,6 @@ export default function HotelRoomUnitsPage() {
       return
     }
 
-
     try {
       setActionLoadingId(
         unit.id
@@ -653,7 +660,6 @@ export default function HotelRoomUnitsPage() {
 
       setErrorMessage('')
       setSuccessMessage('')
-
 
       const {
         data: updatedUnit,
@@ -696,24 +702,19 @@ export default function HotelRoomUnitsPage() {
           `)
           .single()
 
-
       if (error) {
         if (
-          error.code ===
-          '23505'
+          isDuplicateRoomUnitError(
+            error
+          )
         ) {
           throw new Error(
-            'Ya existe una habitación con ese número o código.'
+            duplicateRoomUnitMessage()
           )
         }
 
         throw error
       }
-
-
-      /* =====================================================
-         SOLO ACTUALIZAMOS ESTA TARJETA
-         ===================================================== */
 
       setUnits(
         (currentUnits) =>
@@ -726,18 +727,15 @@ export default function HotelRoomUnitsPage() {
           )
       )
 
-
       setEditingId(
         null
       )
-
 
       setEditForm({
         unit_code: '',
         display_name: '',
         floor: ''
       })
-
 
       setSuccessMessage(
         `Habitación ${updatedUnit.unit_code} actualizada correctamente.`
@@ -749,10 +747,15 @@ export default function HotelRoomUnitsPage() {
         error
       )
 
-
       setErrorMessage(
-        error?.message ||
-        'No pudimos guardar los cambios.'
+        isDuplicateRoomUnitError(
+          error
+        )
+          ? duplicateRoomUnitMessage()
+          : (
+              error?.message ||
+              'No pudimos guardar los cambios.'
+            )
       )
 
     } finally {
@@ -765,12 +768,9 @@ export default function HotelRoomUnitsPage() {
 
   /* =========================================================
      ACTIVAR / DESACTIVAR
-     SIN RECARGAR LA PÁGINA
      ========================================================= */
 
-  async function toggleUnit(
-    unit
-  ) {
+  async function toggleUnit(unit) {
     try {
       setActionLoadingId(
         unit.id
@@ -779,10 +779,8 @@ export default function HotelRoomUnitsPage() {
       setErrorMessage('')
       setSuccessMessage('')
 
-
       const newStatus =
         !unit.is_active
-
 
       const {
         data: updatedUnit,
@@ -812,15 +810,9 @@ export default function HotelRoomUnitsPage() {
           `)
           .single()
 
-
       if (error) {
         throw error
       }
-
-
-      /* =====================================================
-         SOLO ACTUALIZAR ESTA UNIDAD
-         ===================================================== */
 
       setUnits(
         (currentUnits) =>
@@ -833,14 +825,12 @@ export default function HotelRoomUnitsPage() {
           )
       )
 
-
       const updatedActiveCount =
         units.reduce(
           (
             total,
             currentUnit
           ) => {
-
             if (
               currentUnit.id ===
               unit.id
@@ -855,7 +845,6 @@ export default function HotelRoomUnitsPage() {
               )
             }
 
-
             return (
               total +
               (
@@ -867,7 +856,6 @@ export default function HotelRoomUnitsPage() {
           },
           0
         )
-
 
       setRoom(
         (currentRoom) =>
@@ -881,7 +869,6 @@ export default function HotelRoomUnitsPage() {
             : currentRoom
       )
 
-
       setSuccessMessage(
         newStatus
           ? `Habitación ${unit.unit_code} activada.`
@@ -893,7 +880,6 @@ export default function HotelRoomUnitsPage() {
         'Error cambiando estado:',
         error
       )
-
 
       setErrorMessage(
         error?.message ||
@@ -951,17 +937,16 @@ export default function HotelRoomUnitsPage() {
 
   /* =========================================================
      LOADER GLOBAL
-     SOLO PRIMERA CARGA
      ========================================================= */
 
- if (loading) {
-  return (
-    <WakiGlobalLoader
-      title="Preparando tus habitaciones..."
-      subtitle="Estamos organizando tu inventario WAKI"
-    />
-  )
-}
+  if (loading) {
+    return (
+      <WakiGlobalLoader
+        title="Preparando tus habitaciones..."
+        subtitle="Estamos organizando tu inventario WAKI"
+      />
+    )
+  }
 
 
   /* =========================================================
@@ -993,9 +978,7 @@ export default function HotelRoomUnitsPage() {
 
       <main className="hotel-dashboard hotel-room-units-page">
 
-        {/* =================================================
-            VOLVER
-            ================================================= */}
+        {/* VOLVER */}
 
         <button
           type="button"
@@ -1017,9 +1000,7 @@ export default function HotelRoomUnitsPage() {
         </button>
 
 
-        {/* =================================================
-            HEADER
-            ================================================= */}
+        {/* HEADER */}
 
         <header className="hotel-room-units-header">
 
@@ -1066,16 +1047,12 @@ export default function HotelRoomUnitsPage() {
         </header>
 
 
-        {/* =================================================
-            MENSAJES
-            ================================================= */}
+        {/* MENSAJES */}
 
         {errorMessage && (
 
           <div className="hotel-dashboard-error">
-
             {errorMessage}
-
           </div>
 
         )}
@@ -1097,9 +1074,7 @@ export default function HotelRoomUnitsPage() {
         )}
 
 
-        {/* =================================================
-            PENDIENTES DE CONFIGURAR
-            ================================================= */}
+        {/* PENDIENTES DE CONFIGURAR */}
 
         {counts.pendingSetup > 0 && (
 
@@ -1122,24 +1097,18 @@ export default function HotelRoomUnitsPage() {
               </strong>
 
               <p>
-
                 WAKI creó temporalmente{' '}
-
                 {counts.pendingSetup}
-
                 {' '}
-
                 {
                   counts.pendingSetup === 1
                     ? 'unidad'
                     : 'unidades'
                 }
-
                 {' '}según el inventario que ya
                 tenías. Reemplaza códigos como
                 AUTO-1 por el número real de
                 habitación, por ejemplo 201.
-
               </p>
 
             </div>
@@ -1149,9 +1118,7 @@ export default function HotelRoomUnitsPage() {
         )}
 
 
-        {/* =================================================
-            AGREGAR
-            ================================================= */}
+        {/* AGREGAR */}
 
         <section className="hotel-room-unit-create">
 
@@ -1313,9 +1280,7 @@ export default function HotelRoomUnitsPage() {
         </section>
 
 
-        {/* =================================================
-            LISTADO
-            ================================================= */}
+        {/* LISTADO */}
 
         <section className="hotel-room-units-list">
 
@@ -1380,13 +1345,12 @@ export default function HotelRoomUnitsPage() {
                     editingId ===
                     unit.id
 
-
                   const actionLoading =
                     actionLoadingId ===
                     unit.id
 
-
                   return (
+
                     <article
                       key={
                         unit.id
@@ -1615,15 +1579,11 @@ export default function HotelRoomUnitsPage() {
                               {unit.unit_code}
                             </h3>
 
-
                             <p>
-
                               {unit.display_name ||
                                 room?.name
                               }
-
                             </p>
-
 
                             {unit.floor && (
 
@@ -1637,9 +1597,7 @@ export default function HotelRoomUnitsPage() {
                             {unit.is_system_generated && (
 
                               <div className="hotel-room-unit-card__auto">
-
                                 Pendiente de configurar
-
                               </div>
 
                             )}
@@ -1714,6 +1672,7 @@ export default function HotelRoomUnitsPage() {
                       )}
 
                     </article>
+
                   )
                 }
               )}

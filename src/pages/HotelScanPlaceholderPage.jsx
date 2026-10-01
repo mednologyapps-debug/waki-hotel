@@ -15,17 +15,19 @@ import {
   RefreshCw,
   ScanLine,
   ShieldCheck,
-  UserRound,
   XCircle
 } from 'lucide-react'
 
 import {
-  supabase
-} from '../lib/supabase'
-
-import {
   Html5Qrcode
 } from 'html5-qrcode'
+
+import HotelSidebar
+  from '../components/hotel/HotelSidebar'
+
+import {
+  supabase
+} from '../lib/supabase'
 
 import wakiLogo
   from '../assets/waki_logo_full.png'
@@ -77,6 +79,7 @@ export default function HotelScanPlaceholderPage() {
   const scanLockedRef =
     useRef(false)
 
+
   const [loading, setLoading] =
     useState(true)
 
@@ -95,22 +98,34 @@ export default function HotelScanPlaceholderPage() {
   const [hotel, setHotel] =
     useState(null)
 
+  const [staffRole, setStaffRole] =
+    useState(null)
+
   const [qrToken, setQrToken] =
     useState('')
 
   const [preview, setPreview] =
     useState(null)
 
-  const [documentsVerified, setDocumentsVerified] =
+  const [
+    documentsVerified,
+    setDocumentsVerified
+  ] =
     useState(false)
 
   const [recentScans, setRecentScans] =
     useState([])
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage
+  ] =
     useState('')
 
-  const [successMessage, setSuccessMessage] =
+  const [
+    successMessage,
+    setSuccessMessage
+  ] =
     useState('')
 
 
@@ -118,10 +133,14 @@ export default function HotelScanPlaceholderPage() {
     loadPage()
 
     return () => {
-      stopCamera()
+      void stopCamera()
     }
   }, [])
 
+
+  /* =========================================================
+     CARGAR PÁGINA
+     ========================================================= */
 
   async function loadPage() {
     try {
@@ -150,6 +169,9 @@ export default function HotelScanPlaceholderPage() {
         return
       }
 
+
+      /* PERFIL */
+
       const {
         data: profileData,
         error: profileError
@@ -174,6 +196,9 @@ export default function HotelScanPlaceholderPage() {
         profileData
       )
 
+
+      /* ACCESO HOTEL */
+
       const {
         data: accessData,
         error: accessError
@@ -188,7 +213,9 @@ export default function HotelScanPlaceholderPage() {
       }
 
       const accessRows =
-        Array.isArray(accessData)
+        Array.isArray(
+          accessData
+        )
           ? accessData
           : []
 
@@ -209,6 +236,13 @@ export default function HotelScanPlaceholderPage() {
           'Tu cuenta no tiene permiso para utilizar el escáner.'
         )
       }
+
+      setStaffRole(
+        access.staff_role
+      )
+
+
+      /* HOTEL */
 
       const {
         data: hotelData,
@@ -255,6 +289,10 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     ÚLTIMOS ESCANEOS
+     ========================================================= */
+
   async function loadRecentScans() {
     const {
       data,
@@ -282,6 +320,10 @@ export default function HotelScanPlaceholderPage() {
     )
   }
 
+
+  /* =========================================================
+     CÁMARA
+     ========================================================= */
 
   async function startCamera() {
     try {
@@ -341,6 +383,7 @@ export default function HotelScanPlaceholderPage() {
 
           aspectRatio: 1
         },
+
         async (
           decodedText
         ) => {
@@ -357,11 +400,12 @@ export default function HotelScanPlaceholderPage() {
             decodedText
           )
         },
+
         () => {
           /*
-           * html5-qrcode llama este callback
+           * html5-qrcode ejecuta este callback
            * mientras busca un QR.
-           * No mostramos esos intentos como error.
+           * No lo mostramos como error.
            */
         }
       )
@@ -400,33 +444,30 @@ export default function HotelScanPlaceholderPage() {
         ''
       )
 
+    const normalized =
+      message.toLowerCase()
+
     if (
       error?.name ===
         'NotAllowedError' ||
-      message
-        .toLowerCase()
-        .includes(
-          'permission'
-        ) ||
-      message
-        .toLowerCase()
-        .includes(
-          'notallowed'
-        )
+      normalized.includes(
+        'permission'
+      ) ||
+      normalized.includes(
+        'notallowed'
+      )
     ) {
       return (
-        'No tenemos permiso para usar la cámara. En Safari, abre Ajustes > Safari > Cámara y permite el acceso para WAKI.'
+        'No tenemos permiso para usar la cámara. Revisa los permisos del navegador y permite el acceso para WAKI.'
       )
     }
 
     if (
       error?.name ===
         'NotFoundError' ||
-      message
-        .toLowerCase()
-        .includes(
-          'notfound'
-        )
+      normalized.includes(
+        'notfound'
+      )
     ) {
       return (
         'No encontramos una cámara disponible en este dispositivo.'
@@ -434,11 +475,9 @@ export default function HotelScanPlaceholderPage() {
     }
 
     if (
-      message
-        .toLowerCase()
-        .includes(
-          'secure'
-        )
+      normalized.includes(
+        'secure'
+      )
     ) {
       return (
         'La cámara requiere una conexión segura. Abre WAKI desde https://hotel.wakipe.com.'
@@ -490,13 +529,18 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     QR DETECTADO
+     ========================================================= */
+
   async function handleDetectedToken(
     token
   ) {
     const cleanToken =
       String(
         token || ''
-      ).trim()
+      )
+        .trim()
 
     if (!cleanToken) {
       scanLockedRef.current =
@@ -517,13 +561,18 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     PREVIEW QR
+     ========================================================= */
+
   async function previewQr(
     token = qrToken
   ) {
     const cleanToken =
       String(
         token || ''
-      ).trim()
+      )
+        .trim()
 
     if (!cleanToken) {
       setErrorMessage(
@@ -579,6 +628,10 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     CONFIRMAR ACCESO
+     ========================================================= */
+
   async function confirmAccess() {
     if (
       !preview ||
@@ -588,9 +641,7 @@ export default function HotelScanPlaceholderPage() {
       return
     }
 
-    if (
-      !documentsVerified
-    ) {
+    if (!documentsVerified) {
       setErrorMessage(
         'Confirma primero que verificaste visualmente los documentos del huésped.'
       )
@@ -625,6 +676,7 @@ export default function HotelScanPlaceholderPage() {
 
       setPreview({
         ...data,
+
         validation_status:
           'already_verified'
       })
@@ -652,6 +704,10 @@ export default function HotelScanPlaceholderPage() {
     }
   }
 
+
+  /* =========================================================
+     ERRORES QR
+     ========================================================= */
 
   function mapQrError(
     error
@@ -716,6 +772,10 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     REINICIAR
+     ========================================================= */
+
   function resetScanner() {
     void stopCamera()
 
@@ -730,6 +790,10 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     LOGOUT
+     ========================================================= */
+
   async function handleLogout() {
     await stopCamera()
 
@@ -742,6 +806,10 @@ export default function HotelScanPlaceholderPage() {
     )
   }
 
+
+  /* =========================================================
+     FECHAS
+     ========================================================= */
 
   function formatDateTime(
     value
@@ -758,11 +826,12 @@ export default function HotelScanPlaceholderPage() {
         hour: '2-digit',
         minute: '2-digit'
       }
-    ).format(
-      new Date(
-        value
-      )
     )
+      .format(
+        new Date(
+          value
+        )
+      )
   }
 
 
@@ -796,6 +865,10 @@ export default function HotelScanPlaceholderPage() {
   }
 
 
+  /* =========================================================
+     LOADING
+     ========================================================= */
+
   if (loading) {
     return (
       <div className="waki-scan-loading">
@@ -826,64 +899,99 @@ export default function HotelScanPlaceholderPage() {
     preview?.validation_status ===
     'already_verified'
 
+  const hotelLocation =
+    [
+      hotel?.district,
+      hotel?.province
+    ]
+      .filter(Boolean)
+      .join(', ')
 
-  return (
-    <main className="waki-scan-page">
-
-      <header className="waki-scan-topbar">
-
-        <div className="waki-scan-brand">
-
-          <img
-            src={wakiLogo}
-            alt="WAKI"
-          />
-
-          <span>
-            ESCÁNER
-          </span>
-
-        </div>
+  const showPortalNavigation =
+    staffRole === 'admin' ||
+    staffRole === 'reception'
 
 
-        <div className="waki-scan-user">
+  /* =========================================================
+     CONTENIDO PRINCIPAL DEL SCANNER
+     ========================================================= */
 
-          <div>
+  const scannerContent = (
+    <div
+      className="waki-scan-page"
+      style={
+        showPortalNavigation
+          ? {
+              minHeight: 'auto'
+            }
+          : undefined
+      }
+    >
 
-            <strong>
-              {profile?.full_name ||
-                'Equipo WAKI'}
-            </strong>
+      {/* TOPBAR SOLO PARA ROL SCANNER */}
+
+      {!showPortalNavigation && (
+
+        <header className="waki-scan-topbar">
+
+          <div className="waki-scan-brand">
+
+            <img
+              src={wakiLogo}
+              alt="WAKI"
+            />
 
             <span>
-              {hotel?.name ||
-                'Hotel'}
+              ESCÁNER
             </span>
 
           </div>
 
 
-          <button
-            type="button"
-            onClick={
-              handleLogout
-            }
-            aria-label="Cerrar sesión"
-          >
+          <div className="waki-scan-user">
 
-            <LogOut
-              size={18}
-              strokeWidth={1.8}
-            />
+            <div>
 
-          </button>
+              <strong>
+                {profile?.full_name ||
+                  'Equipo WAKI'
+                }
+              </strong>
 
-        </div>
+              <span>
+                {hotel?.name ||
+                  'Hotel'
+                }
+              </span>
 
-      </header>
+            </div>
+
+
+            <button
+              type="button"
+              onClick={
+                handleLogout
+              }
+              aria-label="Cerrar sesión"
+            >
+
+              <LogOut
+                size={18}
+                strokeWidth={1.8}
+              />
+
+            </button>
+
+          </div>
+
+        </header>
+
+      )}
 
 
       <div className="waki-scan-shell">
+
+        {/* HERO */}
 
         <section className="waki-scan-hero">
 
@@ -903,6 +1011,8 @@ export default function HotelScanPlaceholderPage() {
         </section>
 
 
+        {/* ERROR */}
+
         {errorMessage && (
 
           <div className="waki-scan-alert is-error">
@@ -921,6 +1031,8 @@ export default function HotelScanPlaceholderPage() {
         )}
 
 
+        {/* SUCCESS */}
+
         {successMessage && (
 
           <div className="waki-scan-alert is-success">
@@ -938,6 +1050,8 @@ export default function HotelScanPlaceholderPage() {
 
         )}
 
+
+        {/* CÁMARA */}
 
         {!preview && (
 
@@ -1025,11 +1139,13 @@ export default function HotelScanPlaceholderPage() {
 
               )}
 
+
               {cameraStarting
                 ? 'Activando cámara...'
                 : cameraActive
                   ? 'Detener cámara'
-                  : 'Activar cámara'}
+                  : 'Activar cámara'
+              }
 
             </button>
 
@@ -1047,7 +1163,9 @@ export default function HotelScanPlaceholderPage() {
 
               <input
                 type="text"
-                value={qrToken}
+                value={
+                  qrToken
+                }
                 placeholder="Token del QR"
                 disabled={
                   verifying
@@ -1058,6 +1176,7 @@ export default function HotelScanPlaceholderPage() {
                   )
                 }
               />
+
 
               <button
                 type="button"
@@ -1072,7 +1191,8 @@ export default function HotelScanPlaceholderPage() {
 
                 {verifying
                   ? 'Validando...'
-                  : 'Validar'}
+                  : 'Validar'
+                }
 
               </button>
 
@@ -1083,16 +1203,20 @@ export default function HotelScanPlaceholderPage() {
         )}
 
 
+        {/* RESULTADO */}
+
         {preview && (
 
           <section
             className={[
               'waki-scan-result',
+
               isVerified
                 ? 'is-success'
                 : isValid
                   ? 'is-valid'
                   : 'is-error'
+
             ].join(' ')}
           >
 
@@ -1134,7 +1258,8 @@ export default function HotelScanPlaceholderPage() {
 
                 <h2>
                   {validationCopy?.title ||
-                    'Resultado'}
+                    'Resultado'
+                  }
                 </h2>
 
                 <p>
@@ -1156,7 +1281,8 @@ export default function HotelScanPlaceholderPage() {
 
                 <strong>
                   {preview.guest_name ||
-                    '—'}
+                    '—'
+                  }
                 </strong>
 
               </div>
@@ -1171,7 +1297,8 @@ export default function HotelScanPlaceholderPage() {
                 <strong>
                   {preview.room_unit_name ||
                     preview.room_type_name ||
-                    '—'}
+                    '—'
+                  }
                 </strong>
 
                 {preview.room_unit_name &&
@@ -1210,6 +1337,8 @@ export default function HotelScanPlaceholderPage() {
             </div>
 
 
+            {/* DOCUMENTOS */}
+
             {isValid && (
 
               <>
@@ -1231,12 +1360,14 @@ export default function HotelScanPlaceholderPage() {
                     }
                   />
 
+
                   <div>
 
                     <FileCheck2
                       size={20}
                       strokeWidth={1.8}
                     />
+
 
                     <span>
 
@@ -1276,7 +1407,8 @@ export default function HotelScanPlaceholderPage() {
 
                   {verifying
                     ? 'Registrando acceso...'
-                    : 'Confirmar acceso'}
+                    : 'Confirmar acceso'
+                  }
 
                 </button>
 
@@ -1284,6 +1416,8 @@ export default function HotelScanPlaceholderPage() {
 
             )}
 
+
+            {/* YA VERIFICADO */}
 
             {isVerified && (
 
@@ -1334,6 +1468,8 @@ export default function HotelScanPlaceholderPage() {
 
         )}
 
+
+        {/* ACTIVIDAD */}
 
         <section className="waki-scan-recent">
 
@@ -1408,7 +1544,8 @@ export default function HotelScanPlaceholderPage() {
 
                         <strong>
                           {item.guest_name ||
-                            item.booking_code}
+                            item.booking_code
+                          }
                         </strong>
 
                         <span>
@@ -1417,14 +1554,20 @@ export default function HotelScanPlaceholderPage() {
 
                       </div>
 
+
                       <small>
+
                         {item.room_unit_name ||
                           item.room_type_name ||
-                          'Habitación'}
+                          'Habitación'
+                        }
+
                         {' · '}
+
                         {formatDateTime(
                           item.access_verified_at
                         )}
+
                       </small>
 
                     </div>
@@ -1453,6 +1596,52 @@ export default function HotelScanPlaceholderPage() {
 
       </div>
 
-    </main>
+    </div>
   )
+
+
+  /* =========================================================
+     ADMIN / RECEPTION → PORTAL CON SIDEBAR
+     ========================================================= */
+
+  if (showPortalNavigation) {
+    return (
+      <div className="hotel-portal">
+
+        <HotelSidebar
+          activeKey="scanner"
+
+          hotelName={
+            hotel?.name ||
+            'Mi hotel'
+          }
+
+          hotelLocation={
+            hotelLocation ||
+            'Lima, Perú'
+          }
+
+          profileName={
+            profile?.full_name ||
+            'Equipo WAKI'
+          }
+        />
+
+
+        <main className="hotel-dashboard">
+
+          {scannerContent}
+
+        </main>
+
+      </div>
+    )
+  }
+
+
+  /* =========================================================
+     SCANNER → VISTA DEDICADA
+     ========================================================= */
+
+  return scannerContent
 }

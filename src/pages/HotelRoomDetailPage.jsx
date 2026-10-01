@@ -9,6 +9,7 @@ import {
   ImageIcon,
   Maximize2,
   Pencil,
+  Plus,
   UsersRound
 } from 'lucide-react'
 
@@ -23,18 +24,31 @@ import {
   useParams
 } from 'react-router-dom'
 
-import HotelSidebar from '../components/hotel/HotelSidebar'
-import { supabase } from '../lib/supabase'
+import HotelSidebar
+  from '../components/hotel/HotelSidebar'
+
+import {
+  supabase
+} from '../lib/supabase'
 
 
 export default function HotelRoomDetailPage() {
-  const navigate = useNavigate()
-  const { roomId } = useParams()
+  const navigate =
+    useNavigate()
+
+  const {
+    roomId
+  } =
+    useParams()
+
 
   const [loading, setLoading] =
     useState(true)
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage
+  ] =
     useState('')
 
   const [profile, setProfile] =
@@ -52,30 +66,31 @@ export default function HotelRoomDetailPage() {
   }, [roomId])
 
 
+  /* =========================================================
+     CARGAR HABITACIÓN
+     ========================================================= */
+
   async function loadRoom() {
     try {
       setLoading(true)
       setErrorMessage('')
 
 
-      /* =========================================
-         SESIÓN
-      ========================================= */
+      /* SESIÓN */
 
       const {
         data: {
           session
         },
         error: sessionError
-      } = await supabase
-        .auth
-        .getSession()
-
+      } =
+        await supabase
+          .auth
+          .getSession()
 
       if (sessionError) {
         throw sessionError
       }
-
 
       if (!session?.user) {
         throw new Error(
@@ -84,64 +99,58 @@ export default function HotelRoomDetailPage() {
       }
 
 
-      /* =========================================
-         PERFIL
-      ========================================= */
+      /* PERFIL */
 
       const {
         data: profileData,
         error: profileError
-      } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name
-        `)
-        .eq(
-          'id',
-          session.user.id
-        )
-        .maybeSingle()
-
+      } =
+        await supabase
+          .from('profiles')
+          .select(`
+            id,
+            full_name
+          `)
+          .eq(
+            'id',
+            session.user.id
+          )
+          .maybeSingle()
 
       if (profileError) {
         throw profileError
       }
-
 
       setProfile(
         profileData
       )
 
 
-      /* =========================================
-         HOTEL STAFF
-      ========================================= */
+      /* HOTEL STAFF */
 
       const {
         data: staffData,
         error: staffError
-      } = await supabase
-        .from('hotel_staff')
-        .select(`
-          hotel_id
-        `)
-        .eq(
-          'user_id',
-          session.user.id
-        )
-        .eq(
-          'is_active',
-          true
-        )
-        .limit(1)
-        .maybeSingle()
-
+      } =
+        await supabase
+          .from('hotel_staff')
+          .select(`
+            hotel_id
+          `)
+          .eq(
+            'user_id',
+            session.user.id
+          )
+          .eq(
+            'is_active',
+            true
+          )
+          .limit(1)
+          .maybeSingle()
 
       if (staffError) {
         throw staffError
       }
-
 
       if (!staffData?.hotel_id) {
         throw new Error(
@@ -150,99 +159,98 @@ export default function HotelRoomDetailPage() {
       }
 
 
-      /* =========================================
-         HOTEL
-      ========================================= */
+      /* HOTEL */
 
       const {
         data: hotelData,
         error: hotelError
-      } = await supabase
-        .from('hotels')
-        .select(`
-          id,
-          name,
-          district,
-          province
-        `)
-        .eq(
-          'id',
-          staffData.hotel_id
-        )
-        .maybeSingle()
-
+      } =
+        await supabase
+          .from('hotels')
+          .select(`
+            id,
+            name,
+            district,
+            province
+          `)
+          .eq(
+            'id',
+            staffData.hotel_id
+          )
+          .maybeSingle()
 
       if (hotelError) {
         throw hotelError
       }
 
+      if (!hotelData) {
+        throw new Error(
+          'No encontramos la información del hotel.'
+        )
+      }
 
       setHotel(
         hotelData
       )
 
 
-      /* =========================================
-         HABITACIÓN
-      ========================================= */
+      /* HABITACIÓN */
 
       const {
         data: roomData,
         error: roomError
-      } = await supabase
-        .from('room_types')
-        .select(`
-          id,
-          hotel_id,
-          name,
-          description,
-          inventory_count,
-          max_guests,
-          bed_type,
-          size_m2,
-          is_active,
-          display_order,
-
-          room_type_images (
+      } =
+        await supabase
+          .from('room_types')
+          .select(`
             id,
-            image_url,
-            storage_path,
-            is_cover,
-            display_order
-          ),
-
-          rate_plans (
-            id,
+            hotel_id,
             name,
-            duration_minutes,
-            base_price,
-            currency,
+            description,
+            inventory_count,
+            max_guests,
+            bed_type,
+            size_m2,
             is_active,
-            display_order
-          )
-        `)
-        .eq(
-          'id',
-          roomId
-        )
-        .eq(
-          'hotel_id',
-          staffData.hotel_id
-        )
-        .maybeSingle()
+            display_order,
 
+            room_type_images (
+              id,
+              image_url,
+              storage_path,
+              is_cover,
+              display_order
+            ),
+
+            rate_plans (
+              id,
+              name,
+              duration_minutes,
+              base_price,
+              currency,
+              is_active,
+              display_order
+            )
+          `)
+          .eq(
+            'id',
+            roomId
+          )
+          .eq(
+            'hotel_id',
+            staffData.hotel_id
+          )
+          .maybeSingle()
 
       if (roomError) {
         throw roomError
       }
-
 
       if (!roomData) {
         throw new Error(
           'No encontramos esta habitación dentro de tu hotel.'
         )
       }
-
 
       setRoom(
         roomData
@@ -265,9 +273,9 @@ export default function HotelRoomDetailPage() {
   }
 
 
-  /* =========================================
-     UBICACIÓN HOTEL
-  ========================================= */
+  /* =========================================================
+     UBICACIÓN
+     ========================================================= */
 
   const hotelLocation =
     [
@@ -278,76 +286,107 @@ export default function HotelRoomDetailPage() {
       .join(', ')
 
 
-  /* =========================================
+  /* =========================================================
      IMÁGENES
-  ========================================= */
+     ========================================================= */
 
-  const images = useMemo(() => {
-    if (!room?.room_type_images) {
-      return []
-    }
+  const images =
+    useMemo(
+      () => {
+        if (
+          !room
+            ?.room_type_images
+        ) {
+          return []
+        }
 
-    return [
-      ...room.room_type_images
-    ].sort(
-      (a, b) =>
-        Number(
-          b.is_cover
-        ) -
-        Number(
-          a.is_cover
-        ) ||
-        Number(
-          a.display_order || 0
-        ) -
-        Number(
-          b.display_order || 0
-        )
-    )
-  }, [room])
-
-
-  /* =========================================
-     TARIFAS ACTIVAS
-  ========================================= */
-
-  const activeRates = useMemo(() => {
-    if (!room?.rate_plans) {
-      return []
-    }
-
-    return room.rate_plans
-      .filter(
-        (rate) =>
-          rate.is_active !== false
-      )
-      .sort(
-        (a, b) =>
-          Number(
-            a.display_order || 0
-          ) -
-          Number(
-            b.display_order || 0
+        return [
+          ...room.room_type_images
+        ]
+          .sort(
+            (
+              a,
+              b
+            ) =>
+              Number(
+                b.is_cover
+              ) -
+              Number(
+                a.is_cover
+              ) ||
+              Number(
+                a.display_order ||
+                0
+              ) -
+              Number(
+                b.display_order ||
+                0
+              )
           )
-      )
-  }, [room])
+      },
+      [
+        room
+      ]
+    )
 
 
-  /* =========================================
+  /* =========================================================
+     TARIFAS ACTIVAS
+     ========================================================= */
+
+  const activeRates =
+    useMemo(
+      () => {
+        if (
+          !room?.rate_plans
+        ) {
+          return []
+        }
+
+        return room
+          .rate_plans
+          .filter(
+            (rate) =>
+              rate.is_active !==
+              false
+          )
+          .sort(
+            (
+              a,
+              b
+            ) =>
+              Number(
+                a.display_order ||
+                0
+              ) -
+              Number(
+                b.display_order ||
+                0
+              )
+          )
+      },
+      [
+        room
+      ]
+    )
+
+
+  /* =========================================================
      FORMATO DURACIÓN
-  ========================================= */
+     ========================================================= */
 
-  function formatDuration(minutes) {
+  function formatDuration(
+    minutes
+  ) {
     const value =
       Number(
-        minutes || 0
+        minutes ||
+        0
       )
-
 
     if (!value) {
       return 'Sin duración'
     }
-
 
     if (
       value % 60 === 0
@@ -358,38 +397,59 @@ export default function HotelRoomDetailPage() {
       return `${hours} h`
     }
 
+    const hours =
+      Math.floor(
+        value / 60
+      )
+
+    const remainingMinutes =
+      value % 60
+
+    if (
+      hours > 0
+    ) {
+      return (
+        `${hours} h ${remainingMinutes} min`
+      )
+    }
 
     return `${value} min`
   }
 
 
-  /* =========================================
+  /* =========================================================
      FORMATO PRECIO
-  ========================================= */
+     ========================================================= */
 
-  function formatPrice(rate) {
+  function formatPrice(
+    rate
+  ) {
     const value =
       Number(
-        rate.base_price || 0
+        rate.base_price ||
+        0
       )
-
 
     return new Intl.NumberFormat(
       'es-PE',
       {
-        style: 'currency',
+        style:
+          'currency',
+
         currency:
-          rate.currency || 'PEN'
+          rate.currency ||
+          'PEN'
       }
-    ).format(
-      value
     )
+      .format(
+        value
+      )
   }
 
 
-  /* =========================================
+  /* =========================================================
      LOADING
-  ========================================= */
+     ========================================================= */
 
   if (loading) {
     return (
@@ -406,23 +466,26 @@ export default function HotelRoomDetailPage() {
   }
 
 
-  /* =========================================
+  /* =========================================================
      RENDER
-  ========================================= */
+     ========================================================= */
 
   return (
     <div className="hotel-portal">
 
       <HotelSidebar
         activeKey="habitaciones"
+
         hotelName={
           hotel?.name ||
           'Mi hotel'
         }
+
         hotelLocation={
           hotelLocation ||
           'Lima, Perú'
         }
+
         profileName={
           profile?.full_name ||
           'Equipo WAKI'
@@ -432,10 +495,7 @@ export default function HotelRoomDetailPage() {
 
       <main className="hotel-dashboard">
 
-
-        {/* =====================================
-            VOLVER
-        ===================================== */}
+        {/* VOLVER */}
 
         <button
           type="button"
@@ -467,9 +527,7 @@ export default function HotelRoomDetailPage() {
 
           <>
 
-            {/* =================================
-                CABECERA
-            ================================= */}
+            {/* CABECERA */}
 
             <header className="room-detail-header">
 
@@ -493,7 +551,6 @@ export default function HotelRoomDetailPage() {
 
 
               <div className="room-detail-header__actions">
-
 
                 <button
                   type="button"
@@ -539,22 +596,16 @@ export default function HotelRoomDetailPage() {
             </header>
 
 
-            {/* =================================
-                GALERÍA + INFORMACIÓN
-            ================================= */}
+            {/* GALERÍA + INFO */}
 
             <section className="room-detail-grid">
-
-
-              {/* ===============================
-                  GALERÍA
-              =============================== */}
 
               <article className="room-detail-gallery">
 
                 {images.length > 0 ? (
 
                   <>
+
                     <div className="room-detail-gallery__main">
 
                       <img
@@ -657,10 +708,6 @@ export default function HotelRoomDetailPage() {
               </article>
 
 
-              {/* ===============================
-                  INFORMACIÓN
-              =============================== */}
-
               <aside className="room-detail-summary">
 
                 <div className="room-detail-summary__status">
@@ -671,9 +718,12 @@ export default function HotelRoomDetailPage() {
                   />
 
                   <span>
+
                     {room?.is_active
                       ? 'Habitación activa'
-                      : 'Habitación inactiva'}
+                      : 'Habitación inactiva'
+                    }
+
                   </span>
 
                 </div>
@@ -685,7 +735,6 @@ export default function HotelRoomDetailPage() {
 
 
                 <div className="room-detail-info-list">
-
 
                   <DetailRow
                     icon={
@@ -704,10 +753,7 @@ export default function HotelRoomDetailPage() {
                       UsersRound
                     }
                     label="Capacidad"
-                    value={`${
-                      room?.max_guests ||
-                      1
-                    } huéspedes`}
+                    value={`${room?.max_guests || 1} huéspedes`}
                   />
 
 
@@ -716,12 +762,10 @@ export default function HotelRoomDetailPage() {
                       Building2
                     }
                     label="Inventario"
-                    value={`${
-                      room?.inventory_count ||
-                      0
-                    } habitación${
+                    value={`${room?.inventory_count || 0} habitación${
                       Number(
-                        room?.inventory_count
+                        room
+                          ?.inventory_count
                       ) === 1
                         ? ''
                         : 'es'
@@ -761,9 +805,7 @@ export default function HotelRoomDetailPage() {
             </section>
 
 
-            {/* =================================
-                DESCRIPCIÓN
-            ================================= */}
+            {/* DESCRIPCIÓN */}
 
             <section className="room-detail-section">
 
@@ -787,16 +829,15 @@ export default function HotelRoomDetailPage() {
               <p className="room-detail-description">
 
                 {room?.description ||
-                  'Todavía no se ha agregado una descripción para esta habitación.'}
+                  'Todavía no se ha agregado una descripción para esta habitación.'
+                }
 
               </p>
 
             </section>
 
 
-            {/* =================================
-                TARIFAS
-            ================================= */}
+            {/* TARIFAS */}
 
             <section className="room-detail-section">
 
@@ -839,16 +880,40 @@ export default function HotelRoomDetailPage() {
                     strokeWidth={1.6}
                   />
 
+
                   <div>
 
                     <strong>
-                      No hay tarifas activas
+                      Aún no tienes tarifas configuradas
                     </strong>
 
                     <p>
-                      Configuraremos este módulo
-                      en el siguiente bloque.
+                      Agrega tu primera tarifa para comenzar
+                      a recibir reservas para esta habitación.
                     </p>
+
+
+                    <button
+                      type="button"
+                      className="hotel-primary-button"
+                      style={{
+                        marginTop: '16px'
+                      }}
+                      onClick={() =>
+                        navigate(
+                          `/tarifas/nueva?roomId=${roomId}`
+                        )
+                      }
+                    >
+
+                      <Plus
+                        size={17}
+                        strokeWidth={1.8}
+                      />
+
+                      Agregar tarifa
+
+                    </button>
 
                   </div>
 
@@ -859,7 +924,9 @@ export default function HotelRoomDetailPage() {
                 <div className="room-rate-list">
 
                   {activeRates.map(
-                    (rate) => (
+                    (
+                      rate
+                    ) => (
 
                       <article
                         key={
@@ -886,7 +953,8 @@ export default function HotelRoomDetailPage() {
 
                           <span>
                             {formatDuration(
-                              rate.duration_minutes
+                              rate
+                                .duration_minutes
                             )}
                           </span>
 

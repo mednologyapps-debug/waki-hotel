@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  BedDouble,
   CircleDollarSign,
   Clock3,
   Save
@@ -18,8 +19,9 @@ import {
 import HotelSidebar
   from '../components/hotel/HotelSidebar'
 
-import { supabase }
-  from '../lib/supabase'
+import {
+  supabase
+} from '../lib/supabase'
 
 
 export default function HotelRateCreatePage() {
@@ -27,7 +29,8 @@ export default function HotelRateCreatePage() {
     useNavigate()
 
   const [
-    searchParams
+    searchParams,
+    setSearchParams
   ] =
     useSearchParams()
 
@@ -43,7 +46,10 @@ export default function HotelRateCreatePage() {
   const [saving, setSaving] =
     useState(false)
 
-  const [errorMessage, setErrorMessage] =
+  const [
+    errorMessage,
+    setErrorMessage
+  ] =
     useState('')
 
   const [profile, setProfile] =
@@ -51,6 +57,9 @@ export default function HotelRateCreatePage() {
 
   const [hotel, setHotel] =
     useState(null)
+
+  const [rooms, setRooms] =
+    useState([])
 
   const [room, setRoom] =
     useState(null)
@@ -65,33 +74,88 @@ export default function HotelRateCreatePage() {
     })
 
 
+  /* =========================================================
+     CARGAR TODO SOLO UNA VEZ
+     ========================================================= */
+
   useEffect(() => {
-    loadContext()
-  }, [roomId])
+    loadInitialContext()
+  }, [])
 
 
-  async function loadContext() {
+  /* =========================================================
+     SINCRONIZAR ROOM CON URL
+     SIN CONSULTAR SUPABASE NUEVAMENTE
+     ========================================================= */
+
+  useEffect(() => {
+    if (
+      loading ||
+      rooms.length === 0
+    ) {
+      return
+    }
+
+    if (!roomId) {
+      setRoom(null)
+      return
+    }
+
+    const selectedRoom =
+      rooms.find(
+        (currentRoom) =>
+          currentRoom.id ===
+          roomId
+      )
+
+    if (selectedRoom) {
+      setRoom(
+        selectedRoom
+      )
+
+      setErrorMessage('')
+
+      return
+    }
+
+    setRoom(null)
+
+    setErrorMessage(
+      'La habitación seleccionada no existe, está inactiva o no pertenece a tu hotel.'
+    )
+
+  }, [
+    roomId,
+    rooms,
+    loading
+  ])
+
+
+  /* =========================================================
+     CARGA INICIAL
+     ========================================================= */
+
+  async function loadInitialContext() {
     try {
       setLoading(true)
       setErrorMessage('')
 
 
-      if (!roomId) {
-        throw new Error(
-          'Selecciona una habitación.'
-        )
-      }
-
+      /* SESIÓN */
 
       const {
         data: {
           session
-        }
+        },
+        error: sessionError
       } =
         await supabase
           .auth
           .getSession()
 
+      if (sessionError) {
+        throw sessionError
+      }
 
       if (!session?.user) {
         throw new Error(
@@ -100,8 +164,11 @@ export default function HotelRateCreatePage() {
       }
 
 
+      /* PERFIL */
+
       const {
-        data: profileData
+        data: profileData,
+        error: profileError
       } =
         await supabase
           .from('profiles')
@@ -115,11 +182,16 @@ export default function HotelRateCreatePage() {
           )
           .maybeSingle()
 
+      if (profileError) {
+        throw profileError
+      }
 
       setProfile(
         profileData
       )
 
+
+      /* STAFF */
 
       const {
         data: staffData,
@@ -141,11 +213,9 @@ export default function HotelRateCreatePage() {
           .limit(1)
           .maybeSingle()
 
-
       if (staffError) {
         throw staffError
       }
-
 
       if (!staffData?.hotel_id) {
         throw new Error(
@@ -154,8 +224,11 @@ export default function HotelRateCreatePage() {
       }
 
 
+      /* HOTEL */
+
       const {
-        data: hotelData
+        data: hotelData,
+        error: hotelError
       } =
         await supabase
           .from('hotels')
@@ -171,52 +244,97 @@ export default function HotelRateCreatePage() {
           )
           .maybeSingle()
 
+      if (hotelError) {
+        throw hotelError
+      }
+
+      if (!hotelData) {
+        throw new Error(
+          'No encontramos la información del hotel.'
+        )
+      }
 
       setHotel(
         hotelData
       )
 
 
+      /* HABITACIONES ACTIVAS */
+
       const {
-        data: roomData,
-        error: roomError
+        data: roomsData,
+        error: roomsError
       } =
         await supabase
           .from('room_types')
           .select(`
             id,
             hotel_id,
-            name
+            name,
+            is_active,
+            display_order
           `)
-          .eq(
-            'id',
-            roomId
-          )
           .eq(
             'hotel_id',
             staffData.hotel_id
           )
-          .maybeSingle()
+          .eq(
+            'is_active',
+            true
+          )
+          .order(
+            'display_order',
+            {
+              ascending: true
+            }
+          )
+          .order(
+            'name',
+            {
+              ascending: true
+            }
+          )
 
-
-      if (roomError) {
-        throw roomError
+      if (roomsError) {
+        throw roomsError
       }
 
+      const availableRooms =
+        roomsData || []
 
-      if (!roomData) {
-        throw new Error(
-          'No encontramos esta habitación.'
-        )
-      }
-
-
-      setRoom(
-        roomData
+      setRooms(
+        availableRooms
       )
+
+
+      /*
+       * Si la URL ya vino con roomId,
+       * seleccionamos inmediatamente
+       * sin una segunda consulta.
+       */
+
+      if (roomId) {
+        const initialRoom =
+          availableRooms.find(
+            (currentRoom) =>
+              currentRoom.id ===
+              roomId
+          )
+
+        if (initialRoom) {
+          setRoom(
+            initialRoom
+          )
+        } else {
+          setErrorMessage(
+            'La habitación seleccionada no existe, está inactiva o no pertenece a tu hotel.'
+          )
+        }
+      }
 
     } catch (error) {
       console.error(
+        'Error preparando tarifa:',
         error
       )
 
@@ -231,6 +349,68 @@ export default function HotelRateCreatePage() {
   }
 
 
+  /* =========================================================
+     CAMBIAR HABITACIÓN
+     SIN RECARGAR
+     ========================================================= */
+
+  function handleRoomChange(
+    event
+  ) {
+    const selectedRoomId =
+      event.target.value
+
+    setErrorMessage('')
+
+
+    if (!selectedRoomId) {
+      setRoom(null)
+
+      setSearchParams(
+        {},
+        {
+          replace: true
+        }
+      )
+
+      return
+    }
+
+
+    const selectedRoom =
+      rooms.find(
+        (currentRoom) =>
+          currentRoom.id ===
+          selectedRoomId
+      )
+
+    setRoom(
+      selectedRoom ||
+      null
+    )
+
+
+    /*
+     * Actualizamos la URL,
+     * pero NO hacemos otra carga.
+     */
+
+    setSearchParams(
+      {
+        roomId:
+          selectedRoomId
+      },
+      {
+        replace: true
+      }
+    )
+  }
+
+
+  /* =========================================================
+     FORM
+     ========================================================= */
+
   function updateField(
     field,
     value
@@ -244,6 +424,10 @@ export default function HotelRateCreatePage() {
   }
 
 
+  /* =========================================================
+     CREAR TARIFA
+     ========================================================= */
+
   async function handleSubmit(
     event
   ) {
@@ -256,7 +440,7 @@ export default function HotelRateCreatePage() {
 
       if (!room?.id) {
         throw new Error(
-          'No pudimos identificar la habitación.'
+          'Selecciona una habitación antes de crear la tarifa.'
         )
       }
 
@@ -265,7 +449,6 @@ export default function HotelRateCreatePage() {
         Number(
           form.duration_hours
         )
-
 
       const price =
         Number(
@@ -293,8 +476,11 @@ export default function HotelRateCreatePage() {
       }
 
 
+      /* ÚLTIMO ORDEN */
+
       const {
-        data: lastRate
+        data: lastRate,
+        error: lastRateError
       } =
         await supabase
           .from('rate_plans')
@@ -315,11 +501,16 @@ export default function HotelRateCreatePage() {
           .limit(1)
           .maybeSingle()
 
+      if (lastRateError) {
+        throw lastRateError
+      }
+
 
       const nextOrder =
         Number(
           lastRate
-            ?.display_order || 0
+            ?.display_order ||
+          0
         ) + 1
 
 
@@ -327,6 +518,8 @@ export default function HotelRateCreatePage() {
         form.name.trim() ||
         `${hours} horas`
 
+
+      /* INSERT */
 
       const {
         error: insertError
@@ -359,7 +552,6 @@ export default function HotelRateCreatePage() {
               nextOrder
           })
 
-
       if (insertError) {
         throw insertError
       }
@@ -374,6 +566,7 @@ export default function HotelRateCreatePage() {
 
     } catch (error) {
       console.error(
+        'Error creando tarifa:',
         error
       )
 
@@ -388,6 +581,10 @@ export default function HotelRateCreatePage() {
   }
 
 
+  /* =========================================================
+     UBICACIÓN
+     ========================================================= */
+
   const hotelLocation =
     [
       hotel?.district,
@@ -397,34 +594,37 @@ export default function HotelRateCreatePage() {
       .join(', ')
 
 
+  /* =========================================================
+     SKELETON INICIAL
+     ========================================================= */
+
   if (loading) {
     return (
-      <div className="hotel-dashboard-loading">
-
-        <div className="hotel-dashboard-loading__spinner" />
-
-        <p>
-          Preparando tarifa...
-        </p>
-
-      </div>
+      <RateCreateSkeleton />
     )
   }
 
+
+  /* =========================================================
+     RENDER
+     ========================================================= */
 
   return (
     <div className="hotel-portal">
 
       <HotelSidebar
         activeKey="tarifas"
+
         hotelName={
           hotel?.name ||
           'Mi hotel'
         }
+
         hotelLocation={
           hotelLocation ||
           'Lima, Perú'
         }
+
         profileName={
           profile?.full_name ||
           'Equipo WAKI'
@@ -433,6 +633,8 @@ export default function HotelRateCreatePage() {
 
 
       <main className="hotel-dashboard">
+
+        {/* VOLVER */}
 
         <button
           type="button"
@@ -454,6 +656,8 @@ export default function HotelRateCreatePage() {
         </button>
 
 
+        {/* HEADER */}
+
         <header className="room-edit-header">
 
           <div>
@@ -467,8 +671,20 @@ export default function HotelRateCreatePage() {
             </h1>
 
             <p>
-              Configura una duración y precio
-              para {room?.name}.
+
+              {room ? (
+
+                <>
+                  Configura una duración y precio
+                  para <strong>{room.name}</strong>.
+                </>
+
+              ) : (
+
+                'Selecciona una habitación y configura su nueva tarifa.'
+
+              )}
+
             </p>
 
           </div>
@@ -476,19 +692,20 @@ export default function HotelRateCreatePage() {
         </header>
 
 
+        {/* ERROR */}
+
         {errorMessage && (
+
           <div className="hotel-dashboard-error">
             {errorMessage}
           </div>
+
         )}
 
 
-        <form
-          className="hotel-rate-form-layout"
-          onSubmit={
-            handleSubmit
-          }
-        >
+        {/* SIN HABITACIONES */}
+
+        {rooms.length === 0 ? (
 
           <section className="room-edit-card">
 
@@ -496,22 +713,23 @@ export default function HotelRateCreatePage() {
 
               <div className="room-edit-card__heading-icon">
 
-                <CircleDollarSign
+                <BedDouble
                   size={21}
                   strokeWidth={1.7}
                 />
 
               </div>
 
+
               <div>
 
                 <h2>
-                  Precio por duración
+                  Primero agrega una habitación
                 </h2>
 
                 <p>
-                  El huésped verá esta opción
-                  al reservar.
+                  Necesitas al menos un tipo de habitación
+                  activo antes de crear tarifas.
                 </p>
 
               </div>
@@ -519,239 +737,911 @@ export default function HotelRateCreatePage() {
             </div>
 
 
-            <div className="room-form-grid">
+            <div className="room-edit-actions">
 
-
-              <label className="room-form-field room-form-field--full">
-
-                <span>
-                  Nombre de la tarifa
-                </span>
-
-                <input
-                  type="text"
-                  placeholder="Ej. Tarifa 3 horas"
-                  value={
-                    form.name
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      'name',
-                      event.target.value
-                    )
-                  }
-                />
-
-                <small>
-                  Es opcional. Si lo dejas vacío,
-                  WAKI usará la duración como nombre.
-                </small>
-
-              </label>
-
-
-              <label className="room-form-field">
-
-                <span>
-                  Duración
-                </span>
-
-                <div className="room-input-suffix">
-
-                  <input
-                    type="number"
-                    min="1"
-                    step="0.5"
-                    value={
-                      form.duration_hours
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      updateField(
-                        'duration_hours',
-                        event.target.value
-                      )
-                    }
-                  />
-
-                  <span>
-                    horas
-                  </span>
-
-                </div>
-
-              </label>
-
-
-              <label className="room-form-field">
-
-                <span>
-                  Precio base
-                </span>
-
-                <div className="room-input-prefix">
-
-                  <span>
-                    S/
-                  </span>
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={
-                      form.base_price
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      updateField(
-                        'base_price',
-                        event.target.value
-                      )
-                    }
-                  />
-
-                </div>
-
-              </label>
+              <button
+                type="button"
+                className="hotel-primary-button"
+                onClick={() =>
+                  navigate(
+                    '/habitaciones'
+                  )
+                }
+              >
+                Ir a habitaciones
+              </button>
 
             </div>
 
           </section>
 
+        ) : (
 
-          <aside className="room-edit-side">
+          <>
 
-            <div className="room-edit-side-card">
+            {/* SELECTOR HABITACIÓN */}
 
-              <h3>
-                Estado inicial
-              </h3>
+            <section className="room-edit-card">
 
-              <p>
-                Una tarifa activa estará disponible
-                para ser usada en WAKI.
-              </p>
+              <div className="room-edit-card__heading">
 
+                <div className="room-edit-card__heading-icon">
 
-              <label className="room-status-toggle">
-
-                <div>
-
-                  <strong>
-                    Tarifa activa
-                  </strong>
-
-                  <span>
-                    Disponible para reservas
-                  </span>
+                  <BedDouble
+                    size={21}
+                    strokeWidth={1.7}
+                  />
 
                 </div>
 
 
-                <input
-                  type="checkbox"
-                  checked={
-                    form.is_active
+                <div>
+
+                  <h2>
+                    Habitación
+                  </h2>
+
+                  <p>
+                    Selecciona el tipo de habitación
+                    al que pertenecerá esta tarifa.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div className="room-form-grid">
+
+                <label className="room-form-field room-form-field--full">
+
+                  <span>
+                    Tipo de habitación *
+                  </span>
+
+
+                  <select
+                    value={
+                      room?.id ||
+                      ''
+                    }
+                    disabled={
+                      saving
+                    }
+                    onChange={
+                      handleRoomChange
+                    }
+                  >
+
+                    <option value="">
+                      Selecciona una habitación
+                    </option>
+
+
+                    {rooms.map(
+                      (
+                        availableRoom
+                      ) => (
+
+                        <option
+                          key={
+                            availableRoom.id
+                          }
+                          value={
+                            availableRoom.id
+                          }
+                        >
+                          {availableRoom.name}
+                        </option>
+
+                      )
+                    )}
+
+                  </select>
+
+                </label>
+
+              </div>
+
+            </section>
+
+
+            {/* FORM */}
+
+            <form
+              className="hotel-rate-form-layout"
+              onSubmit={
+                handleSubmit
+              }
+            >
+
+              <section className="room-edit-card">
+
+                <div className="room-edit-card__heading">
+
+                  <div className="room-edit-card__heading-icon">
+
+                    <CircleDollarSign
+                      size={21}
+                      strokeWidth={1.7}
+                    />
+
+                  </div>
+
+
+                  <div>
+
+                    <h2>
+                      Precio por duración
+                    </h2>
+
+                    <p>
+                      El huésped verá esta opción
+                      al reservar.
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="room-form-grid">
+
+                  {/* NOMBRE */}
+
+                  <label className="room-form-field room-form-field--full">
+
+                    <span>
+                      Nombre de la tarifa
+                    </span>
+
+                    <input
+                      type="text"
+                      placeholder="Ej. Tarifa 3 horas"
+                      value={
+                        form.name
+                      }
+                      disabled={
+                        saving
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          'name',
+                          event.target.value
+                        )
+                      }
+                    />
+
+                    <small>
+                      Es opcional. Si lo dejas vacío,
+                      WAKI usará la duración como nombre.
+                    </small>
+
+                  </label>
+
+
+                  {/* DURACIÓN */}
+
+                  <label className="room-form-field">
+
+                    <span>
+                      Duración
+                    </span>
+
+
+                    <div className="room-input-suffix">
+
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.5"
+                        value={
+                          form.duration_hours
+                        }
+                        disabled={
+                          saving
+                        }
+                        onChange={(
+                          event
+                        ) =>
+                          updateField(
+                            'duration_hours',
+                            event.target.value
+                          )
+                        }
+                      />
+
+                      <span>
+                        horas
+                      </span>
+
+                    </div>
+
+                  </label>
+
+
+                  {/* PRECIO */}
+
+                  <label className="room-form-field">
+
+                    <span>
+                      Precio base
+                    </span>
+
+
+                    <div className="room-input-prefix">
+
+                      <span>
+                        S/
+                      </span>
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={
+                          form.base_price
+                        }
+                        disabled={
+                          saving
+                        }
+                        onChange={(
+                          event
+                        ) =>
+                          updateField(
+                            'base_price',
+                            event.target.value
+                          )
+                        }
+                      />
+
+                    </div>
+
+                  </label>
+
+                </div>
+
+              </section>
+
+
+              {/* SIDE */}
+
+              <aside className="room-edit-side">
+
+                <div className="room-edit-side-card">
+
+                  <h3>
+                    Estado inicial
+                  </h3>
+
+                  <p>
+                    Una tarifa activa estará disponible
+                    para ser usada en WAKI.
+                  </p>
+
+
+                  <label className="room-status-toggle">
+
+                    <div>
+
+                      <strong>
+                        Tarifa activa
+                      </strong>
+
+                      <span>
+                        Disponible para reservas
+                      </span>
+
+                    </div>
+
+
+                    <input
+                      type="checkbox"
+                      checked={
+                        form.is_active
+                      }
+                      disabled={
+                        saving
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          'is_active',
+                          event.target.checked
+                        )
+                      }
+                    />
+
+
+                    <span className="room-status-toggle__control" />
+
+                  </label>
+
+                </div>
+
+
+                <div className="hotel-rate-preview">
+
+                  <span>
+                    Vista rápida
+                  </span>
+
+                  <Clock3
+                    size={22}
+                    strokeWidth={1.7}
+                  />
+
+                  <strong>
+                    {
+                      Number(
+                        form.duration_hours ||
+                        0
+                      )
+                    } h
+                  </strong>
+
+                  <p>
+                    S/{' '}
+                    {
+                      Number(
+                        form.base_price ||
+                        0
+                      )
+                        .toFixed(
+                          2
+                        )
+                    }
+                  </p>
+
+                </div>
+
+              </aside>
+
+
+              {/* ACCIONES */}
+
+              <div className="room-edit-actions">
+
+                <button
+                  type="button"
+                  className="hotel-secondary-button"
+                  disabled={
+                    saving
                   }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      'is_active',
-                      event.target.checked
+                  onClick={() =>
+                    navigate(
+                      '/tarifas'
                     )
                   }
-                />
+                >
+                  Cancelar
+                </button>
 
 
-                <span className="room-status-toggle__control" />
+                <button
+                  type="submit"
+                  className="hotel-primary-button"
+                  disabled={
+                    saving ||
+                    !room?.id
+                  }
+                >
 
-              </label>
+                  <Save
+                    size={18}
+                    strokeWidth={1.8}
+                  />
 
-            </div>
+                  {saving
+                    ? 'Guardando...'
+                    : 'Crear tarifa'
+                  }
+
+                </button>
+
+              </div>
+
+            </form>
+
+          </>
+
+        )}
+
+      </main>
+
+    </div>
+  )
+}
 
 
-            <div className="hotel-rate-preview">
+/* =========================================================
+   SKELETON
+   ========================================================= */
 
-              <span>
-                Vista rápida
-              </span>
+function RateCreateSkeleton() {
+  const pulse = {
+    background:
+      'linear-gradient(90deg, #eef0f4 25%, #f8f8fa 50%, #eef0f4 75%)',
 
-              <Clock3
-                size={22}
-                strokeWidth={1.7}
+    backgroundSize:
+      '200% 100%',
+
+    borderRadius:
+      '12px'
+  }
+
+
+  return (
+    <div
+      style={{
+        minHeight:
+          '100vh',
+
+        background:
+          '#f8f7fc',
+
+        padding:
+          '48px'
+      }}
+    >
+
+      <div
+        style={{
+          maxWidth:
+            '1100px',
+
+          margin:
+            '0 auto'
+        }}
+      >
+
+        {/* BACK */}
+
+        <div
+          style={{
+            ...pulse,
+
+            width:
+              '170px',
+
+            height:
+              '18px',
+
+            marginBottom:
+              '48px'
+          }}
+        />
+
+
+        {/* HEADER */}
+
+        <div
+          style={{
+            ...pulse,
+
+            width:
+              '90px',
+
+            height:
+              '12px',
+
+            marginBottom:
+              '14px'
+          }}
+        />
+
+        <div
+          style={{
+            ...pulse,
+
+            width:
+              '280px',
+
+            height:
+              '34px',
+
+            marginBottom:
+              '14px'
+          }}
+        />
+
+        <div
+          style={{
+            ...pulse,
+
+            width:
+              '420px',
+
+            maxWidth:
+              '80%',
+
+            height:
+              '16px',
+
+            marginBottom:
+              '42px'
+          }}
+        />
+
+
+        {/* SELECTOR */}
+
+        <div
+          style={{
+            background:
+              '#fff',
+
+            border:
+              '1px solid #ece7f4',
+
+            borderRadius:
+              '24px',
+
+            padding:
+              '28px',
+
+            marginBottom:
+              '24px'
+          }}
+        >
+
+          <div
+            style={{
+              display:
+                'flex',
+
+              alignItems:
+                'center',
+
+              gap:
+                '16px',
+
+              marginBottom:
+                '28px'
+            }}
+          >
+
+            <div
+              style={{
+                ...pulse,
+
+                width:
+                  '48px',
+
+                height:
+                  '48px',
+
+                borderRadius:
+                  '16px'
+              }}
+            />
+
+            <div
+              style={{
+                flex:
+                  1
+              }}
+            >
+
+              <div
+                style={{
+                  ...pulse,
+
+                  width:
+                    '160px',
+
+                  height:
+                    '18px',
+
+                  marginBottom:
+                    '10px'
+                }}
               />
 
-              <strong>
-                {
-                  Number(
-                    form.duration_hours || 0
-                  )
-                } h
-              </strong>
+              <div
+                style={{
+                  ...pulse,
 
-              <p>
-                S/{' '}
-                {
-                  Number(
-                    form.base_price || 0
-                  ).toFixed(2)
-                }
-              </p>
+                  width:
+                    '310px',
 
-            </div>
+                  maxWidth:
+                    '70%',
 
-          </aside>
-
-
-          <div className="room-edit-actions">
-
-            <button
-              type="button"
-              className="hotel-secondary-button"
-              disabled={
-                saving
-              }
-              onClick={() =>
-                navigate(
-                  '/tarifas'
-                )
-              }
-            >
-              Cancelar
-            </button>
-
-
-            <button
-              type="submit"
-              className="hotel-primary-button"
-              disabled={
-                saving
-              }
-            >
-
-              <Save
-                size={18}
-                strokeWidth={1.8}
+                  height:
+                    '13px'
+                }}
               />
 
-              {saving
-                ? 'Guardando...'
-                : 'Crear tarifa'}
-
-            </button>
+            </div>
 
           </div>
 
-        </form>
 
-      </main>
+          <div
+            style={{
+              ...pulse,
+
+              width:
+                '100%',
+
+              height:
+                '52px'
+            }}
+          />
+
+        </div>
+
+
+        {/* FORM */}
+
+        <div
+          style={{
+            display:
+              'grid',
+
+            gridTemplateColumns:
+              'minmax(0, 2fr) minmax(260px, 1fr)',
+
+            gap:
+              '24px'
+          }}
+        >
+
+          <div
+            style={{
+              background:
+                '#fff',
+
+              border:
+                '1px solid #ece7f4',
+
+              borderRadius:
+                '24px',
+
+              padding:
+                '28px'
+            }}
+          >
+
+            <div
+              style={{
+                ...pulse,
+
+                width:
+                  '210px',
+
+                height:
+                  '22px',
+
+                marginBottom:
+                  '14px'
+              }}
+            />
+
+            <div
+              style={{
+                ...pulse,
+
+                width:
+                  '330px',
+
+                maxWidth:
+                  '80%',
+
+                height:
+                  '14px',
+
+                marginBottom:
+                  '32px'
+              }}
+            />
+
+
+            <div
+              style={{
+                ...pulse,
+
+                width:
+                  '100%',
+
+                height:
+                  '52px',
+
+                marginBottom:
+                  '20px'
+              }}
+            />
+
+
+            <div
+              style={{
+                display:
+                  'grid',
+
+                gridTemplateColumns:
+                  '1fr 1fr',
+
+                gap:
+                  '18px'
+              }}
+            >
+
+              <div
+                style={{
+                  ...pulse,
+
+                  height:
+                    '52px'
+                }}
+              />
+
+              <div
+                style={{
+                  ...pulse,
+
+                  height:
+                    '52px'
+                }}
+              />
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div
+              style={{
+                background:
+                  '#fff',
+
+                border:
+                  '1px solid #ece7f4',
+
+                borderRadius:
+                  '24px',
+
+                padding:
+                  '28px',
+
+                marginBottom:
+                  '20px'
+              }}
+            >
+
+              <div
+                style={{
+                  ...pulse,
+
+                  width:
+                    '130px',
+
+                  height:
+                    '18px',
+
+                  marginBottom:
+                    '14px'
+                }}
+              />
+
+              <div
+                style={{
+                  ...pulse,
+
+                  width:
+                    '100%',
+
+                  height:
+                    '58px'
+                }}
+              />
+
+            </div>
+
+
+            <div
+              style={{
+                background:
+                  '#fff',
+
+                border:
+                  '1px solid #ece7f4',
+
+                borderRadius:
+                  '24px',
+
+                padding:
+                  '28px'
+              }}
+            >
+
+              <div
+                style={{
+                  ...pulse,
+
+                  width:
+                    '90px',
+
+                  height:
+                    '12px',
+
+                  marginBottom:
+                    '20px'
+                }}
+              />
+
+              <div
+                style={{
+                  ...pulse,
+
+                  width:
+                    '72px',
+
+                  height:
+                    '32px',
+
+                  margin:
+                    '0 auto 16px'
+                }}
+              />
+
+              <div
+                style={{
+                  ...pulse,
+
+                  width:
+                    '110px',
+
+                  height:
+                    '22px',
+
+                  margin:
+                    '0 auto'
+                }}
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <style>
+        {`
+          @keyframes wakiRateSkeletonPulse {
+            0% {
+              background-position: 200% 0;
+            }
+
+            100% {
+              background-position: -200% 0;
+            }
+          }
+
+          .hotel-rate-create-skeleton-item {
+            animation:
+              wakiRateSkeletonPulse
+              1.5s
+              ease-in-out
+              infinite;
+          }
+
+          @media (max-width: 768px) {
+            .hotel-rate-create-skeleton-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}
+      </style>
 
     </div>
   )

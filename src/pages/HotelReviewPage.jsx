@@ -6,7 +6,6 @@ import {
   Check,
   CircleDollarSign,
   Clock3,
-  MapPin,
   Send
 } from 'lucide-react'
 
@@ -34,7 +33,6 @@ import {
 export default function HotelReviewPage() {
   const navigate =
     useNavigate()
-
 
   const [loading, setLoading] =
     useState(true)
@@ -76,9 +74,7 @@ export default function HotelReviewPage() {
   async function loadPage() {
     try {
       setLoading(true)
-
       setErrorMessage('')
-
 
       /* =====================================================
          SESIÓN
@@ -94,11 +90,9 @@ export default function HotelReviewPage() {
           .auth
           .getSession()
 
-
       if (sessionError) {
         throw sessionError
       }
-
 
       if (!session?.user) {
         throw new Error(
@@ -127,11 +121,9 @@ export default function HotelReviewPage() {
           )
           .maybeSingle()
 
-
       if (profileError) {
         throw profileError
       }
-
 
       setProfile(
         profileData
@@ -162,18 +154,15 @@ export default function HotelReviewPage() {
           .limit(1)
           .maybeSingle()
 
-
       if (staffError) {
         throw staffError
       }
-
 
       if (!staffData?.hotel_id) {
         throw new Error(
           'Esta cuenta no tiene una sede asignada.'
         )
       }
-
 
       setHotelId(
         staffData.hotel_id
@@ -214,18 +203,15 @@ export default function HotelReviewPage() {
           )
           .maybeSingle()
 
-
       if (hotelError) {
         throw hotelError
       }
-
 
       if (!hotelData) {
         throw new Error(
           'No encontramos la información del hotel.'
         )
       }
-
 
       setHotel(
         hotelData
@@ -249,11 +235,9 @@ export default function HotelReviewPage() {
             }
           )
 
-
       if (onboardingError) {
         throw onboardingError
       }
-
 
       setOnboarding(
         onboardingData
@@ -302,11 +286,9 @@ export default function HotelReviewPage() {
             }
           )
 
-
       if (roomsError) {
         throw roomsError
       }
-
 
       setRooms(
         roomsData ||
@@ -318,7 +300,6 @@ export default function HotelReviewPage() {
         'Error cargando revisión:',
         error
       )
-
 
       setErrorMessage(
         error?.message ||
@@ -428,7 +409,7 @@ export default function HotelReviewPage() {
 
 
   /* =========================================================
-     READY
+     ESTADOS
      ========================================================= */
 
   const isReady =
@@ -436,6 +417,14 @@ export default function HotelReviewPage() {
       onboarding
         ?.is_ready
     )
+
+  const isApproved =
+    hotel?.approval_status ===
+    'approved'
+
+  const isPendingReview =
+    hotel?.approval_status ===
+    'pending_review'
 
 
   /* =========================================================
@@ -447,6 +436,20 @@ export default function HotelReviewPage() {
       return
     }
 
+    /*
+     * Protección adicional:
+     * aunque por UI un hotel aprobado ya no
+     * tendrá el botón, tampoco permitimos
+     * ejecutar este flujo accidentalmente.
+     */
+
+    if (isApproved) {
+      setErrorMessage(
+        'Este hotel ya está aprobado y no necesita enviarse nuevamente a revisión.'
+      )
+
+      return
+    }
 
     if (!isReady) {
       setErrorMessage(
@@ -456,24 +459,20 @@ export default function HotelReviewPage() {
       return
     }
 
-
     const confirmed =
       window.confirm(
         '¿Quieres enviar tu hotel a revisión? Una vez enviado, WAKI revisará la configuración antes de publicarlo.'
       )
 
-
     if (!confirmed) {
       return
     }
-
 
     try {
       setSubmitting(true)
 
       setErrorMessage('')
       setSuccessMessage('')
-
 
       const {
         error
@@ -487,16 +486,13 @@ export default function HotelReviewPage() {
             }
           )
 
-
       if (error) {
         throw error
       }
 
-
       setSuccessMessage(
         'Tu hotel fue enviado a revisión correctamente.'
       )
-
 
       await loadPage()
 
@@ -505,7 +501,6 @@ export default function HotelReviewPage() {
         'Error enviando hotel a revisión:',
         error
       )
-
 
       if (
         error?.message
@@ -516,6 +511,7 @@ export default function HotelReviewPage() {
         setErrorMessage(
           'Todavía hay requisitos pendientes antes de enviar tu hotel.'
         )
+
       } else {
         setErrorMessage(
           error?.message ||
@@ -555,21 +551,23 @@ export default function HotelReviewPage() {
   return (
     <div className="hotel-portal">
 
-
       {/* =====================================================
           SIDEBAR
           ===================================================== */}
 
       <HotelSidebar
         activeKey="hotel"
+
         hotelName={
           hotel?.name ||
           'Mi hotel'
         }
+
         hotelLocation={
           hotelLocation ||
           'Lima, Perú'
         }
+
         profileName={
           profile?.full_name ||
           'Equipo WAKI'
@@ -582,7 +580,6 @@ export default function HotelReviewPage() {
           ===================================================== */}
 
       <main className="hotel-dashboard hotel-review-page">
-
 
         {/* =================================================
             VOLVER
@@ -615,17 +612,32 @@ export default function HotelReviewPage() {
         <header className="hotel-review-header">
 
           <span className="hotel-dashboard-eyebrow">
-            Revisión final
+
+            {isApproved
+              ? 'Hotel aprobado'
+              : 'Revisión final'
+            }
+
           </span>
 
+
           <h1>
-            Revisa tu hotel antes de enviarlo
+
+            {isApproved
+              ? 'Tu hotel está aprobado'
+              : 'Revisa tu hotel antes de enviarlo'
+            }
+
           </h1>
 
+
           <p>
-            Confirma que la información,
-            habitaciones, fotografías y tarifas
-            estén correctas antes de enviarlas a WAKI.
+
+            {isApproved
+              ? 'La configuración de tu hotel ya fue aprobada por WAKI. Puedes revisar la información publicada desde esta pantalla.'
+              : 'Confirma que la información, habitaciones, fotografías y tarifas estén correctas antes de enviarlas a WAKI.'
+            }
+
           </p>
 
         </header>
@@ -666,7 +678,11 @@ export default function HotelReviewPage() {
             ONBOARDING
             ================================================= */}
 
-        <HotelOnboardingGuide />
+        {!isApproved && (
+
+          <HotelOnboardingGuide />
+
+        )}
 
 
         {/* =================================================
@@ -698,7 +714,6 @@ export default function HotelReviewPage() {
 
         <section className="hotel-review-summary">
 
-
           {/* INFORMACIÓN */}
 
           <article className="hotel-review-summary-card">
@@ -720,10 +735,12 @@ export default function HotelReviewPage() {
               </span>
 
               <strong>
+
                 {onboarding?.info_complete
                   ? 'Completa'
                   : 'Pendiente'
                 }
+
               </strong>
 
             </div>
@@ -929,7 +946,6 @@ export default function HotelReviewPage() {
 
           <div className="hotel-review-info-grid">
 
-
             <div>
 
               <span>
@@ -937,9 +953,11 @@ export default function HotelReviewPage() {
               </span>
 
               <strong>
+
                 {fullAddress ||
                   'Sin dirección'
                 }
+
               </strong>
 
             </div>
@@ -952,9 +970,11 @@ export default function HotelReviewPage() {
               </span>
 
               <strong>
+
                 {hotel?.phone ||
                   'Sin teléfono'
                 }
+
               </strong>
 
             </div>
@@ -967,9 +987,11 @@ export default function HotelReviewPage() {
               </span>
 
               <strong>
+
                 {hotel?.contact_email ||
                   'Sin correo'
                 }
+
               </strong>
 
             </div>
@@ -982,9 +1004,11 @@ export default function HotelReviewPage() {
               </span>
 
               <strong>
+
                 {hotel?.whatsapp ||
                   'No configurado'
                 }
+
               </strong>
 
             </div>
@@ -1049,7 +1073,6 @@ export default function HotelReviewPage() {
 
           <div className="hotel-review-room-list">
 
-
             {activeRooms.map(
               (room) => {
 
@@ -1057,14 +1080,12 @@ export default function HotelReviewPage() {
                   room.room_type_images ||
                   []
 
-
                 const cover =
                   images.find(
                     (image) =>
                       image.is_cover
                   ) ||
                   images[0]
-
 
                 const activeRates =
                   (
@@ -1078,13 +1099,13 @@ export default function HotelReviewPage() {
 
 
                 return (
+
                   <article
                     key={
                       room.id
                     }
                     className="hotel-review-room"
                   >
-
 
                     <div className="hotel-review-room__image">
 
@@ -1227,6 +1248,7 @@ export default function HotelReviewPage() {
                     </div>
 
                   </article>
+
                 )
               }
             )}
@@ -1240,8 +1262,40 @@ export default function HotelReviewPage() {
             ESTADO FINAL
             ================================================= */}
 
-        {hotel?.approval_status ===
-        'pending_review' ? (
+        {isApproved ? (
+
+          <section className="hotel-review-submit">
+
+            <div className="hotel-review-submit__icon">
+
+              <Check
+                size={24}
+                strokeWidth={2}
+              />
+
+            </div>
+
+
+            <div className="hotel-review-submit__copy">
+
+              <span>
+                Aprobación completada
+              </span>
+
+              <h2>
+                Tu hotel está aprobado
+              </h2>
+
+              <p>
+                WAKI ya aprobó la configuración de este hotel.
+                No necesitas volver a enviarlo a revisión.
+              </p>
+
+            </div>
+
+          </section>
+
+        ) : isPendingReview ? (
 
           <section className="hotel-review-submit hotel-review-submit--pending">
 
@@ -1277,7 +1331,6 @@ export default function HotelReviewPage() {
         ) : (
 
           <section className="hotel-review-submit">
-
 
             <div className="hotel-review-submit__copy">
 

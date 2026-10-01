@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  QrCode,
   UsersRound,
   X
 } from 'lucide-react'
@@ -42,6 +43,7 @@ const menuItems = [
       'admin'
     ]
   },
+
   {
     key: 'hotel',
     label: 'Mi hotel',
@@ -51,6 +53,7 @@ const menuItems = [
       'admin'
     ]
   },
+
   {
     key: 'reservas',
     label: 'Reservas',
@@ -62,6 +65,20 @@ const menuItems = [
     ],
     requiresApprovedHotel: true
   },
+
+  {
+    key: 'scanner',
+    label: 'Scanner',
+    icon: QrCode,
+    route: '/scan',
+    roles: [
+      'admin',
+      'reception',
+      'scanner'
+    ],
+    requiresApprovedHotel: true
+  },
+
   {
     key: 'habitaciones',
     label: 'Habitaciones',
@@ -71,6 +88,7 @@ const menuItems = [
       'admin'
     ]
   },
+
   {
     key: 'tarifas',
     label: 'Tarifas',
@@ -80,6 +98,7 @@ const menuItems = [
       'admin'
     ]
   },
+
   {
     key: 'equipo',
     label: 'Equipo',
@@ -142,10 +161,8 @@ export default function HotelSidebar({
       return undefined
     }
 
-
     document.body.style.overflow =
       'hidden'
-
 
     function handleEscape(
       event
@@ -160,12 +177,10 @@ export default function HotelSidebar({
       }
     }
 
-
     window.addEventListener(
       'keydown',
       handleEscape
     )
-
 
     return () => {
       document.body.style.overflow =
@@ -191,11 +206,9 @@ export default function HotelSidebar({
           .auth
           .getSession()
 
-
       if (!session?.user) {
         return
       }
-
 
       const {
         data: accessData,
@@ -206,11 +219,9 @@ export default function HotelSidebar({
             'get_my_hotel_access'
           )
 
-
       if (accessError) {
         throw accessError
       }
-
 
       const access =
         Array.isArray(
@@ -219,11 +230,9 @@ export default function HotelSidebar({
           ? accessData[0]
           : null
 
-
       if (!access?.hotel_id) {
         return
       }
-
 
       setStaffRole(
         access.staff_role ||
@@ -288,11 +297,9 @@ export default function HotelSidebar({
         throw hotelResult.error
       }
 
-
       if (roomsResult.error) {
         throw roomsResult.error
       }
-
 
       setHotelApprovalStatus(
         hotelResult.data
@@ -300,10 +307,8 @@ export default function HotelSidebar({
         null
       )
 
-
       const roomsData =
         roomsResult.data || []
-
 
       const images =
         roomsData
@@ -325,7 +330,6 @@ export default function HotelSidebar({
               )
           )
 
-
       images.sort(
         (a, b) => {
 
@@ -341,25 +345,21 @@ export default function HotelSidebar({
               )
             )
 
-
           if (
             coverDifference !== 0
           ) {
             return coverDifference
           }
 
-
           const roomDifference =
             a.roomDisplayOrder -
             b.roomDisplayOrder
-
 
           if (
             roomDifference !== 0
           ) {
             return roomDifference
           }
-
 
           return (
             Number(
@@ -373,7 +373,6 @@ export default function HotelSidebar({
           )
         }
       )
-
 
       setHotelImage(
         images[0]
@@ -398,11 +397,9 @@ export default function HotelSidebar({
       return
     }
 
-
     setMobileOpen(
       false
     )
-
 
     navigate(
       route
@@ -415,11 +412,9 @@ export default function HotelSidebar({
       false
     )
 
-
     await supabase
       .auth
       .signOut()
-
 
     navigate(
       '/login',
@@ -584,14 +579,12 @@ export default function HotelSidebar({
                 const Icon =
                   item.icon
 
-
                 const disabled =
                   Boolean(
                     item.requiresApprovedHotel
                   ) &&
                   hotelApprovalStatus !==
                     'approved'
-
 
                 return (
                   <button

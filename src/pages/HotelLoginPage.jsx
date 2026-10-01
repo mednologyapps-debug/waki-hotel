@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+
 import { useNavigate } from 'react-router-dom'
+
 import {
   Eye,
   EyeOff,
@@ -13,6 +15,7 @@ import { supabase } from '../lib/supabase'
 import wakiLogo from '../assets/waki_logo_full.png'
 import wakiMascot from '../assets/waki_admin_access.png'
 
+
 export default function HotelLoginPage() {
   const navigate = useNavigate()
 
@@ -22,6 +25,7 @@ export default function HotelLoginPage() {
   const [loading, setLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+
 
   useEffect(() => {
     checkExistingSession()
@@ -64,6 +68,87 @@ export default function HotelLoginPage() {
 
 
   /* =========================================================
+     MENSAJES AMIGABLES DE LOGIN
+     ========================================================= */
+
+  function getFriendlyLoginError(error) {
+    const message = String(
+      error?.message || ''
+    )
+
+    const normalizedMessage =
+      message.toLowerCase()
+
+    if (
+      normalizedMessage.includes(
+        'invalid login credentials'
+      ) ||
+      normalizedMessage.includes(
+        'invalid credentials'
+      )
+    ) {
+      return (
+        'El correo o la contraseña son incorrectos.'
+      )
+    }
+
+    if (
+      normalizedMessage.includes(
+        'email not confirmed'
+      )
+    ) {
+      return (
+        'Confirma tu correo electrónico antes de iniciar sesión.'
+      )
+    }
+
+    if (
+      normalizedMessage.includes(
+        'failed to fetch'
+      ) ||
+      normalizedMessage.includes(
+        'networkerror'
+      ) ||
+      normalizedMessage.includes(
+        'network request failed'
+      ) ||
+      normalizedMessage.includes(
+        'load failed'
+      ) ||
+      (
+        typeof navigator !== 'undefined' &&
+        navigator.onLine === false
+      )
+    ) {
+      return (
+        'No pudimos conectarnos con WAKI. Revisa tu conexión a internet e inténtalo nuevamente.'
+      )
+    }
+
+    const knownMessages = [
+      'No se pudo identificar al usuario.',
+      'No encontramos un perfil asociado a esta cuenta.',
+      'Esta cuenta no pertenece al portal de hoteles WAKI.',
+      'Tu cuenta no se encuentra activa. Contacta con WAKI.',
+      'Tu cuenta todavía no tiene un acceso activo a un hotel.',
+      'Tu cuenta no tiene un rol válido dentro del hotel.'
+    ]
+
+    if (
+      knownMessages.includes(
+        message
+      )
+    ) {
+      return message
+    }
+
+    return (
+      'No se pudo iniciar sesión. Inténtalo nuevamente.'
+    )
+  }
+
+
+  /* =========================================================
      VALIDAR ACCESO DEL USUARIO
      ========================================================= */
 
@@ -71,8 +156,8 @@ export default function HotelLoginPage() {
     const {
       data: accessData,
       error: accessError
-    } = await supabase
-      .rpc(
+    } =
+      await supabase.rpc(
         'get_my_hotel_access'
       )
 
@@ -108,11 +193,14 @@ export default function HotelLoginPage() {
   async function checkExistingSession() {
     try {
       const {
-        data: { session },
+        data: {
+          session
+        },
         error: sessionError
-      } = await supabase
-        .auth
-        .getSession()
+      } =
+        await supabase
+          .auth
+          .getSession()
 
       if (sessionError) {
         throw sessionError
@@ -126,17 +214,18 @@ export default function HotelLoginPage() {
       const {
         data: profile,
         error: profileError
-      } = await supabase
-        .from('profiles')
-        .select(`
-          role,
-          account_status
-        `)
-        .eq(
-          'id',
-          session.user.id
-        )
-        .maybeSingle()
+      } =
+        await supabase
+          .from('profiles')
+          .select(`
+            role,
+            account_status
+          `)
+          .eq(
+            'id',
+            session.user.id
+          )
+          .maybeSingle()
 
       if (profileError) {
         throw profileError
@@ -168,13 +257,27 @@ export default function HotelLoginPage() {
         error
       )
 
-      await supabase
-        .auth
-        .signOut()
+      try {
+        await supabase
+          .auth
+          .signOut()
+      } catch (signOutError) {
+        console.warn(
+          'No se pudo cerrar la sesión durante la validación:',
+          signOutError
+        )
+      }
+
+      const friendlyMessage =
+        getFriendlyLoginError(
+          error
+        )
 
       setErrorMessage(
-        error?.message ||
-        'No pudimos validar tu acceso a WAKI Hotel.'
+        friendlyMessage ===
+          'No se pudo iniciar sesión. Inténtalo nuevamente.'
+          ? 'No pudimos validar tu acceso a WAKI Hotel. Inténtalo nuevamente.'
+          : friendlyMessage
       )
 
       setCheckingSession(false)
@@ -189,7 +292,10 @@ export default function HotelLoginPage() {
   async function handleLogin(event) {
     event.preventDefault()
 
-    if (!email.trim() || !password) {
+    if (
+      !email.trim() ||
+      !password
+    ) {
       setErrorMessage(
         'Ingresa tu correo electrónico y contraseña.'
       )
@@ -204,16 +310,17 @@ export default function HotelLoginPage() {
       const {
         data: authData,
         error: authError
-      } = await supabase
-        .auth
-        .signInWithPassword({
-          email:
-            email
-              .trim()
-              .toLowerCase(),
+      } =
+        await supabase
+          .auth
+          .signInWithPassword({
+            email:
+              email
+                .trim()
+                .toLowerCase(),
 
-          password
-        })
+            password
+          })
 
       if (authError) {
         throw authError
@@ -233,18 +340,19 @@ export default function HotelLoginPage() {
       const {
         data: profile,
         error: profileError
-      } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          role,
-          account_status
-        `)
-        .eq(
-          'id',
-          authData.user.id
-        )
-        .maybeSingle()
+      } =
+        await supabase
+          .from('profiles')
+          .select(`
+            id,
+            role,
+            account_status
+          `)
+          .eq(
+            'id',
+            authData.user.id
+          )
+          .maybeSingle()
 
       if (profileError) {
         throw profileError
@@ -262,7 +370,10 @@ export default function HotelLoginPage() {
         return
       }
 
-      if (profile.role !== 'hotel') {
+      if (
+        profile.role !==
+        'hotel'
+      ) {
         await supabase
           .auth
           .signOut()
@@ -317,37 +428,49 @@ export default function HotelLoginPage() {
        * dejamos una sesión equivocada activa.
        */
 
-      const {
-        data: {
-          session
+      try {
+        const {
+          data: {
+            session
+          }
+        } =
+          await supabase
+            .auth
+            .getSession()
+
+        const invalidCredentials =
+          String(
+            error?.message ||
+            ''
+          )
+            .toLowerCase()
+            .includes(
+              'invalid login credentials'
+            )
+
+        if (
+          session &&
+          !invalidCredentials
+        ) {
+          await supabase
+            .auth
+            .signOut()
         }
-      } = await supabase
-        .auth
-        .getSession()
 
-      if (
-        session &&
-        error?.message !==
-          'Invalid login credentials'
+      } catch (
+        sessionCleanupError
       ) {
-        await supabase
-          .auth
-          .signOut()
-      }
-
-      if (
-        error?.message ===
-        'Invalid login credentials'
-      ) {
-        setErrorMessage(
-          'El correo o la contraseña son incorrectos.'
-        )
-      } else {
-        setErrorMessage(
-          error?.message ||
-            'No se pudo iniciar sesión. Inténtalo nuevamente.'
+        console.warn(
+          'No se pudo limpiar la sesión después del error de login:',
+          sessionCleanupError
         )
       }
+
+      setErrorMessage(
+        getFriendlyLoginError(
+          error
+        )
+      )
 
     } finally {
       setLoading(false)
@@ -358,14 +481,17 @@ export default function HotelLoginPage() {
   if (checkingSession) {
     return (
       <div className="waki-hotel-auth-loading">
+
         <div className="waki-hotel-auth-spinner" />
 
         <p>
           Verificando acceso...
         </p>
+
       </div>
     )
   }
+
 
   return (
     <main className="waki-hotel-login">
@@ -388,6 +514,7 @@ export default function HotelLoginPage() {
           ✦
         </span>
 
+
         <div className="waki-hotel-login__left-content">
 
           <div className="waki-hotel-login__mascot-wrapper">
@@ -399,6 +526,7 @@ export default function HotelLoginPage() {
             />
 
           </div>
+
 
           <div className="waki-hotel-login__welcome">
 
@@ -414,6 +542,7 @@ export default function HotelLoginPage() {
           </div>
 
         </div>
+
 
         <p className="waki-hotel-login__copyright">
           © 2026 WAKI. Todos los derechos reservados.
@@ -444,6 +573,7 @@ export default function HotelLoginPage() {
 
           </div>
 
+
           <div className="waki-hotel-login-card__heading">
 
             <h2>
@@ -456,8 +586,11 @@ export default function HotelLoginPage() {
 
           </div>
 
+
           <form
-            onSubmit={handleLogin}
+            onSubmit={
+              handleLogin
+            }
             className="waki-hotel-login-form"
           >
 
@@ -478,9 +611,14 @@ export default function HotelLoginPage() {
 
                 <input
                   type="email"
-                  value={email}
+                  value={
+                    email
+                  }
                   placeholder="hotel@wakipe.com"
                   autoComplete="email"
+                  disabled={
+                    loading
+                  }
                   onChange={(event) =>
                     setEmail(
                       event.target.value
@@ -514,9 +652,14 @@ export default function HotelLoginPage() {
                       ? 'text'
                       : 'password'
                   }
-                  value={password}
+                  value={
+                    password
+                  }
                   placeholder="Ingresa tu contraseña"
                   autoComplete="current-password"
+                  disabled={
+                    loading
+                  }
                   onChange={(event) =>
                     setPassword(
                       event.target.value
@@ -524,12 +667,17 @@ export default function HotelLoginPage() {
                   }
                 />
 
+
                 <button
                   type="button"
                   className="waki-hotel-password-button"
+                  disabled={
+                    loading
+                  }
                   onClick={() =>
                     setShowPassword(
-                      (current) => !current
+                      (current) =>
+                        !current
                     )
                   }
                   aria-label={
@@ -540,15 +688,19 @@ export default function HotelLoginPage() {
                 >
 
                   {showPassword ? (
+
                     <EyeOff
                       size={19}
                       strokeWidth={1.8}
                     />
+
                   ) : (
+
                     <Eye
                       size={19}
                       strokeWidth={1.8}
                     />
+
                   )}
 
                 </button>
@@ -563,8 +715,13 @@ export default function HotelLoginPage() {
               <button
                 type="button"
                 className="waki-hotel-forgot-button"
+                disabled={
+                  loading
+                }
                 onClick={() =>
-                  navigate('/recuperar-contrasena')
+                  navigate(
+                    '/recuperar-contrasena'
+                  )
                 }
               >
                 ¿Olvidaste tu contraseña?
@@ -576,9 +733,11 @@ export default function HotelLoginPage() {
             {/* ERROR */}
 
             {errorMessage && (
+
               <div className="waki-hotel-login-error">
                 {errorMessage}
               </div>
+
             )}
 
 
@@ -587,12 +746,15 @@ export default function HotelLoginPage() {
             <button
               type="submit"
               className="waki-hotel-login-submit"
-              disabled={loading}
+              disabled={
+                loading
+              }
             >
 
               {loading
                 ? 'Ingresando...'
-                : 'Ingresar'}
+                : 'Ingresar'
+              }
 
             </button>
 
