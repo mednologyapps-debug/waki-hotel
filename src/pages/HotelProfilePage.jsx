@@ -24,6 +24,9 @@ import HotelSidebar
 import HotelOnboardingGuide
   from '../components/hotel/HotelOnboardingGuide'
 
+import HotelLocationPicker
+  from '../components/hotel/HotelLocationPicker'
+
 import {
   supabase
 } from '../lib/supabase'
@@ -61,6 +64,8 @@ export default function HotelProfilePage() {
       name: '',
       description: '',
       address: '',
+      latitude: null,
+      longitude: null,
       district: '',
       province: '',
       department: '',
@@ -201,6 +206,8 @@ export default function HotelProfilePage() {
             name,
             description,
             address,
+            latitude,
+            longitude,
             district,
             province,
             department,
@@ -255,6 +262,14 @@ export default function HotelProfilePage() {
         address:
           hotelData.address ||
           '',
+
+        latitude:
+          hotelData.latitude ??
+          null,
+
+        longitude:
+          hotelData.longitude ??
+          null,
 
         district:
           hotelData.district ||
@@ -350,6 +365,16 @@ export default function HotelProfilePage() {
 
 
     if (
+      form.latitude == null ||
+      form.longitude == null
+    ) {
+      throw new Error(
+        'Selecciona la ubicación exacta del hotel en Google Maps.'
+      )
+    }
+
+
+    if (
       !form.district.trim()
     ) {
       throw new Error(
@@ -411,6 +436,16 @@ export default function HotelProfilePage() {
       address:
         form.address.trim(),
 
+      latitude:
+        Number(
+          form.latitude
+        ),
+
+      longitude:
+        Number(
+          form.longitude
+        ),
+
       district:
         form.district.trim(),
 
@@ -467,6 +502,8 @@ export default function HotelProfilePage() {
           name,
           description,
           address,
+          latitude,
+          longitude,
           district,
           province,
           department,
@@ -950,6 +987,58 @@ export default function HotelProfilePage() {
 
 
             {/* =============================================
+                UBICACIÓN GOOGLE MAPS
+                ============================================= */}
+
+            <div className="hotel-setup-field hotel-setup-field--full">
+
+              <HotelLocationPicker
+                latitude={
+                  form.latitude
+                }
+                longitude={
+                  form.longitude
+                }
+                address={
+                  form.address
+                }
+                onLocationSelected={(
+                  location
+                ) => {
+                  setForm(
+                    (current) => ({
+                      ...current,
+
+                      latitude:
+                        location.latitude,
+
+                      longitude:
+                        location.longitude,
+
+                      address:
+                        location.address ||
+                        current.address,
+
+                      district:
+                        location.district ||
+                        current.district,
+
+                      province:
+                        location.province ||
+                        current.province,
+
+                      department:
+                        location.department ||
+                        current.department
+                    })
+                  )
+                }}
+              />
+
+            </div>
+
+
+            {/* =============================================
                 DIRECCIÓN
                 ============================================= */}
 
@@ -989,7 +1078,7 @@ export default function HotelProfilePage() {
 
 
               <small>
-                Incluye calle, número y referencia si es necesario.
+                Se completa automáticamente al elegir un lugar en Google Maps y puedes ajustarla si hace falta.
               </small>
 
             </label>
