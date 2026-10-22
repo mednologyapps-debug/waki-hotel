@@ -18399,3 +18399,147 @@ body {
 
 }
 
+
+
+/* =========================================================
+   WAKI HOTEL — SELECTOR DE UBICACIÓN GOOGLE MAPS
+   ========================================================= */
+
+.hotel-location-picker {
+  width: 100%;
+  padding: 18px;
+  box-sizing: border-box;
+  border: 1px solid #e7def3;
+  border-radius: 18px;
+  background: #fbf9ff;
+}
+
+.hotel-location-picker__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.hotel-location-picker__heading > div:first-child {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #eee7ff;
+  color: var(--waki-purple, #7137e8);
+}
+
+.hotel-location-picker__heading strong,
+.hotel-location-picker__heading span {
+  display: block;
+}
+
+.hotel-location-picker__heading strong {
+  color: var(--waki-text, #170f36);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hotel-location-picker__heading span {
+  margin-top: 3px;
+  color: var(--waki-text-light, #8b8498);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.hotel-location-picker__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd2ed;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--waki-purple, #7137e8);
+}
+
+.hotel-location-picker__autocomplete {
+  flex: 1;
+  min-width: 0;
+}
+
+.hotel-location-picker__autocomplete gmp-place-autocomplete {
+  width: 100%;
+  color-scheme: light;
+}
+
+.hotel-location-picker__map {
+  width: 100%;
+  height: 330px;
+  overflow: hidden;
+  border: 1px solid #e5dced;
+  border-radius: 16px;
+  background: #f3eff8;
+}
+
+.hotel-location-picker__status,
+.hotel-location-picker__error {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+
+.hotel-location-picker__status {
+  background: #f1ecfb;
+  color: #67577d;
+}
+
+.hotel-location-picker__error {
+  background: #fff0f0;
+  color: #9b3030;
+}
+
+.hotel-location-picker__footer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hotel-location-picker__footer span {
+  color: var(--waki-text-soft, #6f687c);
+  font-size: 10px;
+}
+
+.hotel-location-picker__footer code {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #eee7ff;
+  color: var(--waki-purple, #7137e8);
+  font-size: 9px;
+}
+
+.hotel-location-picker > small {
+  display: block;
+  margin-top: 8px;
+  color: var(--waki-text-light, #8b8498);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .hotel-location-picker {
+    padding: 14px;
+  }
+
+  .hotel-location-picker__map {
+    height: 280px;
+  }
+
+  .hotel-location-picker__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
