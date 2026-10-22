@@ -663,9 +663,20 @@ export default function HotelSidebar({
 
               <button
                 type="button"
+                onClick={() => {
+                  window.location.href = 'mailto:soporte@wakipe.com'
+                }}
               >
                 Contactar soporte
               </button>
+
+              <a
+                href="https://wakipe.com/legal.html#hotels"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Condiciones para hoteles afiliados
+              </a>
 
             </div>
 
