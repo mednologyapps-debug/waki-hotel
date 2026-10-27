@@ -1,3 +1,4 @@
+import HotelBookingAlerts from './HotelBookingAlerts'
 import {
   BedDouble,
   Building2,
@@ -66,6 +67,8 @@ const menuItems = [
     requiresApprovedHotel: true
   },
 
+  {key:'disponibilidad',label:'Disponibilidad',icon:CalendarDays,route:'/disponibilidad',roles:['admin','reception'],requiresApprovedHotel:true},
+
   {
     key: 'scanner',
     label: 'Scanner',
@@ -118,6 +121,8 @@ export default function HotelSidebar({
 }) {
   const navigate =
     useNavigate()
+
+  const [alertHotelId,setAlertHotelId]=useState(null)
 
   const [hotelImage, setHotelImage] =
     useState(null)
@@ -233,6 +238,8 @@ export default function HotelSidebar({
       if (!access?.hotel_id) {
         return
       }
+
+      setAlertHotelId(access.hotel_id)
 
       setStaffRole(
         access.staff_role ||
@@ -637,6 +644,8 @@ export default function HotelSidebar({
           </nav>
 
 
+          {alertHotelId && ['admin','reception'].includes(staffRole) && <HotelBookingAlerts hotelId={alertHotelId} />}
+
           <div className="hotel-sidebar-ref__help">
 
             <div className="hotel-sidebar-ref__help-icon">
@@ -670,14 +679,6 @@ export default function HotelSidebar({
                 Contactar soporte
               </button>
 
-              <a
-                href="https://wakipe.com/legal.html#hotels"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Condiciones para hoteles afiliados
-              </a>
-
             </div>
 
           </div>
@@ -705,6 +706,15 @@ export default function HotelSidebar({
             </span>
 
           </button>
+
+          <a
+            className="hotel-sidebar-ref__legal"
+            href="https://wakipe.com/legal.html#hotels"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Términos para hoteles
+          </a>
 
         </div>
 

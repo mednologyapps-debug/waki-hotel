@@ -1,3 +1,4 @@
+import HotelLegalAcceptance from '../components/hotel/HotelLegalAcceptance'
 import {
   ArrowLeft,
   BedDouble,
@@ -514,8 +515,7 @@ export default function HotelReviewPage() {
 
       } else {
         setErrorMessage(
-          error?.message ||
-          'No pudimos enviar el hotel a revisión.'
+          error?.message?.includes('HOTEL_LEGAL_ACCEPTANCE_REQUIRED') ? 'Primero guarda la aceptación de los términos para hoteles.' : 'No pudimos enviar el hotel a revisión. Inténtalo nuevamente.'
         )
       }
 
@@ -1382,6 +1382,7 @@ export default function HotelReviewPage() {
 
         )}
 
+        {!isApproved && hotelId && <HotelLegalAcceptance hotelId={hotelId} />}
       </main>
 
     </div>

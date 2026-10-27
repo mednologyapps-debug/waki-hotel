@@ -7,10 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:operations": "node tests/hotel-operations.test.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.116.0",
+    "@supabase/supabase-js": "2.116.0",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
@@ -18,6 +19,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
