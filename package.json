@@ -11,7 +11,7 @@
     "test:operations": "node tests/hotel-operations.test.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.116.0",
+    "@supabase/supabase-js": "2.116.0",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",

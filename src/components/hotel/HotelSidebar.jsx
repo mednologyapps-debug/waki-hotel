@@ -1,3 +1,4 @@
+import HotelBookingAlerts from './HotelBookingAlerts'
 import {
   BedDouble,
   Building2,
@@ -121,6 +122,8 @@ export default function HotelSidebar({
   const navigate =
     useNavigate()
 
+  const [alertHotelId,setAlertHotelId]=useState(null)
+
   const [hotelImage, setHotelImage] =
     useState(null)
 
@@ -235,6 +238,8 @@ export default function HotelSidebar({
       if (!access?.hotel_id) {
         return
       }
+
+      setAlertHotelId(access.hotel_id)
 
       setStaffRole(
         access.staff_role ||
@@ -638,6 +643,8 @@ export default function HotelSidebar({
 
           </nav>
 
+
+          {alertHotelId && ['admin','reception'].includes(staffRole) && <HotelBookingAlerts hotelId={alertHotelId} />}
 
           <div className="hotel-sidebar-ref__help">
 
