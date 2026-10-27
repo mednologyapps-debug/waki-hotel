@@ -1,9 +1,15 @@
+Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-
+  RewriteRule (^|/)\.git(/|$) - [F,L,NC]
+  RewriteRule (^|/)\.env([./]|$) - [F,L,NC]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-
   RewriteRule ^ index.html [L]
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|version\.json)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
 </IfModule>
