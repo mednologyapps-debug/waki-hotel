@@ -1,1 +1,7 @@
-{"source_commit":"947bf87a7fdb3cd3a8f17aab2ac74e70838b1fdb","source_branch":"codex/availability-services","publication_branch":"deploy/hotel","built_at":"2026-10-27T17:50:14.609Z","format":"vite-static"}
+{
+  "source_commit": "2fc1b645a057b18283d96eff118be4f53044e690",
+  "source_branch": "codex/availability-services",
+  "publication_branch": "deploy/hotel",
+  "built_at": "2026-10-27T17:57:13.248Z",
+  "format": "vite-static"
+}
