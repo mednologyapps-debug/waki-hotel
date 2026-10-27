@@ -672,14 +672,6 @@ export default function HotelSidebar({
                 Contactar soporte
               </button>
 
-              <a
-                href="https://wakipe.com/legal.html#hotels"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Condiciones para hoteles afiliados
-              </a>
-
             </div>
 
           </div>
@@ -707,6 +699,15 @@ export default function HotelSidebar({
             </span>
 
           </button>
+
+          <a
+            className="hotel-sidebar-ref__legal"
+            href="https://wakipe.com/legal.html#hotels"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Términos para hoteles
+          </a>
 
         </div>
 
