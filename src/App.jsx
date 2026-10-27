@@ -1,3 +1,4 @@
+import HotelAvailabilityPage from './pages/HotelAvailabilityPage'
 import {
   Navigate,
   Route,
@@ -107,6 +108,8 @@ function ProtectedPage({
 export default function App() {
   return (
     <Routes>
+      <Route path="/disponibilidad" element={<ProtectedPage roles={['admin','reception']} requireApprovedHotel><HotelAvailabilityPage/></ProtectedPage>}/>
+
 
       <Route
         path="/"

@@ -66,6 +66,8 @@ const menuItems = [
     requiresApprovedHotel: true
   },
 
+  {key:'disponibilidad',label:'Disponibilidad',icon:CalendarDays,route:'/disponibilidad',roles:['admin','reception'],requiresApprovedHotel:true},
+
   {
     key: 'scanner',
     label: 'Scanner',
