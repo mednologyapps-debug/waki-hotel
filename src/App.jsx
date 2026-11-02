@@ -1,5 +1,7 @@
+import HotelAvailabilityPage from './pages/HotelAvailabilityPage'
 import {
   Navigate,
+  useLocation,
   Route,
   Routes
 } from 'react-router-dom'
@@ -104,9 +106,18 @@ function ProtectedPage({
 }
 
 
+function ReceptionRedirect({ to }) {
+  const location = useLocation();
+  return <Navigate to={to + location.search + location.hash} replace/>;
+}
+
 export default function App() {
   return (
     <Routes>
+      <Route path="/recepcion" element={<ProtectedPage roles={['admin','reception']} requireApprovedHotel><HotelAvailabilityPage/></ProtectedPage>}/>
+      <Route path="/disponibilidad" element={<ReceptionRedirect to="/recepcion"/>}/>
+      <Route path="/reservas" element={<ReceptionRedirect to="/recepcion/reservas"/>}/>
+
 
       <Route
         path="/"
@@ -170,7 +181,7 @@ export default function App() {
 
 
       <Route
-        path="/reservas"
+        path="/recepcion/reservas"
         element={
           <ProtectedPage
             roles={[

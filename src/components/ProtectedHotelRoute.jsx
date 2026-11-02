@@ -1117,7 +1117,7 @@ export default function ProtectedHotelRoute({
 
         <Navigate
 
-          to="/reservas"
+          to="/recepcion"
 
           replace
 

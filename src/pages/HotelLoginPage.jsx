@@ -46,7 +46,7 @@ export default function HotelLoginPage() {
     }
 
     if (staffRole === 'reception') {
-      navigate('/reservas', {
+      navigate('/recepcion', {
         replace: true
       })
 

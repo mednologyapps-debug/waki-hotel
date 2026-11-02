@@ -1,3 +1,4 @@
+import HotelServices from '../components/hotel/HotelServices'
 import {
   Building2,
   Mail,
@@ -215,6 +216,7 @@ export default function HotelProfilePage() {
             phone,
             contact_email,
             whatsapp,
+            featured_services,
             approval_status,
             is_active,
             rejection_reason,
@@ -1348,6 +1350,7 @@ export default function HotelProfilePage() {
           </div>
 
         </form>
+        {hotel&&<HotelServices key={hotel.id} hotel={hotel}/>}
 
       </main>
 

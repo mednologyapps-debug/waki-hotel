@@ -217,7 +217,7 @@ export default function HotelTeamActivationPage() {
         'reception'
       ) {
         navigate(
-          '/reservas',
+          '/recepcion',
           {
             replace: true
           }

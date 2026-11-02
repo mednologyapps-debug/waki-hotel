@@ -1,3 +1,4 @@
+import HotelBookingAlerts from './HotelBookingAlerts'
 import {
   BedDouble,
   Building2,
@@ -55,16 +56,17 @@ const menuItems = [
   },
 
   {
-    key: 'reservas',
-    label: 'Reservas',
+    key: 'recepcion',
+    label: 'Recepción',
     icon: CalendarDays,
-    route: '/reservas',
+    route: '/recepcion',
     roles: [
       'admin',
       'reception'
     ],
     requiresApprovedHotel: true
   },
+
 
   {
     key: 'scanner',
@@ -116,8 +118,11 @@ export default function HotelSidebar({
   hotelName = 'Mi hotel',
   hotelLocation = 'Lima, Perú'
 }) {
+  const selectedKey = ['reservas', 'disponibilidad'].includes(activeKey) ? 'recepcion' : activeKey
   const navigate =
     useNavigate()
+
+  const [alertHotelId,setAlertHotelId]=useState(null)
 
   const [hotelImage, setHotelImage] =
     useState(null)
@@ -233,6 +238,8 @@ export default function HotelSidebar({
       if (!access?.hotel_id) {
         return
       }
+
+      setAlertHotelId(access.hotel_id)
 
       setStaffRole(
         access.staff_role ||
@@ -603,7 +610,7 @@ export default function HotelSidebar({
                     className={[
                       'hotel-sidebar-ref__item',
 
-                      activeKey ===
+                      selectedKey ===
                       item.key
                         ? 'is-active'
                         : '',
@@ -636,6 +643,8 @@ export default function HotelSidebar({
 
           </nav>
 
+
+          {alertHotelId && ['admin','reception'].includes(staffRole) && <HotelBookingAlerts hotelId={alertHotelId} />}
 
           <div className="hotel-sidebar-ref__help">
 
@@ -670,14 +679,6 @@ export default function HotelSidebar({
                 Contactar soporte
               </button>
 
-              <a
-                href="https://wakipe.com/legal.html#hotels"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Condiciones para hoteles afiliados
-              </a>
-
             </div>
 
           </div>
@@ -705,6 +706,15 @@ export default function HotelSidebar({
             </span>
 
           </button>
+
+          <a
+            className="hotel-sidebar-ref__legal"
+            href="https://wakipe.com/legal.html#hotels"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Términos para hoteles
+          </a>
 
         </div>
 
