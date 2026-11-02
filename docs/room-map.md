@@ -11,3 +11,7 @@ La vista /disponibilidad consulta el RPC existente y conserva sus permisos y blo
 - Si falla la lectura, no se muestran habitaciones verdes de un snapshot anterior.
 
 Validación: npm run test:availability, npm run test:operations, npm run build y lint de archivos modificados. Las pruebas de UI usan exclusivamente datos simulados, sin crear reservas comerciales.
+
+## Navegación por categorías
+
+Los tipos de habitación aparecen como pestañas. Se abre la primera categoría disponible y solo se montan sus cuartos. Al cambiar pestaña, el mapa vuelve al inicio; los filtros de estado y horario se mantienen. Las pestañas admiten flechas, Inicio y Fin. El mapa tiene altura acotada con desplazamiento interno, de modo que 25 cuartos de una misma categoría no alargan toda la página. El resumen superior se retiró y «Ahora» permanece destacado, incluso al consultar otro horario.
