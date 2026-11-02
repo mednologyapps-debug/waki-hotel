@@ -89,7 +89,7 @@ export default function HotelAvailabilityPage() {
       {notice && <p className="ops-success" role="status">{notice}</p>}
       <section className="availability-controls" aria-label="Consultar disponibilidad">
         <div className="availability-date"><CalendarDays size={18}/><label>Fecha<input type="date" value={day} onChange={e => changeDay(e.target.value)}/></label></div>
-        <label className="availability-time">Hora de consulta<input type="time" value={time || limaInput(now).slice(11)} onChange={e => setTime(e.target.value)}/></label>
+        <label className="availability-time">Hora de consulta<input type="time" value={time || limaInput(now).slice(11)} onChange={e => { if (e.target.value) setTime(e.target.value); }}/></label>
         <button className={'ops-button ' + (!time && day === limaDay(now) ? 'primary' : '')} onClick={() => { setDay(limaDay()); setTime(''); setNow(new Date()); refresh(); }}>Ahora</button>
         <button className="ops-button availability-refresh" disabled={loading} onClick={refresh}><RotateCw size={16} className={loading ? 'is-spinning' : ''}/><span>Actualizar</span></button>
       </section>
