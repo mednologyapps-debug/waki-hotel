@@ -1,0 +1,13 @@
+# Mapa de habitaciones — disponibilidad
+
+La vista /disponibilidad consulta el RPC existente y conserva sus permisos y bloqueos atómicos. No requiere migraciones.
+
+- Mini habitaciones agrupadas por categoría: verde libre; rojo reserva WAKI, reserva en pago, ampliación en pago o bloqueo del hotel.
+- Fecha y hora de consulta explícitas; «Ahora» mantiene el reloj activo. Una reserva futura aparece como próxima sin pintar de rojo antes de su inicio.
+- Tocar una verde abre el bloqueo con habitación preseleccionada, ingreso, salida y duraciones rápidas. Por defecto tres horas, recortadas a la próxima reserva conocida. El servidor valida todo el intervalo: el verde describe el instante, no garantiza la duración.
+- Tocar una roja muestra horarios, enlace de reserva o liberación con confirmación de bloqueos del hotel. Nunca cancela reservas WAKI desde el mapa.
+- Reservas heredadas sin unidad se muestran conservadoramente como ocupación de categoría; si el RPC no informa categoría, se restringe todo el mapa durante ese intervalo y se pide revisar Reservas.
+- Refresco al recibir el aviso existente de reserva confirmada, al volver a la pestaña y cada minuto visible. No abre otro canal Realtime ni consulta por habitación. Los cambios de otros turnos se reflejan en el siguiente refresco.
+- Si falla la lectura, no se muestran habitaciones verdes de un snapshot anterior.
+
+Validación: npm run test:availability, npm run test:operations, npm run build y lint de archivos modificados. Las pruebas de UI usan exclusivamente datos simulados, sin crear reservas comerciales.

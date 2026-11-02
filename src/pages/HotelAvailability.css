@@ -1,0 +1,91 @@
+.availability-page .hotel-ops-heading h1 { margin: 0 0 9px; }
+.availability-page .hotel-ops-heading p { margin: 0; color: #80728d; }
+.availability-controls { display:flex; align-items:end; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.availability-date { display:flex; align-items:center; gap:12px; background:white; border:1px solid #e8e1f0; border-radius:13px; padding:11px 15px; color:#7137e8; }
+.availability-controls label { display:grid; gap:5px; color:#82728f; font-size:11px; font-weight:600; }
+.availability-controls input { background:transparent; border:0; font:inherit; font-size:14px; color:#33243f; padding:0; min-width:0; }
+.availability-controls input:focus-visible { outline:2px solid #b9b1c3; outline-offset:4px; border-radius:3px; }
+.availability-time { border:1px solid #e8e1f0; border-radius:13px; padding:11px 15px; background:white; }
+.availability-controls > .ops-button { min-height:59px; }
+.availability-refresh { margin-left:auto; }
+.availability-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:24px; }
+.availability-count { display:flex; align-items:center; justify-content:space-between; text-align:left; gap:12px; padding:20px; border:1px solid #e9e1f1; background:#fff; border-radius:15px; font:inherit; cursor:pointer; color:#7a6989; }
+.availability-count span { font-size:13px; font-weight:500; }
+.availability-count strong { font-size:28px; line-height:1; color:#49305f; }
+.availability-count.free strong { color:#247253; }
+.availability-count.busy strong { color:#b14453; }
+.availability-count.selected { border-color:#b89cde; box-shadow:0 0 0 2px #7137e80a; background:#fbf8ff; }
+.availability-count:focus-visible,.mini-room:focus-visible { outline:3px solid #aa93cc; outline-offset:4px; }
+.room-map .ops-card-title { border-bottom:0; padding-bottom:12px; }
+.room-map .ops-card-title p { margin:7px 0 0; color:#8a7a97; font-size:12px; }
+.availability-category select { font:inherit; font-size:12px; border:1px solid #e8e0ef; border-radius:9px; padding:10px; color:#695476; background:white; max-width:100%; }
+.room-map-guide { display:flex; align-items:center; flex-wrap:wrap; gap:18px; padding:0 24px 22px; color:#776685; font-size:11px; border-bottom:1px solid #f0eaf6; }
+.room-map-guide span { display:flex; align-items:center; gap:7px; }
+.room-map-guide i { width:9px; height:9px; border-radius:3px; }
+.room-map-guide i.free { background:#529b78; }
+.room-map-guide i.busy { background:#d36d78; }
+.room-map-guide small { margin-left:auto; font-size:11px; color:#93839e; }
+.room-map-groups { padding:4px 24px 28px; }
+.room-map-group h3 { display:flex; align-items:center; flex-wrap:wrap; gap:10px; font-size:14px; font-weight:650; color:#51415e; margin:24px 0 17px; }
+.room-map-group h3 span { font-size:10px; font-weight:400; color:#9c8aa8; }
+.room-map-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(128px,1fr)); gap:16px; }
+.mini-room { position:relative; display:flex; flex-direction:column; align-items:stretch; text-align:left; min-width:0; padding:11px 12px 13px; border:1.5px solid #b9ddcb; border-radius:12px 12px 5px 5px; background:#f1faf5; color:#2d7655; font:inherit; cursor:pointer; transition:transform .15s,box-shadow .15s; }
+.mini-room:hover { transform:translateY(-3px); box-shadow:0 7px 15px #23463510; }
+.mini-room::after { content:''; position:absolute; width:24px; height:4px; bottom:-2px; left:calc(50% - 12px); background:white; border-left:1px solid currentColor; border-right:1px solid currentColor; opacity:.7; }
+.mini-room.busy { border-color:#edc0c6; color:#ad4351; background:#fff3f4; }
+.mini-room-top { display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:20px; }
+.mini-room-top strong { font-size:16px; overflow-wrap:anywhere; }
+.mini-room-interior { position:relative; display:flex; justify-content:center; align-items:center; height:65px; margin:10px 0 9px; background:#e4f3eb; border:1px solid #d2e9dd; border-radius:5px; }
+.mini-room-interior i { position:absolute; width:8px; height:19px; right:8px; top:8px; border:1px solid #9cc3ae; border-radius:2px; opacity:.6; }
+.busy .mini-room-interior { background:#fde7ea; border-color:#f5d6dc; }
+.busy .mini-room-interior i { border-color:#d6a1aa; }
+.mini-room-status { font-size:11px; font-weight:700; line-height:1.4; overflow-wrap:anywhere; }
+.mini-room small { font-size:10px; opacity:.85; margin-top:4px; line-height:1.4; }
+.room-map-footer { display:flex; gap:7px; align-items:center; padding:15px 24px; font-size:10px; line-height:1.6; background:#fcfaff; color:#9986a6; border-top:1px solid #f0eaf6; }
+.room-map-footer svg { flex-shrink:0; }
+.quick-block-room { display:flex; align-items:center; gap:13px; padding:16px; background:#f8f3ff; border:1px solid #e9dff6; border-radius:12px; color:#7137e8; }
+.quick-block-room > div { display:grid; gap:5px; }
+.quick-block-room strong { font-size:14px; color:#483059; }
+.quick-block-room span { font-size:11px; color:#8d789c; }
+.quick-block-room .quick-block-badge { margin-left:auto; color:#7137e8; font-weight:600; }
+.quick-block-extra { border:1px solid #e9e1ef; border-radius:11px; padding:12px; font-size:12px; color:#8b759a; }
+.quick-block-extra summary { cursor:pointer; font-weight:600; }
+.quick-block-extra label { display:grid; gap:7px; margin-top:14px; }
+.ops-form > .quick-block-next { display:flex; gap:8px; color:#8c6528; background:#fff9ed; padding:12px; border-radius:10px; }
+.quick-block-next svg { flex-shrink:0; }
+.is-spinning { animation:room-spin 1.2s linear infinite; }
+@keyframes room-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .is-spinning { animation:none; } .mini-room { transition:none; } }
+@media(max-width:760px) {
+ .availability-summary { gap:8px; margin-bottom:18px; }
+ .availability-count { padding:13px 10px; align-items:start; flex-direction:column-reverse; gap:10px; }
+ .availability-count strong { font-size:24px; }
+ .availability-count span { font-size:10px; line-height:1.5; }
+ .availability-controls { gap:8px; }
+ .availability-date { flex:1; padding:10px; }
+ .availability-time { padding:10px; }
+ .availability-controls > .ops-button { min-height:42px; }
+ .availability-refresh { margin-left:0; }
+ .room-map .ops-card-title { align-items:start; flex-direction:column; gap:14px; }
+ .room-map-guide { padding:0 18px 18px; gap:12px; }
+ .room-map-guide small { width:100%; margin-left:0; line-height:1.6; }
+ .room-map-groups { padding:0 16px 23px; }
+ .room-map-grid { grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:12px; }
+ .room-map-footer { padding:13px 16px; }
+ .quick-block-room { flex-wrap:wrap; }
+ .quick-block-room .quick-block-badge { margin-left:0; }
+}
+.availability-page .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+@media (max-width:760px) {
+ .availability-date { flex:1 1 175px; }
+ .availability-date label { flex:1; }
+ .availability-date input { width:100%; }
+ .availability-time { flex:1 1 105px; }
+ .room-map-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+ .mini-room { padding:9px 8px 11px; }
+ .mini-room-interior { height:56px; }
+ .mini-room-top strong { font-size:14px; }
+ .mini-room-status { font-size:10px; }
+ .mini-room small { font-size:9px; }
+}
+@media (max-width:340px) { .room-map-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }

@@ -25,7 +25,7 @@ export default function HotelBookingAlerts({hotelId}){
    };
    if(navigator.locks)await navigator.locks.request('waki-reservation-tone',{ifAvailable:true},async lock=>{if(lock)await play()});else await play();
   }
-  function add(row,notify){if(!row?.id||map.has(row.id))return;map.set(row.id,row);if(alive)setRows([...map.values()].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,20));if(notify)announce(row)}
+  function add(row,notify){if(!row?.id||map.has(row.id))return;map.set(row.id,row);if(alive)setRows([...map.values()].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,20));if(notify){window.dispatchEvent(new Event('waki:booking-updated'));announce(row)}}
   const channel=supabase.channel('hotel-booking-notices-'+hotelId).on('postgres_changes',{event:'INSERT',schema:'public',table:'hotel_booking_notices',filter:'hotel_id=eq.'+hotelId},event=>add(event.new,true)).subscribe(status=>{if(status==='CHANNEL_ERROR'&&alive)setError('Avisos sin conexión. Revisa Reservas y actualiza la página.');if(status==='SUBSCRIBED')load()});
   async function load(){const {data,error:e}=await supabase.from('hotel_booking_notices').select('id,reservation_id,created_at').eq('hotel_id',hotelId).gte('created_at',new Date(Date.now()-7*86400000).toISOString()).order('created_at',{ascending:false}).limit(20);if(alive){if(e)setError('No pudimos consultar los avisos. Revisa la sección Reservas.');else (data||[]).forEach(row=>add(row,false))}}
   return()=>{alive=false;supabase.removeChannel(channel)};

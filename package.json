@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:operations": "node tests/hotel-operations.test.mjs"
+    "test:operations": "node tests/hotel-operations.test.mjs",
+    "test:availability": "node tests/room-availability.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.116.0",
