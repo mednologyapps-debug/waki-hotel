@@ -111,3 +111,5 @@
 .block-period input[type="text"] { font-variant-numeric:tabular-nums; }
 .ops-form > .block-period-hint { margin-top:-9px; font-size:11px; color:#97859f; }
 @media(max-width:760px) { .block-period > div { grid-template-columns:minmax(0,1.5fr) minmax(90px,1fr); } }
+
+.mini-room-type { font-size:10px; line-height:1.4; margin:0 0 6px; color:inherit; opacity:.8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
