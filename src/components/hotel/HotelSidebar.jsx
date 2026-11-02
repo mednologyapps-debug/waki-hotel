@@ -56,10 +56,10 @@ const menuItems = [
   },
 
   {
-    key: 'reservas',
-    label: 'Reservas',
+    key: 'recepcion',
+    label: 'Recepción',
     icon: CalendarDays,
-    route: '/reservas',
+    route: '/recepcion',
     roles: [
       'admin',
       'reception'
@@ -67,7 +67,6 @@ const menuItems = [
     requiresApprovedHotel: true
   },
 
-  {key:'disponibilidad',label:'Disponibilidad',icon:CalendarDays,route:'/disponibilidad',roles:['admin','reception'],requiresApprovedHotel:true},
 
   {
     key: 'scanner',
@@ -119,6 +118,7 @@ export default function HotelSidebar({
   hotelName = 'Mi hotel',
   hotelLocation = 'Lima, Perú'
 }) {
+  const selectedKey = ['reservas', 'disponibilidad'].includes(activeKey) ? 'recepcion' : activeKey
   const navigate =
     useNavigate()
 
@@ -610,7 +610,7 @@ export default function HotelSidebar({
                     className={[
                       'hotel-sidebar-ref__item',
 
-                      activeKey ===
+                      selectedKey ===
                       item.key
                         ? 'is-active'
                         : '',

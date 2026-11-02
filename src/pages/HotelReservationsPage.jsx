@@ -1,3 +1,4 @@
+import ReceptionHeader from '../components/hotel/ReceptionHeader'
 import {
   BedDouble,
   CalendarClock,
@@ -977,10 +978,15 @@ export default function HotelReservationsPage() {
 
   if (loading) {
   return (
-    <WakiGlobalLoader
-      title="Preparando tus reservas..."
-      subtitle="Sincronizando la operación"
-    />
+    <div className="hotel-portal">
+      <HotelSidebar activeKey="recepcion" hotelName={hotel?.name || 'Mi hotel'}/>
+      <main className="hotel-dashboard hotel-live-reservations">
+        <ReceptionHeader view="reservations"/>
+        <section className="reception-loading" aria-busy="true">
+          <WakiGlobalLoader title="Preparando tus reservas..." subtitle="Sincronizando la operación" fullScreen={false}/>
+        </section>
+      </main>
+    </div>
   )
 }
 
@@ -992,7 +998,7 @@ export default function HotelReservationsPage() {
     <div className="hotel-portal">
 
       <HotelSidebar
-        activeKey="reservas"
+        activeKey="recepcion"
 
         hotelName={
           hotel?.name ||
@@ -1017,35 +1023,7 @@ export default function HotelReservationsPage() {
             HEADER
             ================================================= */}
 
-        <header className="hotel-live-reservations__header">
-
-          <div>
-
-            <span className="hotel-dashboard-eyebrow">
-              Operación en tiempo real
-            </span>
-
-            <h1>
-              Reservas
-            </h1>
-
-            <p>
-              Sigue automáticamente las estadías,
-              horarios y accesos de tu hotel.
-            </p>
-
-          </div>
-
-
-          <div className="hotel-live-indicator">
-
-            <span />
-
-            En vivo
-
-          </div>
-
-        </header>
+        <ReceptionHeader view="reservations"/>
 
 
         {errorMessage && (

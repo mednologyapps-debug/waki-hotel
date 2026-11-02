@@ -2683,7 +2683,7 @@ export default function HotelReservationDetailPage() {
 
         <HotelSidebar
 
-          activeKey="reservas"
+          activeKey="recepcion"
 
 
 
@@ -2735,7 +2735,7 @@ export default function HotelReservationDetailPage() {
 
               navigate(
 
-                '/reservas'
+                '/recepcion/reservas'
 
               )
 
@@ -2751,7 +2751,7 @@ export default function HotelReservationDetailPage() {
 
 
 
-            Volver a reservas
+            Volver a Reservas WAKI
 
           </button>
 
@@ -2801,7 +2801,7 @@ export default function HotelReservationDetailPage() {
 
       <HotelSidebar
 
-        activeKey="reservas"
+        activeKey="recepcion"
 
 
 
@@ -2853,7 +2853,7 @@ export default function HotelReservationDetailPage() {
 
             navigate(
 
-              '/reservas'
+              '/recepcion/reservas'
 
             )
 
@@ -2873,7 +2873,7 @@ export default function HotelReservationDetailPage() {
 
 
 
-          Volver a reservas
+          Volver a Reservas WAKI
 
 
 

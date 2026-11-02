@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { BedDouble, CalendarDays, Check, Clock3, LockKeyhole, Plus, RotateCw } from 'lucide-react';
+import ReceptionHeader from '../components/hotel/ReceptionHeader';
 import HotelSidebar from '../components/hotel/HotelSidebar';
 import OperationsDialog from '../components/hotel/OperationsDialog';
 import { supabase } from '../lib/supabase';
@@ -89,9 +90,9 @@ export default function HotelAvailabilityPage() {
   }
   const title = modal?.kind === 'release' ? 'Liberar bloqueo' : modal?.kind === 'detail' ? `Habitación ${modal.unit.code}` : modal?.unit ? `Bloquear habitación ${modal.unit.code}` : 'Bloquear varias habitaciones';
   return <div className="hotel-portal">
-    <HotelSidebar activeKey="disponibilidad" hotelName={data?.hotel?.name} />
+    <HotelSidebar activeKey="recepcion" hotelName={data?.hotel?.name} />
     <main className="hotel-dashboard hotel-ops availability-page">
-      <header className="hotel-ops-heading"><div><h1>Disponibilidad</h1><p>Tu hotel, de un vistazo. Toca una habitación libre para bloquearla.</p></div><button className="ops-button" disabled={loading || !rooms.length} onClick={() => open()}><Plus size={17}/> Bloquear varias</button></header>
+      <ReceptionHeader><button className="ops-button" disabled={loading || !rooms.length} onClick={() => open()}><Plus size={17}/> Bloquear varias</button></ReceptionHeader>
       {error && <p className="ops-error" role="alert">{error}</p>}
       {notice && <p className="ops-success" role="status">{notice}</p>}
       <section className="availability-controls" aria-label="Consultar disponibilidad">
@@ -116,7 +117,7 @@ export default function HotelAvailabilityPage() {
         {loading ? <p className="ops-empty" role="status">Actualizando habitaciones…</p> : !data ? <div className="ops-empty"><p>No hay disponibilidad actualizada para mostrar.</p><button className="ops-button" onClick={refresh}>Reintentar</button></div> : !rooms.length ? <p className="ops-empty">Primero agrega las habitaciones individuales de tu hotel en <Link to="/habitaciones">Habitaciones</Link>.</p> : !visible.length ? <div className="ops-empty" id="room-type-panel" role="tabpanel" aria-labelledby={'room-tab-' + activeCategory} tabIndex={0}>No hay habitaciones con este estado en esta categoría.</div> : <div className="room-map-groups" key={activeCategory} id="room-type-panel" role="tabpanel" aria-labelledby={'room-tab-' + activeCategory} tabIndex={0}>{types.filter(([id]) => id === activeCategory).map(([id,name]) => <section className="room-map-group" key={id}><h3>{name}<span>{visible.filter(u => u.room_type_id === id).length} habitaciones</span></h3><div className="room-map-grid">{visible.filter(u => u.room_type_id === id).map(u => <button key={u.id} className={'mini-room ' + (u.occupied ? 'busy' : 'free')} onClick={() => showRoom(u)} aria-label={`Habitación ${u.code}, ${u.occupied ? eventLabel(u.active[0]) : 'libre'}. ${u.occupied ? 'Ver detalle' : 'Bloquear horario'}`}><span className="mini-room-top"><strong>{u.code}</strong>{u.occupied ? <LockKeyhole size={13}/> : <Check size={14}/>}</span><span className="mini-room-interior"><BedDouble size={35} strokeWidth={1.5}/><i/></span><span className="mini-room-status">{u.occupied ? eventLabel(u.active[0]) : 'Libre'}</span><small>{u.occupied ? `Hasta ${timeOnly(u.active.reduce((a,b) => Date.parse(a.end_at) > Date.parse(b.end_at) ? a : b).end_at)}` : u.next ? `Próxima ${timeOnly(u.next.start_at)}` : 'Toca para bloquear'}</small></button>)}</div></section>)}</div>}
         <footer className="room-map-footer"><Clock3 size={14}/><span>{updated ? `Última actualización ${timeOnly(updated)}` : 'Consultando…'} · Se actualiza cada minuto mientras esta vista está abierta.</span></footer>
       </section>
-      {data?.reservations?.some(r => !r.room_unit_id) && <p className="ops-error">Hay reservas sin habitación asignada. Revisa <Link to="/reservas">Reservas</Link> antes de bloquear esa categoría.</p>}
+      {data?.reservations?.some(r => !r.room_unit_id) && <p className="ops-error">Hay reservas sin habitación asignada. Revisa <Link to="/recepcion/reservas">Reservas</Link> antes de bloquear esa categoría.</p>}
       <p className="ops-tip"><LockKeyhole size={16}/>Los bloqueos terminan a la hora indicada. Las reservas de la app se gestionan desde su detalle.</p>
       {modal && <OperationsDialog title={title} busy={busy} onClose={() => setModal(null)}>
         {modal.kind === 'detail' ? <div className="ops-form"><p>{modal.unit.room_type} · Estos son sus horarios para el día consultado.</p><div className="ops-periods">{(current?.events || []).map(e => <div className={'ops-period ' + e.kind} key={e.kind + e.id}><div><strong>{eventLabel(e)}</strong><span>{hour(e.start_at)} — {hour(e.end_at)}</span>{e.notes && <small>{e.notes}</small>}</div>{e.kind === 'block' ? <button className="ops-button" onClick={() => { setMessage(''); setModal({ kind: 'release', unit: modal.unit, block: e }); }}>Liberar bloqueo</button> : e.kind === 'reservation' ? <Link className="ops-link" to={'/reservas/' + e.id}>Ver reserva {e.code}</Link> : null}</div>)}</div><footer><button className="ops-button" onClick={() => setModal(null)}>Cerrar</button></footer></div> : <form className="ops-form" onSubmit={save}>
