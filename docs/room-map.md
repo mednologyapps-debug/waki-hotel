@@ -15,3 +15,5 @@ Validación: npm run test:availability, npm run test:operations, npm run build y
 ## Navegación por categorías
 
 Los tipos de habitación aparecen como pestañas. Se abre la primera categoría disponible y solo se montan sus cuartos. Al cambiar pestaña, el mapa vuelve al inicio; los filtros de estado y horario se mantienen. Las pestañas admiten flechas, Inicio y Fin. El mapa tiene altura acotada con desplazamiento interno, de modo que 25 cuartos de una misma categoría no alargan toda la página. El resumen superior se retiró y «Ahora» permanece destacado, incluso al consultar otro horario.
+
+Ingreso y salida tienen fecha y hora separadas. La hora se escribe directamente en formato de 24 horas; al salir del campo se normalizan entradas como 930 o 9:30 a 09:30. Las duraciones rápidas siguen calculando correctamente cambios de día y la validación rechaza horas inválidas.

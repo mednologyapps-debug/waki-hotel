@@ -102,3 +102,12 @@
  .availability-category { width:100%; }
  .availability-category select { flex:1; }
 }
+
+.block-period-fields .block-period { margin:0; padding:13px; }
+.block-period legend { color:#5d4771; font-size:13px; }
+.block-period > div { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(75px,1fr); gap:10px; }
+.block-period label { display:grid; gap:8px; font-size:11px; color:#8a7599; font-weight:500; min-width:0; }
+.block-period input { min-width:0; width:100%; }
+.block-period input[type="text"] { font-variant-numeric:tabular-nums; }
+.ops-form > .block-period-hint { margin-top:-9px; font-size:11px; color:#97859f; }
+@media(max-width:760px) { .block-period > div { grid-template-columns:minmax(0,1.5fr) minmax(90px,1fr); } }

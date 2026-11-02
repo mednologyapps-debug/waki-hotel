@@ -9,6 +9,12 @@ import { availabilityEvents, roomAvailability } from '../lib/roomAvailability';
 import './HotelOperations.css';
 import './HotelAvailability.css';
 
+const validDateTime = value => /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d$/.test(value) && Number.isFinite(Date.parse(value + ':00-05:00'));
+const normalizeClock = value => {
+  const match = value.trim().match(/^(\d{1,2})(?::?(\d{2}))?$/);
+  if (!match || Number(match[1]) > 23 || Number(match[2] || 0) > 59) return value;
+  return match[1].padStart(2, '0') + ':' + (match[2] || '00');
+};
 const timeOnly = value => new Date(value).toLocaleTimeString('es-PE', { timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit', hour12: false });
 const eventLabel = e => e.kind === 'block' ? blockReasons[e.reason] || 'Bloqueo del hotel' : e.kind === 'extension' ? 'Ampliación en pago' : e.status === 'pending_payment' ? 'Reserva en pago' : 'Reserva WAKI';
 
@@ -67,10 +73,11 @@ export default function HotelAvailabilityPage() {
     setModal({ kind: 'block', unit });
   }
   function showRoom(unit) { if (unit.occupied) { setMessage(''); setModal({ kind: 'detail', unit }); } else open(unit); }
-  function preset(hours) { if (start) setEnd(limaInput(new Date(Date.parse(fromLima(start)) + hours * 3600000))); }
+  function changePeriod(setter, part, value) { setter(previous => { const parts = previous.split('T'); parts[part] = value; return (parts[0] || '') + 'T' + (parts[1] || ''); }); }
+  function preset(hours) { if (validDateTime(start)) setEnd(limaInput(new Date(Date.parse(fromLima(start)) + hours * 3600000))); }
   async function save(e) {
     e.preventDefault(); if (busy) return;
-    if (modal.kind === 'block' && (!selected.length || !start || !end || start >= end)) { setMessage('Selecciona una habitación y una salida posterior al ingreso.'); return; }
+    if (modal.kind === 'block' && (!selected.length || !validDateTime(start) || !validDateTime(end) || start >= end)) { setMessage('Revisa las fechas y horas (formato 24 horas). La salida debe ser posterior al ingreso.'); return; }
     setBusy(true); setMessage('');
     try {
       const payload = modal.kind === 'release' ? { id: modal.block.id } : { ...Object.fromEntries(new FormData(e.currentTarget)), units: selected, start_at: fromLima(start), end_at: fromLima(end) };
@@ -116,8 +123,8 @@ export default function HotelAvailabilityPage() {
           {message && <p className="ops-error" role="alert">{message}</p>}
           {modal.kind === 'release' ? <p>¿Quieres retirar el bloqueo de la habitación <strong>{modal.unit.code}</strong> del {hour(modal.block.start_at)} al {hour(modal.block.end_at)}? Las reservas WAKI no se modifican.</p> : <>
             {modal.unit ? <div className="quick-block-room"><BedDouble size={30}/><div><strong>Habitación {modal.unit.code}</strong><span>{modal.unit.room_type}</span></div><span className="quick-block-badge">Reserva presencial</span></div> : <fieldset><legend>Selecciona las habitaciones</legend><div className="ops-unit-picker">{rooms.map(u => <label key={u.id} className={selected.includes(u.id) ? 'checked' : ''}><input type="checkbox" checked={selected.includes(u.id)} onChange={e => setSelected(ids => e.target.checked ? [...ids,u.id] : ids.filter(id => id !== u.id))}/><span><strong>{u.code}</strong><small>{u.room_type}</small></span></label>)}</div></fieldset>}
-            <div className="ops-two"><label>Ingreso<input type="datetime-local" required value={start} onChange={e => setStart(e.target.value)}/></label><label>Salida<input type="datetime-local" required value={end} onChange={e => setEnd(e.target.value)}/></label></div>
-            <div className="ops-presets"><span>Duración:</span>{[1,2,3,6,12,24].map(h => <button className={'ops-button ' + (start && end && Date.parse(fromLima(end)) - Date.parse(fromLima(start)) === h * 3600000 ? 'primary' : '')} type="button" key={h} onClick={() => preset(h)}>{h} h</button>)}</div>
+            <div className="ops-two block-period-fields">{[['Ingreso', start, setStart], ['Salida', end, setEnd]].map(([label, value, setter]) => <fieldset className="block-period" key={label}><legend>{label}</legend><div><label>Fecha de {label.toLowerCase()}<input type="date" required value={value.split('T')[0] || ''} onChange={e => changePeriod(setter, 0, e.target.value)}/></label><label>Hora de {label.toLowerCase()}<input type="text" inputMode="numeric" required maxLength={5} pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" title="Escribe la hora en formato 24 horas, por ejemplo 14:30" placeholder="HH:MM" value={value.split('T')[1] || ''} onChange={e => changePeriod(setter, 1, e.target.value)} onBlur={e => changePeriod(setter, 1, normalizeClock(e.target.value))}/></label></div></fieldset>)}</div><p className="block-period-hint">Horas en formato de 24 horas · Lima</p>
+            <div className="ops-presets"><span>Duración:</span>{[1,2,3,6,12,24].map(h => <button className={'ops-button ' + (validDateTime(start) && validDateTime(end) && Date.parse(fromLima(end)) - Date.parse(fromLima(start)) === h * 3600000 ? 'primary' : '')} type="button" key={h} onClick={() => preset(h)}>{h} h</button>)}</div>
             {modal.unit?.next && <p className="quick-block-next"><Clock3 size={15}/>Próxima reserva: {hour(modal.unit.next.start_at)}. El bloqueo debe terminar antes.</p>}
             <details className="quick-block-extra"><summary>Otro motivo o nota interna</summary><label>Motivo<select name="reason" defaultValue="walk_in">{Object.entries(blockReasons).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Nota opcional<textarea name="notes" maxLength={300} placeholder="Sin datos personales de huéspedes"/></label></details>
             <p className="ops-confirm-summary"><LockKeyhole size={16}/>{selected.length === 1 ? 'Esta habitación no se ofrecerá' : `${selected.length} habitaciones no se ofrecerán`} en WAKI durante el horario indicado.</p>
