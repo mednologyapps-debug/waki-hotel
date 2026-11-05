@@ -1,4 +1,5 @@
 import HotelLegalAcceptance from '../components/hotel/HotelLegalAcceptance'
+import HotelAffiliationDossier from '../components/hotel/HotelAffiliationDossier'
 import {
   ArrowLeft,
   BedDouble,
@@ -55,6 +56,9 @@ export default function HotelReviewPage() {
 
   const [hotelId, setHotelId] =
     useState(null)
+
+  const [dossierReady, setDossierReady] =
+    useState(false)
 
   const [onboarding, setOnboarding] =
     useState(null)
@@ -515,7 +519,7 @@ export default function HotelReviewPage() {
 
       } else {
         setErrorMessage(
-          error?.message?.includes('HOTEL_LEGAL_ACCEPTANCE_REQUIRED') ? 'Primero guarda la aceptación de los términos para hoteles.' : 'No pudimos enviar el hotel a revisión. Inténtalo nuevamente.'
+          error?.message?.includes('AFFILIATION_DOSSIER_INCOMPLETE') ? 'Completa tu cuenta bancaria y adjunta el contrato firmado antes de enviar el hotel.' : error?.message?.includes('HOTEL_LEGAL_ACCEPTANCE_REQUIRED') ? 'Primero guarda la aceptación de los términos para hoteles.' : 'No pudimos enviar el hotel a revisión. Inténtalo nuevamente.'
         )
       }
 
@@ -1262,6 +1266,11 @@ export default function HotelReviewPage() {
             ESTADO FINAL
             ================================================= */}
 
+
+        {hotelId && <HotelAffiliationDossier hotelId={hotelId} approved={isApproved} onReadyChange={setDossierReady} />}
+
+        {!isApproved && hotelId && <HotelLegalAcceptance hotelId={hotelId} />}
+
         {isApproved ? (
 
           <section className="hotel-review-submit">
@@ -1359,7 +1368,8 @@ export default function HotelReviewPage() {
               className="hotel-setup-primary-button hotel-review-submit__button"
               disabled={
                 submitting ||
-                !isReady
+                !isReady ||
+                !dossierReady
               }
               onClick={
                 handleSubmitForReview
@@ -1382,7 +1392,6 @@ export default function HotelReviewPage() {
 
         )}
 
-        {!isApproved && hotelId && <HotelLegalAcceptance hotelId={hotelId} />}
       </main>
 
     </div>
