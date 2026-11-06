@@ -26,6 +26,8 @@ import HotelReservationsPage
 import HotelLoginPage
   from './pages/HotelLoginPage'
 
+import HotelInvitePage from './pages/HotelInvitePage'
+
 import HotelRecoverPasswordPage
   from './pages/HotelRecoverPasswordPage'
 
@@ -135,6 +137,11 @@ export default function App() {
         element={
           <HotelLoginPage />
         }
+      />
+
+      <Route
+        path="/invitacion/:token"
+        element={<HotelInvitePage />}
       />
 
 
