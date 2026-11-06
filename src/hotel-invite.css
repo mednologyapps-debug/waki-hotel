@@ -1,0 +1,436 @@
+.hotel-invite-page {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 28px 18px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(112, 64, 213, .10), transparent 31%),
+    #faf9fe;
+}
+
+.hotel-invite-card {
+  width: min(100%, 560px);
+  padding: 32px 30px;
+  box-sizing: border-box;
+  border: 1px solid #ebe6f1;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(46, 25, 77, .07);
+}
+
+.hotel-invite-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 34px;
+}
+
+.hotel-invite-brand img {
+  width: 104px;
+  height: auto;
+  display: block;
+}
+
+.hotel-invite-brand span {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #efe9ff;
+  color: #7040d5;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.hotel-invite-heading h1 {
+  margin: 0;
+  color: #24133d;
+  font-size: 32px;
+  line-height: 1.08;
+  letter-spacing: -.7px;
+  font-weight: 700;
+}
+
+.hotel-invite-heading p {
+  margin: 12px 0 0;
+  color: #776c82;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.hotel-invite-hotel {
+  margin-top: 28px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-radius: 18px;
+  background: #f4effd;
+}
+
+.hotel-invite-hotel__icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #7040d5;
+  color: #fff;
+}
+
+.hotel-invite-hotel__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.hotel-invite-hotel__content strong {
+  display: block;
+  color: #2f1c4a;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.hotel-invite-hotel__district {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7e7489;
+  font-size: 14px;
+}
+
+.hotel-invite-hotel__address {
+  margin: 8px 0 0;
+  color: #6e6479;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.hotel-invite-details {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hotel-invite-details > div {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #ece7f0;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.hotel-invite-details span {
+  display: block;
+  margin-bottom: 6px;
+  color: #8b8196;
+  font-size: 13px;
+}
+
+.hotel-invite-details strong {
+  display: block;
+  color: #3f324c;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.hotel-invite-details__wide {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #7040d5;
+}
+
+.hotel-invite-form {
+  margin-top: 28px;
+  display: grid;
+  gap: 15px;
+}
+
+.hotel-invite-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hotel-invite-field {
+  display: grid;
+  gap: 7px;
+}
+
+.hotel-invite-field > span {
+  color: #564a62;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hotel-invite-field__control {
+  min-height: 48px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  border: 1px solid #e4dfea;
+  border-radius: 13px;
+  background: #fff;
+  color: #8c8097;
+}
+
+.hotel-invite-field__control:focus-within {
+  border-color: #9b7ce6;
+  box-shadow: 0 0 0 3px rgba(112, 64, 213, .08);
+}
+
+.hotel-invite-field__control.is-readonly {
+  background: #f8f6fb;
+}
+
+.hotel-invite-field__control input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #34273f;
+  font: inherit;
+  font-size: 14px;
+}
+
+.hotel-invite-field__control input::placeholder {
+  color: #aaa0b3;
+}
+
+.hotel-invite-password-toggle {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #8a7e94;
+  cursor: pointer;
+}
+
+.hotel-invite-primary {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 22px;
+  border: 0;
+  border-radius: 14px;
+  background: #7040d5;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hotel-invite-form .hotel-invite-primary {
+  margin-top: 4px;
+}
+
+.hotel-invite-primary:disabled {
+  opacity: .58;
+  cursor: wait;
+}
+
+.hotel-invite-inline-error,
+.hotel-invite-inline-success {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.hotel-invite-inline-error {
+  background: #fff2f2;
+  color: #a63f46;
+  border: 1px solid #f2d3d5;
+}
+
+.hotel-invite-inline-success {
+  background: #eff9f3;
+  color: #32724d;
+  border: 1px solid #d2eadb;
+}
+
+.hotel-invite-invalid {
+  padding: 34px 6px;
+  text-align: center;
+}
+
+.hotel-invite-invalid svg {
+  color: #7040d5;
+}
+
+.hotel-invite-invalid h1 {
+  margin: 14px 0 8px;
+  color: #2b1849;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.hotel-invite-invalid p {
+  max-width: 390px;
+  margin: 0 auto;
+  color: #7f7488;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.hotel-invite-invalid button {
+  min-height: 43px;
+  margin-top: 18px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #7040d5;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hotel-invite-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 11px;
+  background: #faf9fe;
+  color: #74697e;
+}
+
+.hotel-invite-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #e5def0;
+  border-top-color: #7040d5;
+  border-radius: 50%;
+  animation: hotelInviteSpin .75s linear infinite;
+}
+
+@keyframes hotelInviteSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .hotel-invite-page {
+    padding: 14px;
+  }
+
+  .hotel-invite-card {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+
+  .hotel-invite-brand {
+    margin-bottom: 28px;
+  }
+
+  .hotel-invite-brand img {
+    width: 98px;
+  }
+
+  .hotel-invite-heading h1 {
+    font-size: 28px;
+  }
+
+  .hotel-invite-heading p {
+    font-size: 15px;
+  }
+
+  .hotel-invite-details,
+  .hotel-invite-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hotel-invite-details__wide {
+    grid-column: 1;
+  }
+}
+
+
+.hotel-invite-resend {
+  min-height: 43px;
+  margin-top: 18px;
+  padding: 0 16px;
+  border: 1px solid #d8ccef;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #7040d5;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hotel-invite-resend:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+
+/* =========================================================
+   CONFIRMACIÓN DE CORREO
+   ========================================================= */
+
+.hotel-invite-confirmation {
+  padding: 4px 4px 24px;
+  text-align: center;
+}
+
+.hotel-invite-confirmation__image {
+  width: min(100%, 330px);
+  height: auto;
+  display: block;
+  margin: 0 auto 8px;
+  object-fit: contain;
+}
+
+.hotel-invite-confirmation h1 {
+  margin: 0;
+  color: #2b1849;
+  font-size: 27px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.hotel-invite-confirmation p {
+  max-width: 410px;
+  margin: 10px auto 0;
+  color: #7f7488;
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.hotel-invite-confirmation .hotel-invite-inline-error {
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .hotel-invite-confirmation__image {
+    width: min(100%, 275px);
+  }
+
+  .hotel-invite-confirmation h1 {
+    font-size: 25px;
+  }
+}
