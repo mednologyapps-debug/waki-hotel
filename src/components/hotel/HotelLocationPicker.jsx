@@ -35,7 +35,7 @@ function loadGoogleMaps() {
   if (!apiKey) {
     return Promise.reject(
       new Error(
-        'Falta configurar VITE_GOOGLE_MAPS_API_KEY.'
+        'El mapa no está habilitado todavía. Contacta al equipo WAKI para configurar la ubicación.'
       )
     )
   }
@@ -333,7 +333,7 @@ export default function HotelLocationPicker({
                   !place.location
                 ) {
                   throw new Error(
-                    'Google Maps no devolvió una ubicación válida.'
+                    'No encontramos las coordenadas del lugar. Selecciona otro resultado.'
                   )
                 }
 
@@ -388,6 +388,7 @@ export default function HotelLocationPicker({
                       components,
                       [
                         'sublocality_level_1',
+                        'administrative_area_level_3',
                         'locality'
                       ]
                     ),
@@ -428,55 +429,46 @@ export default function HotelLocationPicker({
             }
           )
 
-        map.addListener(
-          'click',
-          (
-            event
-          ) => {
-            if (
-              !event.latLng
-            ) {
-              return
-            }
-
-            const nextLatitude =
-              event.latLng.lat()
-
-            const nextLongitude =
-              event.latLng.lng()
-
-            marker.setPosition(
-              event.latLng
-            )
-
-            marker.setVisible(
-              true
-            )
-
-            onLocationSelected({
-              latitude:
-                nextLatitude,
-
-              longitude:
-                nextLongitude,
-
-              address:
-                null,
-
-              district:
-                null,
-
-              province:
-                null,
-
-              department:
-                null,
-
-              placeName:
-                null
+        const geocoder = new google.maps.Geocoder()
+        let latestPin = 0
+        map.addListener('click', async (event) => {
+          if (!event.latLng) return
+          const requestId = ++latestPin
+          const nextLatitude = event.latLng.lat()
+          const nextLongitude = event.latLng.lng()
+          marker.setPosition(event.latLng)
+          marker.setVisible(true)
+          setErrorMessage('')
+          try {
+            // Clicking the pin must update the ADDRESS, not just coordinates.
+            const { results } = await geocoder.geocode({
+              location: { lat: nextLatitude, lng: nextLongitude }
             })
+            if (cancelled || requestId !== latestPin) return
+            const result = results?.[0]
+            if (!result) throw new Error('ADDRESS_NOT_FOUND')
+            const components = result.address_components || []
+            onLocationSelected({
+              latitude: nextLatitude,
+              longitude: nextLongitude,
+              address: result.formatted_address || '',
+              district: findAddressPart(components, [
+                'sublocality_level_1', 'administrative_area_level_3', 'locality'
+              ]),
+              province: findAddressPart(components, ['administrative_area_level_2','locality']),
+              department: findAddressPart(components, ['administrative_area_level_1']),
+              placeName: ''
+            })
+          } catch {
+            if (cancelled || requestId !== latestPin) return
+            // Keep the selected point, allow the person to complete address manually.
+            onLocationSelected({
+              latitude: nextLatitude, longitude: nextLongitude,
+              address: '', district: '', province: '', department: '', placeName: ''
+            })
+            setErrorMessage('Marcamos el punto, pero no pudimos obtener la dirección. Complétala manualmente en el formulario.')
           }
-        )
+        })
       } catch (
         error
       ) {
@@ -486,8 +478,7 @@ export default function HotelLocationPicker({
         )
 
         setErrorMessage(
-          error?.message ||
-          'No pudimos cargar el selector de ubicación.'
+          'El mapa no está disponible en este momento. Puedes completar la dirección manualmente o contactar a WAKI.'
         )
       } finally {
         if (
