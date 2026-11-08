@@ -6,6 +6,24 @@ import {supabase} from '../../lib/supabase';
 import './HotelBookingAlerts.css';
 let tone;
 function audio(){if(!tone)tone=new Audio('/sounds/waki-reserva.wav');tone.currentTime=0;return tone}
+function playWakiSound(){
+  // Brand voice is spoken by the device's Spanish voice. The pre-existing
+  // WAV remains a fallback for browsers without Web Speech support.
+  if(typeof window!=='undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window){
+    try{
+      const voice=new SpeechSynthesisUtterance('¡Waaaki!');
+      voice.lang='es-PE';voice.rate=0.85;voice.pitch=1.2;voice.volume=1;
+      const voices=window.speechSynthesis.getVoices();
+      voice.voice=voices.find(v=>v.lang?.toLowerCase()==='es-pe') ||
+        voices.find(v=>v.lang?.toLowerCase().startsWith('es')) || null;
+      voice.onerror=()=>{void audio().play().catch(()=>{})};
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(voice);
+      return Promise.resolve();
+    }catch{ /* Use the existing WAKI fallback sound */ }
+  }
+  return audio().play();
+}
 const readSeen=hotel=>{try{return localStorage.getItem('waki-notice-seen-'+hotel)||''}catch{return ''}};
 export default function HotelBookingAlerts({hotelId}){
  const [rows,setRows]=useState([]),[open,setOpen]=useState(false),[enabled,setEnabled]=useState(false),[toast,setToast]=useState(null),[error,setError]=useState(''),[seen,setSeen]=useState(()=>readSeen(hotelId));
@@ -17,7 +35,7 @@ export default function HotelBookingAlerts({hotelId}){
    if(alive)setToast(row);
    if(!armed.current)return;
    const play=async()=>{try{const key='waki-notice-sounded-'+hotelId;if(localStorage.getItem(key)===row.id)return;localStorage.setItem(key,row.id)}catch{}
-    audio().play().catch(()=>{if(alive){setEnabled(false);armed.current=false;setError('Activa nuevamente el sonido en este navegador.')}});
+    playWakiSound().catch(()=>{if(alive){setEnabled(false);armed.current=false;setError('Activa nuevamente el sonido en este navegador.')}});
     if(alive)setToast(row);
     if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){
      const notice=new Notification('Nueva reserva WAKI',{body:'Tienes una reserva confirmada. Toca para revisarla.',icon:'/waki_fav.png',tag:'waki-'+row.id});notice.onclick=()=>{window.focus();navigate('/reservas/'+row.reservation_id);notice.close()};
@@ -30,9 +48,9 @@ export default function HotelBookingAlerts({hotelId}){
   async function load(){const {data,error:e}=await supabase.from('hotel_booking_notices').select('id,reservation_id,created_at').eq('hotel_id',hotelId).gte('created_at',new Date(Date.now()-7*86400000).toISOString()).order('created_at',{ascending:false}).limit(20);if(alive){if(e)setError('No pudimos consultar los avisos. Revisa la sección Reservas.');else (data||[]).forEach(row=>add(row,false))}}
   return()=>{alive=false;supabase.removeChannel(channel)};
  },[hotelId,navigate]);
- async function toggle(){if(armed.current){armed.current=false;setEnabled(false);return}try{await audio().play();armed.current=true;setEnabled(true);setError('');if('Notification' in window&&Notification.permission==='default')Promise.resolve(Notification.requestPermission()).catch(()=>{})}catch{setError('El navegador no pudo reproducir el sonido. Revisa sus permisos.')}}
+ async function toggle(){if(armed.current){armed.current=false;setEnabled(false);return}try{await playWakiSound();armed.current=true;setEnabled(true);setError('');if('Notification' in window&&Notification.permission==='default')Promise.resolve(Notification.requestPermission()).catch(()=>{})}catch{setError('El navegador no pudo reproducir el sonido. Revisa sus permisos.')}}
  function show(){setOpen(!open);if(!open){const now=new Date().toISOString();setSeen(now);try{localStorage.setItem('waki-notice-seen-'+hotelId,now)}catch{}}}
  const unread=rows.filter(r=>r.created_at>seen).length;
- return <><div className="hotel-booking-alerts"><button type="button" onClick={show} aria-expanded={open} aria-label={`Avisos de reservas, ${unread} nuevos`}><Bell size={16}/><span>Reservas</span>{unread>0&&<b>{unread}</b>}</button><button type="button" onClick={toggle} aria-pressed={enabled} title={enabled?'Silenciar avisos':'Activar sonido WAKI'}>{enabled?<Volume2 size={16}/>:<VolumeX size={16}/>}<span>{enabled?'Sonido activo':'Activar sonido'}</span></button></div>{error&&<p className="hotel-alert-warning" role="status">{error}</p>}
- {createPortal(<>{toast&&<div className="hotel-reservation-toast" role="status"><Bell size={23}/><div><strong>Nueva reserva WAKI</strong><button type="button" onClick={()=>{navigate('/reservas/'+toast.reservation_id);setToast(null)}}>Ver reserva</button></div><button type="button" aria-label="Cerrar aviso" onClick={()=>setToast(null)}><X size={18}/></button></div>}{open&&<section className="hotel-booking-notice-panel" aria-label="Avisos de reservas"><header><h2>Tus reservas WAKI</h2><button type="button" aria-label="Cerrar avisos" onClick={()=>setOpen(false)}><X size={20}/></button></header><p>Activa el sonido al comenzar tu turno. Mantén el portal abierto para recibirlo; el navegador puede limitar los avisos en segundo plano.</p><div>{rows.map(r=><button key={r.id} type="button" onClick={()=>{setOpen(false);navigate('/reservas/'+r.reservation_id)}}><Bell size={18}/><span><strong>Reserva confirmada</strong><small>{new Date(r.created_at).toLocaleString('es-PE',{timeZone:'America/Lima'})}</small></span><span>Ver</span></button>)}{!rows.length&&<p>No hay nuevas reservas en los últimos 7 días.</p>}</div></section>}</>,document.body)}</>;
+ return <><div className="hotel-booking-alerts"><button type="button" onClick={show} aria-expanded={open} aria-label={`Avisos de reservas, ${unread} nuevos`}><Bell size={16}/><span>Reservas</span>{unread>0&&<b>{unread}</b>}</button><button type="button" onClick={toggle} aria-pressed={enabled} title={enabled?'Silenciar avisos':'Activar voz Waaaki al recibir reservas'}>{enabled?<Volume2 size={16}/>:<VolumeX size={16}/>}<span>{enabled?'Voz WAKI activa':'Activar voz WAKI'}</span></button></div>{error&&<p className="hotel-alert-warning" role="status">{error}</p>}
+ {createPortal(<>{toast&&<div className="hotel-reservation-toast" role="status"><Bell size={23}/><div><strong>Nueva reserva WAKI</strong><button type="button" onClick={()=>{navigate('/reservas/'+toast.reservation_id);setToast(null)}}>Ver reserva</button></div><button type="button" aria-label="Cerrar aviso" onClick={()=>setToast(null)}><X size={18}/></button></div>}{open&&<section className="hotel-booking-notice-panel" aria-label="Avisos de reservas"><header><h2>Tus reservas WAKI</h2><button type="button" aria-label="Cerrar avisos" onClick={()=>setOpen(false)}><X size={20}/></button></header><p>Activa la voz «Waaaki» al comenzar tu turno. Mantén el portal abierto para recibirlo; el navegador puede limitar los avisos en segundo plano.</p><div>{rows.map(r=><button key={r.id} type="button" onClick={()=>{setOpen(false);navigate('/reservas/'+r.reservation_id)}}><Bell size={18}/><span><strong>Reserva confirmada</strong><small>{new Date(r.created_at).toLocaleString('es-PE',{timeZone:'America/Lima'})}</small></span><span>Ver</span></button>)}{!rows.length&&<p>No hay nuevas reservas en los últimos 7 días.</p>}</div></section>}</>,document.body)}</>;
 }
