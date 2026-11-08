@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { HotelSidebarContents } from './HotelSidebar'
 import { HotelPortalLayoutContext } from './HotelPortalLayoutContext'
 import HotelPageSkeleton from '../common/HotelPageSkeleton'
+import './HotelPortalLayout.css'
 
 const statusMeta = {
   approved: { text: 'Aprobado', icon: CheckCircle2 },
