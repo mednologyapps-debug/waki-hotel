@@ -1,0 +1,72 @@
+/* Refinements for Hotel only. Existing sidebar design is unchanged. */
+
+/* Compact map action and accessible on-demand dialog */
+.hotel-location-action{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:2px 0 16px}
+.hotel-location-action__button{display:inline-flex;gap:10px;align-items:center;justify-content:center;min-height:45px;padding:11px 16px;border:1px solid #d8c9f4;background:#f7f3ff;color:#6331c9;border-radius:11px;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.hotel-location-action__button:hover{background:#eee5ff}
+.hotel-location-action__confirmed{font-size:12px;font-weight:650;color:#267852}
+.hotel-map-dialog__overlay{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;background:rgba(27,17,47,.60);backdrop-filter:blur(4px);padding:16px;box-sizing:border-box}
+.hotel-map-dialog{display:flex;flex-direction:column;width:min(920px,100%);max-height:min(94vh,94dvh);overflow:hidden;background:#fff;border:1px solid #e8dff4;border-radius:22px;box-shadow:0 26px 80px rgba(30,19,56,.25)}
+.hotel-map-dialog__header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:23px 26px 17px;border-bottom:1px solid #f0ebf6}
+.hotel-map-dialog__header h2{margin:0 0 5px;font-size:21px;color:#211632}
+.hotel-map-dialog__header p{margin:0;font-size:13px;line-height:1.5;color:#82738e}
+.hotel-map-dialog__close{background:#f6f2fa;border:1px solid #ebe4f3;border-radius:9px;padding:9px 13px;font-size:12px;font-weight:700;color:#59486c;cursor:pointer}
+.hotel-map-dialog__body{min-height:0;overflow:auto;padding:20px 26px}
+.hotel-map-dialog__body .hotel-location-picker{padding:14px;border-radius:14px;background:#fff}
+.hotel-map-dialog__body .hotel-location-picker__map{height:min(42vh,360px);min-height:220px}
+.hotel-map-dialog__footer{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 26px;border-top:1px solid #f0ebf6;background:#fbfafe}
+.hotel-map-dialog__address{flex:1;min-width:0;font-size:12px;line-height:1.5;color:#756587;overflow-wrap:anywhere}
+.hotel-map-dialog__buttons{display:flex;align-items:center;gap:9px}
+.hotel-map-dialog__buttons button{min-height:42px;white-space:nowrap;cursor:pointer}
+.hotel-map-dialog__buttons button:disabled{opacity:.45;cursor:not-allowed}
+.hotel-map-dialog__close:focus-visible,.hotel-location-action__button:focus-visible{outline:3px solid #cbb8f2;outline-offset:2px}
+
+/* Search-first Team. Preserve existing team cards, roles and edit controls. */
+.waki-team-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:0 0 18px;padding:14px 16px;border:1px solid #e8e2f0;border-radius:15px;background:#fff}
+.waki-team-toolbar__search{flex:1 1 300px;display:flex;align-items:center;gap:9px;min-height:45px;padding:0 13px;border:1px solid #e4dbed;border-radius:10px;color:#7137e8;background:#fdfcff}
+.waki-team-toolbar__search:focus-within{border-color:#9f7de5;box-shadow:0 0 0 3px #7137e815}
+.waki-team-toolbar__search input{width:100%;min-width:0;border:none;background:transparent;font:inherit;font-size:13px;color:#2d2140;outline:none}
+.waki-team-toolbar__filter{display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:12px;font-weight:650;color:#766883}
+.waki-team-toolbar__filter select{min-height:45px;min-width:145px;max-width:190px;padding:0 12px;border:1px solid #e4dbed;border-radius:10px;background:#fff;color:#2f2043;font:inherit;font-size:12px}
+.waki-team-toolbar__count{font-size:12px;white-space:nowrap;color:#81758c;font-weight:650}
+.waki-team-no-results{padding:32px;text-align:center;color:#80758d;font-size:13px}
+
+/* Private contract / bank dossier: structured cards instead of native bare inputs */
+.waki-dossier{margin-top:24px;border:1px solid #e9e2f0;border-radius:18px;background:#fff;box-shadow:0 6px 23px #30204408;overflow:hidden;color:#2e2341}
+.waki-dossier__header{display:flex;align-items:flex-start;gap:14px;padding:24px 25px 16px}
+.waki-dossier__header-icon{width:44px;height:44px;flex-shrink:0;display:grid;place-items:center;border-radius:13px;background:#f1eaff;color:#7137e8}
+.waki-dossier__eyebrow{display:block;margin-bottom:6px;color:#7137e8;font-size:10px;font-weight:800;letter-spacing:.1em}
+.waki-dossier__header h3{margin:0;font-size:19px;line-height:1.25;letter-spacing:-.3px;color:#251a38}
+.waki-dossier__header p{margin:8px 0 0;font-size:12px;line-height:1.55;color:#81758e;max-width:650px}
+.waki-dossier__progress{display:flex;align-items:center;gap:13px;padding:0 25px 21px;flex-wrap:wrap}
+.waki-dossier__progress-item{display:inline-flex;align-items:center;gap:8px;min-height:35px;padding:6px 11px;border:1px solid #ebe6f1;border-radius:11px;font-size:12px;color:#6c6079;background:#fcfbff}
+.waki-dossier__progress-item>svg{color:#8a69cd}
+.waki-dossier__tag{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#fff4e3;color:#956019;font-size:10px;font-weight:750}
+.waki-dossier__tag.is-verified{background:#e9f8ef;color:#257447}
+.waki-dossier__error,.waki-dossier__success{margin:0 25px 12px;padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.5}
+.waki-dossier__error{background:#fff1f1;color:#a53232}.waki-dossier__success{background:#edfaef;color:#26734d}
+.waki-dossier__form,.waki-dossier__files{padding:22px 25px;border-top:1px solid #f0ebf4}
+.waki-dossier__form{background:#fff}.waki-dossier__files{background:#fbfaff}
+.waki-dossier__section-title{display:flex;align-items:center;gap:9px;margin-bottom:18px;color:#7137e8}
+.waki-dossier__section-title h4{margin:0;color:#30223e;font-size:15px;font-weight:800}
+.waki-dossier__fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.waki-dossier__fields label{display:flex;flex-direction:column;min-width:0;gap:8px;font-size:12px;font-weight:700;color:#5d506b}
+.waki-dossier__fields input,.waki-dossier__fields select{width:100%;min-height:45px;box-sizing:border-box;padding:0 12px;border:1px solid #e2daea;border-radius:10px;background:#fff;color:#2f2440;font:inherit;font-size:13px;outline:none}
+.waki-dossier__fields input:focus,.waki-dossier__fields select:focus{border-color:#7137e8;box-shadow:0 0 0 3px #7137e813}
+.waki-dossier__fields input:disabled,.waki-dossier__fields select:disabled{background:#f7f5fa;color:#6d6478;opacity:1;cursor:not-allowed}
+.waki-dossier__form-actions{display:flex;justify-content:flex-end;margin-top:19px}
+.waki-dossier__form-actions button{min-height:43px}
+.waki-dossier__documents{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.waki-dossier__document{padding:19px;border:1px dashed #d9cceb;border-radius:14px;background:#fff;min-width:0}
+.waki-dossier__document-icon{display:grid;place-items:center;width:39px;height:39px;margin-bottom:12px;border-radius:12px;background:#eee8ff;color:#7137e8}
+.waki-dossier__document>strong{display:block;font-size:13px;color:#2c2040}
+.waki-dossier__document p{margin:6px 0 16px;font-size:12px;line-height:1.5;color:#877b94}
+.waki-dossier__document-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.waki-dossier__upload,.waki-dossier__document-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;min-height:39px;border:1px solid #d6c7ee;border-radius:9px;background:#f7f2ff;color:#642cc7;font:inherit;font-size:12px;font-weight:750;cursor:pointer;box-sizing:border-box}
+.waki-dossier__upload input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.waki-dossier__upload:focus-within{outline:3px solid #c9b5f0}
+.waki-dossier__document-actions button{background:#fff;border-color:#ded5ea;color:#534566}
+.waki-dossier__document-actions span{font-size:12px;color:#a093af}
+.waki-dossier__footnote{margin:16px 0 0;font-size:12px;line-height:1.6;color:#81758e}
+@media(max-width:950px){.waki-dossier__fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.hotel-map-dialog__header{padding:17px}.hotel-map-dialog__body{padding:10px 12px}.hotel-map-dialog__footer{padding:14px 17px;flex-direction:column;align-items:stretch}.hotel-map-dialog__buttons{display:grid;grid-template-columns:1fr 1fr}.hotel-map-dialog__buttons button{white-space:normal}.waki-dossier__header,.waki-dossier__form,.waki-dossier__files{padding:19px 16px}.waki-dossier__progress{padding:0 16px 16px}.waki-dossier__fields,.waki-dossier__documents{grid-template-columns:1fr}.waki-team-toolbar{padding:12px}.waki-team-toolbar__search,.waki-team-toolbar__filter{width:100%;flex-basis:100%}.waki-team-toolbar__filter select{flex:1;max-width:none}}

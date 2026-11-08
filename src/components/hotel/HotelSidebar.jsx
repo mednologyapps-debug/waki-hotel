@@ -1,4 +1,5 @@
 import HotelBookingAlerts from './HotelBookingAlerts'
+import { HotelPortalLayoutContext } from './HotelPortalLayoutContext'
 import {
   BedDouble,
   Building2,
@@ -16,7 +17,8 @@ import {
 import {
   useEffect,
   useMemo,
-  useState
+  useState,
+  useContext
 } from 'react'
 
 import {
@@ -113,7 +115,7 @@ const menuItems = [
 ]
 
 
-export default function HotelSidebar({
+export function HotelSidebarContents({
   activeKey = 'resumen',
   hotelName = 'Mi hotel',
   hotelLocation = 'Lima, Perú'
@@ -722,4 +724,13 @@ export default function HotelSidebar({
 
     </>
   )
+}
+
+
+// Legacy pages already render HotelSidebar. The persistent layout owns the
+// visible instance, so legacy copies do no work and issue no extra requests.
+export default function HotelSidebar(props) {
+  const layout = useContext(HotelPortalLayoutContext)
+  if (layout?.embedded) return null
+  return <HotelSidebarContents {...props} />
 }

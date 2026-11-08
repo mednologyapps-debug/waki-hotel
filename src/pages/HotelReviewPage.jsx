@@ -1271,40 +1271,7 @@ export default function HotelReviewPage() {
 
         {!isApproved && hotelId && <HotelLegalAcceptance hotelId={hotelId} />}
 
-        {isApproved ? (
-
-          <section className="hotel-review-submit">
-
-            <div className="hotel-review-submit__icon">
-
-              <Check
-                size={24}
-                strokeWidth={2}
-              />
-
-            </div>
-
-
-            <div className="hotel-review-submit__copy">
-
-              <span>
-                Aprobación completada
-              </span>
-
-              <h2>
-                Tu hotel está aprobado
-              </h2>
-
-              <p>
-                WAKI ya aprobó la configuración de este hotel.
-                No necesitas volver a enviarlo a revisión.
-              </p>
-
-            </div>
-
-          </section>
-
-        ) : isPendingReview ? (
+        {isApproved ? null : isPendingReview ? (
 
           <section className="hotel-review-submit hotel-review-submit--pending">
 

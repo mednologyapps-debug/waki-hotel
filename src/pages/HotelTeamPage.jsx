@@ -2,6 +2,7 @@ import {
   Check,
   ChevronDown,
   Mail,
+  Search,
   Plus,
   ShieldCheck,
   UserRound,
@@ -11,7 +12,6 @@ import {
 
 import {
   useEffect,
-  useMemo,
   useState
 } from 'react'
 
@@ -124,6 +124,9 @@ export default function HotelTeamPage() {
   const [team, setTeam] =
     useState([])
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState('all')
+
   const [createOpen, setCreateOpen] =
     useState(false)
 
@@ -142,30 +145,6 @@ export default function HotelTeamPage() {
   useEffect(() => {
     loadPage()
   }, [])
-
-
-  const activeCount =
-    useMemo(
-      () =>
-        team.filter(
-          (member) =>
-            member.is_active
-        ).length,
-      [team]
-    )
-
-
-  const adminCount =
-    useMemo(
-      () =>
-        team.filter(
-          (member) =>
-            member.is_active &&
-            member.staff_role ===
-              'admin'
-        ).length,
-      [team]
-    )
 
 
   async function loadPage(
@@ -692,6 +671,13 @@ export default function HotelTeamPage() {
   }
 
 
+  const filteredTeam = team.filter(member => {
+    const text = searchQuery.trim().toLocaleLowerCase('es-PE')
+    const matchesText = !text || [member.full_name, member.email, getRoleMeta(member.staff_role).label]
+      .some(value => String(value || '').toLocaleLowerCase('es-PE').includes(text))
+    return matchesText && (roleFilter === 'all' || member.staff_role === roleFilter)
+  })
+
   if (loading) {
     return (
       <WakiGlobalLoader
@@ -776,75 +762,25 @@ export default function HotelTeamPage() {
         )}
 
 
-        <section className="hotel-team-summary">
-
-          <article>
-
-            <div className="hotel-team-summary__icon">
-              <UsersRound
-                size={20}
-                strokeWidth={1.8}
-              />
-            </div>
-
-            <div>
-              <span>
-                Miembros
-              </span>
-
-              <strong>
-                {team.length}
-              </strong>
-            </div>
-
-          </article>
-
-
-          <article>
-
-            <div className="hotel-team-summary__icon is-green">
-              <Check
-                size={20}
-                strokeWidth={2}
-              />
-            </div>
-
-            <div>
-              <span>
-                Activos
-              </span>
-
-              <strong>
-                {activeCount}
-              </strong>
-            </div>
-
-          </article>
-
-
-          <article>
-
-            <div className="hotel-team-summary__icon is-dark">
-              <ShieldCheck
-                size={20}
-                strokeWidth={1.8}
-              />
-            </div>
-
-            <div>
-              <span>
-                Administradores
-              </span>
-
-              <strong>
-                {adminCount}
-              </strong>
-            </div>
-
-          </article>
-
-        </section>
-
+        <div className="waki-team-toolbar">
+          <label className="waki-team-toolbar__search">
+            <Search size={18} strokeWidth={1.8} />
+            <input type="search" value={searchQuery}
+              placeholder="Buscar por nombre, correo o rol"
+              aria-label="Buscar miembros del equipo"
+              onChange={event => setSearchQuery(event.target.value)} />
+          </label>
+          <label className="waki-team-toolbar__filter">
+            <span>Rol</span>
+            <select value={roleFilter} onChange={event => setRoleFilter(event.target.value)}>
+              <option value="all">Todos los roles</option>
+              {ROLE_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </label>
+          <span className="waki-team-toolbar__count">
+            {filteredTeam.length} {filteredTeam.length === 1 ? 'miembro' : 'miembros'}
+          </span>
+        </div>
 
         <section className="hotel-team-panel">
 
@@ -890,7 +826,12 @@ export default function HotelTeamPage() {
 
             <div className="hotel-team-list">
 
-              {team.map(
+              {filteredTeam.length === 0 && (
+                <div className="waki-team-no-results">
+                  No encontramos miembros con esos filtros. Prueba otra búsqueda.
+                </div>
+              )}
+              {filteredTeam.map(
                 (member) => {
 
                   const roleMeta =
