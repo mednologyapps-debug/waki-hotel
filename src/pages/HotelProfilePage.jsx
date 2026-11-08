@@ -59,6 +59,9 @@ export default function HotelProfilePage() {
   const [hotel, setHotel] =
     useState(null)
 
+  const [mapOpen, setMapOpen] = useState(false)
+  const [draftLocation, setDraftLocation] = useState(null)
+
 
   const [form, setForm] =
     useState({
@@ -79,6 +82,42 @@ export default function HotelProfilePage() {
   useEffect(() => {
     loadHotel()
   }, [])
+
+  useEffect(() => {
+    if (!mapOpen) return undefined
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const esc = event => { if (event.key === 'Escape') setMapOpen(false) }
+    window.addEventListener('keydown', esc)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', esc)
+    }
+  }, [mapOpen])
+
+  function confirmMapLocation() {
+    if (!draftLocation || !Number.isFinite(Number(draftLocation.latitude)) ||
+      !Number.isFinite(Number(draftLocation.longitude))) return
+    setForm(current => ({
+      ...current,
+      latitude: Number(draftLocation.latitude),
+      longitude: Number(draftLocation.longitude),
+      address: draftLocation.address ?? current.address,
+      district: draftLocation.district ?? current.district,
+      province: draftLocation.province ?? current.province,
+      department: draftLocation.department ?? current.department
+    }))
+    setMapOpen(false)
+  }
+
+  function openMap() {
+    setDraftLocation({
+      latitude: form.latitude, longitude: form.longitude,
+      address: form.address, district: form.district,
+      province: form.province, department: form.department
+    })
+    setMapOpen(true)
+  }
 
 
   /* =========================================================
@@ -709,12 +748,13 @@ export default function HotelProfilePage() {
           <div>
 
             <h1>
-              Configura tu hotel
+              {hotel?.approval_status === 'approved' ? 'Mi hotel' : 'Configura tu hotel'}
             </h1>
 
             <p>
-              Te guiamos paso a paso para que tu hotel
-              esté listo en WAKI. Es rápido y sencillo.
+              {hotel?.approval_status === 'approved'
+                ? 'Actualiza la información que ven tus huéspedes.'
+                : 'Te guiamos paso a paso para que tu hotel esté listo en WAKI.'}
             </p>
 
           </div>
@@ -989,58 +1029,6 @@ export default function HotelProfilePage() {
 
 
             {/* =============================================
-                UBICACIÓN GOOGLE MAPS
-                ============================================= */}
-
-            <div className="hotel-setup-field hotel-setup-field--full">
-
-              <HotelLocationPicker
-                latitude={
-                  form.latitude
-                }
-                longitude={
-                  form.longitude
-                }
-                address={
-                  form.address
-                }
-                onLocationSelected={(
-                  location
-                ) => {
-                  setForm(
-                    (current) => ({
-                      ...current,
-
-                      latitude:
-                        location.latitude,
-
-                      longitude:
-                        location.longitude,
-
-                      address:
-                        location.address ||
-                        current.address,
-
-                      district:
-                        location.district ||
-                        current.district,
-
-                      province:
-                        location.province ||
-                        current.province,
-
-                      department:
-                        location.department ||
-                        current.department
-                    })
-                  )
-                }}
-              />
-
-            </div>
-
-
-            {/* =============================================
                 DIRECCIÓN
                 ============================================= */}
 
@@ -1085,6 +1073,20 @@ export default function HotelProfilePage() {
 
             </label>
 
+
+            <div className="hotel-location-action hotel-setup-field--full">
+              <button type="button" className="hotel-location-action__button" onClick={openMap}>
+                <MapPin size={18} strokeWidth={1.8} />
+                {form.latitude != null && form.longitude != null
+                  ? 'Editar ubicación en mapa'
+                  : 'Seleccionar ubicación en mapa'}
+              </button>
+              {form.latitude != null && form.longitude != null && (
+                <span className="hotel-location-action__confirmed">
+                  Ubicación seleccionada · {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}
+                </span>
+              )}
+            </div>
 
             {/* =============================================
                 DISTRITO
@@ -1351,6 +1353,43 @@ export default function HotelProfilePage() {
 
         </form>
         {hotel&&<HotelServices key={hotel.id} hotel={hotel}/>}
+
+        {mapOpen && (
+          <div className="hotel-map-dialog__overlay"
+            onMouseDown={event => { if (event.target === event.currentTarget) setMapOpen(false) }}>
+            <section role="dialog" aria-modal="true" aria-labelledby="hotel-map-dialog-title"
+              className="hotel-map-dialog">
+              <header className="hotel-map-dialog__header">
+                <div>
+                  <h2 id="hotel-map-dialog-title">Seleccionar ubicación en mapa</h2>
+                  <p>Busca el hotel o selecciona su entrada sobre el mapa para completar la dirección.</p>
+                </div>
+                <button type="button" className="hotel-map-dialog__close"
+                  onClick={() => setMapOpen(false)} aria-label="Cerrar mapa">Cerrar</button>
+              </header>
+              <div className="hotel-map-dialog__body">
+                <HotelLocationPicker
+                  latitude={draftLocation?.latitude}
+                  longitude={draftLocation?.longitude}
+                  address={draftLocation?.address}
+                  onLocationSelected={location => setDraftLocation(location)}
+                />
+              </div>
+              <footer className="hotel-map-dialog__footer">
+                <div className="hotel-map-dialog__address">
+                  {draftLocation?.address || 'Selecciona un lugar. Si no se obtiene la dirección, podrás escribirla en el formulario.'}
+                </div>
+                <div className="hotel-map-dialog__buttons">
+                  <button type="button" className="hotel-setup-secondary-button"
+                    onClick={() => setMapOpen(false)}>Cancelar</button>
+                  <button type="button" className="hotel-setup-primary-button"
+                    disabled={draftLocation?.latitude == null || draftLocation?.longitude == null}
+                    onClick={confirmMapLocation}>Confirmar ubicación</button>
+                </div>
+              </footer>
+            </section>
+          </div>
+        )}
 
       </main>
 
