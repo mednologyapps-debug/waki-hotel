@@ -1,4 +1,5 @@
 import HotelAvailabilityPage from './pages/HotelAvailabilityPage'
+import HotelPortalLayout from './components/hotel/HotelPortalLayout'
 import {
   Navigate,
   useLocation,
@@ -116,9 +117,6 @@ function ReceptionRedirect({ to }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/recepcion" element={<ProtectedPage roles={['admin','reception']} requireApprovedHotel><HotelAvailabilityPage/></ProtectedPage>}/>
-      <Route path="/disponibilidad" element={<ReceptionRedirect to="/recepcion"/>}/>
-      <Route path="/reservas" element={<ReceptionRedirect to="/recepcion/reservas"/>}/>
 
 
       <Route
@@ -176,6 +174,11 @@ export default function App() {
         }
       />
 
+
+      <Route element={<HotelPortalLayout />}>
+      <Route path="/recepcion" element={<ProtectedPage roles={['admin','reception']} requireApprovedHotel><HotelAvailabilityPage/></ProtectedPage>}/>
+      <Route path="/disponibilidad" element={<ReceptionRedirect to="/recepcion"/>}/>
+      <Route path="/reservas" element={<ReceptionRedirect to="/recepcion/reservas"/>}/>
 
       <Route
         path="/dashboard"
@@ -393,6 +396,8 @@ export default function App() {
         }
       />
 
+
+      </Route>
 
       <Route
         path="*"
