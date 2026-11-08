@@ -694,6 +694,7 @@ export default function HotelDashboardPage() {
             ESTADO
         ===================================== */}
 
+        {hotel?.approval_status !== 'approved' && (
         <section className="hotel-status-banner">
 
           <div className="hotel-status-banner__icon">
@@ -740,6 +741,7 @@ export default function HotelDashboardPage() {
           </button>
 
         </section>
+        )}
 
 
         {/* =====================================
