@@ -206,6 +206,8 @@ export default function HotelLocationPicker({
               'places'
             )
 
+        const { Geocoder } = await google.maps.importLibrary('geocoding')
+
         const initialPosition =
           latitude != null &&
           longitude != null
@@ -429,7 +431,7 @@ export default function HotelLocationPicker({
             }
           )
 
-        const geocoder = new google.maps.Geocoder()
+        const geocoder = new Geocoder()
         let latestPin = 0
         map.addListener('click', async (event) => {
           if (!event.latLng) return
