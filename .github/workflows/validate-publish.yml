@@ -21,6 +21,8 @@ jobs:
       - run: npm ci
       - run: npm run test:operations
       - run: npm run test:availability
+      - name: Verify fixed-sidebar layout does not double offset pages
+        run: node --test tests/hotel-layout-regression.test.mjs
       - run: npm run lint
       - name: Build with public WAKI client configuration
         run: npm run build
