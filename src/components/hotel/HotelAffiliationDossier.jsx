@@ -1,3 +1,4 @@
+import { Building2, CheckCircle2, Clock3, CreditCard, FileText, UploadCloud, ExternalLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
@@ -93,66 +94,146 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
 
   if (!hotelId) return null
   const readonly = approved
+  const contractStatus = !dossier?.contract_ready ? 'Pendiente' : dossier?.contract_verified ? 'Verificado' : 'Por verificar'
+  const bankStatus = !dossier?.bank_ready ? 'Pendiente' : dossier?.bank_verified ? 'Verificada' : 'Por verificar'
+  const contractDone = Boolean(dossier?.contract_verified)
+  const bankDone = Boolean(dossier?.bank_verified)
+
   return (
-    <section className="hotel-review-submit" style={{ display: 'block', marginTop: 20 }}>
-      <div className="hotel-review-submit__copy">
-        <span>Expediente comercial y bancario</span>
-        <h3>Contrato firmado y cuenta de abono</h3>
-        <p>Este expediente es privado: solo tu administrador de hotel y el equipo autorizado de WAKI pueden consultarlo. No se muestra a huéspedes ni al personal de recepción.</p>
+    <section className="waki-dossier" aria-labelledby="waki-dossier-title">
+      <header className="waki-dossier__header">
+        <div className="waki-dossier__header-icon"><CreditCard size={21} /></div>
+        <div>
+          <span className="waki-dossier__eyebrow">EXPEDIENTE PRIVADO</span>
+          <h3 id="waki-dossier-title">Contrato y cuenta de abono</h3>
+          <p>Información protegida. Solo el administrador del hotel y WAKI pueden consultarla.</p>
+        </div>
+      </header>
+
+      <div className="waki-dossier__progress">
+        <div className="waki-dossier__progress-item">
+          <FileText size={17} />
+          <span>Contrato</span>
+          <strong className={'waki-dossier__tag ' + (contractDone ? 'is-verified' : '')}>
+            {contractDone && <CheckCircle2 size={13} />}
+            {!contractDone && <Clock3 size={13} />}
+            {contractStatus}
+          </strong>
+        </div>
+        <div className="waki-dossier__progress-item">
+          <Building2 size={17} />
+          <span>Cuenta de abono</span>
+          <strong className={'waki-dossier__tag ' + (bankDone ? 'is-verified' : '')}>
+            {bankDone && <CheckCircle2 size={13} />}
+            {!bankDone && <Clock3 size={13} />}
+            {bankStatus}
+          </strong>
+        </div>
       </div>
-      {error && <p role="alert" style={{ color: '#b42318' }}>{error}</p>}
-      {message && <p role="status" style={{ color: '#16764a' }}>{message}</p>}
-      {dossier && <p>
-        Contrato: <strong>{dossier.contract_ready ? (dossier.contract_verified ? 'Verificado' : 'Por verificar') : 'Pendiente'}</strong>
-        {' · '}Cuenta: <strong>{dossier.bank_ready ? (dossier.bank_verified ? 'Verificada' : 'Por verificar') : 'Pendiente'}</strong>
-      </p>}
-      <form onSubmit={saveBank} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12, marginTop: 12 }}>
-        <label>Banco *
-          <input required disabled={readonly || Boolean(busy)} maxLength={80} value={form.bank_name}
-            onChange={e => setForm(v => ({ ...v, bank_name: e.target.value }))} placeholder="Nombre del banco" />
-        </label>
-        <label>Tipo de cuenta *
-          <select disabled={readonly || Boolean(busy)} value={form.account_type}
-            onChange={e => setForm(v => ({ ...v, account_type: e.target.value }))}>
-            <option value="corriente">Corriente</option><option value="ahorros">Ahorros</option>
-          </select>
-        </label>
-        <label>Número de cuenta *
-          <input required disabled={readonly || Boolean(busy)} inputMode="numeric" pattern="[0-9]{6,30}" value={form.account_number}
-            onChange={e => setForm(v => ({ ...v, account_number: e.target.value.replace(/\D/g,'') }))} />
-        </label>
-        <label>CCI (20 dígitos) *
-          <input required disabled={readonly || Boolean(busy)} inputMode="numeric" maxLength={20} pattern="[0-9]{20}"
-            value={form.cci} onChange={e => setForm(v => ({ ...v, cci: e.target.value.replace(/\D/g,'') }))} />
-        </label>
-        <label>Titular de la cuenta *
-          <input required disabled={readonly || Boolean(busy)} maxLength={150} value={form.account_holder}
-            onChange={e => setForm(v => ({ ...v, account_holder: e.target.value }))} />
-        </label>
-        <label>RUC del titular *
-          <input required disabled={readonly || Boolean(busy)} inputMode="numeric" pattern="[0-9]{11}"
-            maxLength={11} value={form.holder_ruc}
-            onChange={e => setForm(v => ({ ...v, holder_ruc: e.target.value.replace(/\D/g,'') }))} />
-        </label>
-        {!readonly && <button className="hotel-setup-primary-button" type="submit" disabled={Boolean(busy)}>
-          {busy === 'bank' ? 'Guardando...' : 'Guardar datos bancarios'}
-        </button>}
+
+      {error && <div className="waki-dossier__error" role="alert">{error}</div>}
+      {message && <div className="waki-dossier__success" role="status">{message}</div>}
+
+      <form onSubmit={saveBank} className="waki-dossier__form">
+        <div className="waki-dossier__section-title">
+          <CreditCard size={17}/>
+          <h4>Datos bancarios</h4>
+        </div>
+        <div className="waki-dossier__fields">
+          <label>Banco *
+            <input required disabled={readonly || Boolean(busy)} maxLength={80}
+              value={form.bank_name} placeholder="Nombre del banco"
+              onChange={e => setForm(v => ({ ...v, bank_name: e.target.value }))}/>
+          </label>
+          <label>Tipo de cuenta *
+            <select disabled={readonly || Boolean(busy)} value={form.account_type}
+              onChange={e => setForm(v => ({ ...v, account_type: e.target.value }))}>
+              <option value="corriente">Corriente</option>
+              <option value="ahorros">Ahorros</option>
+            </select>
+          </label>
+          <label>Número de cuenta *
+            <input required disabled={readonly || Boolean(busy)} inputMode="numeric" pattern="[0-9]{6,30}"
+              value={form.account_number} placeholder="Solo números"
+              onChange={e => setForm(v => ({ ...v, account_number: e.target.value.replace(/\D/g,'') }))}/>
+          </label>
+          <label>CCI · 20 dígitos *
+            <input required disabled={readonly || Boolean(busy)} inputMode="numeric" maxLength={20}
+              pattern="[0-9]{20}" value={form.cci} placeholder="20 dígitos"
+              onChange={e => setForm(v => ({ ...v, cci: e.target.value.replace(/\D/g,'') }))}/>
+          </label>
+          <label>Titular de la cuenta *
+            <input required disabled={readonly || Boolean(busy)} maxLength={150}
+              value={form.account_holder} placeholder="Nombre o razón social"
+              onChange={e => setForm(v => ({ ...v, account_holder: e.target.value }))}/>
+          </label>
+          <label>RUC del titular *
+            <input required disabled={readonly || Boolean(busy)} inputMode="numeric" pattern="[0-9]{11}" maxLength={11}
+              value={form.holder_ruc} placeholder="11 dígitos"
+              onChange={e => setForm(v => ({ ...v, holder_ruc: e.target.value.replace(/\D/g,'') }))}/>
+          </label>
+        </div>
+        {!readonly && (
+          <div className="waki-dossier__form-actions">
+            <button className="hotel-setup-primary-button" type="submit" disabled={Boolean(busy)}>
+              {busy === 'bank' ? 'Guardando...' : 'Guardar datos bancarios'}
+            </button>
+          </div>
+        )}
       </form>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 18 }}>
-        <label>Contrato firmado en PDF * (hasta 10 MB)
-          {!readonly && <input type="file" accept="application/pdf,.pdf" disabled={Boolean(busy)}
-            onChange={e => { void upload(e.target.files?.[0], 'contract'); e.target.value = '' }} />}
-          {dossier?.signed_contract_path && <button type="button" onClick={() => void view(dossier.signed_contract_path)}>Ver contrato cargado</button>}
-        </label>
-        <label>Constancia bancaria en PDF (recomendada)
-          {!readonly && <input type="file" accept="application/pdf,.pdf" disabled={Boolean(busy)}
-            onChange={e => { void upload(e.target.files?.[0], 'bank'); e.target.value = '' }} />}
-          {dossier?.bank_document_path && <button type="button" onClick={() => void view(dossier.bank_document_path)}>Ver constancia cargada</button>}
-        </label>
+
+      <div className="waki-dossier__files">
+        <div className="waki-dossier__section-title">
+          <FileText size={17}/>
+          <h4>Documentos de afiliación</h4>
+        </div>
+        <div className="waki-dossier__documents">
+          <div className="waki-dossier__document">
+            <div className="waki-dossier__document-icon"><FileText size={21}/></div>
+            <strong>Contrato firmado</strong>
+            <p>Adjunta el contrato en PDF (máximo 10 MB).</p>
+            <div className="waki-dossier__document-actions">
+              {!readonly && (
+                <label className="waki-dossier__upload">
+                  <UploadCloud size={15}/>{busy === 'contract' ? 'Subiendo...' : 'Subir PDF'}
+                  <input type="file" accept="application/pdf,.pdf" disabled={Boolean(busy)}
+                    onChange={e => { void upload(e.target.files?.[0], 'contract'); e.target.value = '' }} />
+                </label>
+              )}
+              {dossier?.signed_contract_path && (
+                <button type="button" onClick={() => void view(dossier.signed_contract_path)}>
+                  <ExternalLink size={15}/> Ver documento
+                </button>
+              )}
+              {!dossier?.signed_contract_path && readonly && <span>Sin documento cargado</span>}
+            </div>
+          </div>
+          <div className="waki-dossier__document">
+            <div className="waki-dossier__document-icon"><Building2 size={21}/></div>
+            <strong>Constancia bancaria</strong>
+            <p>Documento opcional que ayuda a verificar la cuenta.</p>
+            <div className="waki-dossier__document-actions">
+              {!readonly && (
+                <label className="waki-dossier__upload">
+                  <UploadCloud size={15}/>{busy === 'bank' ? 'Subiendo...' : 'Subir PDF'}
+                  <input type="file" accept="application/pdf,.pdf" disabled={Boolean(busy)}
+                    onChange={e => { void upload(e.target.files?.[0], 'bank'); e.target.value = '' }} />
+                </label>
+              )}
+              {dossier?.bank_document_path && (
+                <button type="button" onClick={() => void view(dossier.bank_document_path)}>
+                  <ExternalLink size={15}/> Ver documento
+                </button>
+              )}
+              {!dossier?.bank_document_path && readonly && <span>Sin documento cargado</span>}
+            </div>
+          </div>
+        </div>
+        {!readonly && <p className="waki-dossier__footnote">
+          Para solicitar la aprobación, guarda tu cuenta bancaria y adjunta el contrato firmado.
+          WAKI verificará ambos antes de aprobar el establecimiento.
+        </p>}
       </div>
-      {!readonly && <p style={{ marginTop: 10, fontSize: 13 }}>
-        Para enviar el hotel a revisión se requieren los datos bancarios y el contrato firmado. El administrador global debe verificar ambos antes de aprobar.
-      </p>}
     </section>
   )
 }
