@@ -6,6 +6,7 @@ import { HotelSidebarContents } from './HotelSidebar'
 import { HotelPortalLayoutContext } from './HotelPortalLayoutContext'
 import HotelPageSkeleton from '../common/HotelPageSkeleton'
 import './HotelPortalLayout.css'
+import './HotelExperience.css'
 
 const statusMeta = {
   approved: { text: 'Aprobado', icon: CheckCircle2 },
