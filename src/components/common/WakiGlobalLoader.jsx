@@ -1,3 +1,6 @@
+import { useContext } from 'react'
+import { HotelPortalLayoutContext } from '../hotel/HotelPortalLayoutContext'
+import HotelPageSkeleton from './HotelPageSkeleton'
 import wakiLoader1
   from '../../assets/loader/waki-loader-1.png'
 
@@ -16,6 +19,8 @@ export default function WakiGlobalLoader({
   subtitle = 'Todo estará listo en un momento',
   fullScreen = true
 }) {
+  const layout = useContext(HotelPortalLayoutContext)
+  if (layout?.embedded) return <HotelPageSkeleton title={title} />
   return (
     <div
       className={
