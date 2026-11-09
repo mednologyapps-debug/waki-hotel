@@ -656,52 +656,12 @@ export default function HotelRoomPhotosPage() {
       setSuccessMessage('')
 
 
-      const {
-        error: clearError
-      } =
-        await supabase
-          .from('room_type_images')
-          .update({
-            is_cover:
-              false
-          })
-          .eq(
-            'room_type_id',
-            roomId
-          )
-
-
-      if (clearError) {
-        throw clearError
-      }
-
-
-      const {
-        error: coverError
-      } =
-        await supabase
-          .from('room_type_images')
-          .update({
-            is_cover:
-              true,
-
-            display_order:
-              0
-          })
-          .eq(
-            'id',
-            image.id
-          )
-          .eq(
-            'room_type_id',
-            roomId
-          )
-
-
-      if (coverError) {
-        throw coverError
-      }
-
+      const { error } = await supabase.rpc('hotel_manage_room_photo', {
+        target_room_type: roomId,
+        target_image: image.id,
+        target_action: 'cover'
+      })
+      if (error) throw error
 
       await refreshPhotoState()
 
@@ -757,93 +717,21 @@ export default function HotelRoomPhotosPage() {
       setSuccessMessage('')
 
 
-      const {
-        error: deleteError
-      } =
-        await supabase
-          .from('room_type_images')
-          .delete()
-          .eq(
-            'id',
-            image.id
-          )
-          .eq(
-            'room_type_id',
-            roomId
-          )
+      const { data: storagePath, error } = await supabase.rpc('hotel_manage_room_photo', {
+        target_room_type: roomId,
+        target_image: image.id,
+        target_action: 'delete'
+      })
+      if (error) throw error
 
-
-      if (deleteError) {
-        throw deleteError
-      }
-
-
-      if (
-        image.storage_path
-      ) {
-        const {
-          error: storageError
-        } =
-          await supabase
-            .storage
-            .from('room-images')
-            .remove([
-              image.storage_path
-            ])
-
-
+      if (storagePath) {
+        const { error: storageError } = await supabase.storage
+          .from('room-images')
+          .remove([storagePath])
         if (storageError) {
-          console.warn(
-            'No se pudo limpiar el archivo del storage:',
-            storageError
-          )
+          console.warn('No se pudo limpiar el archivo del storage:', storageError)
         }
       }
-
-
-      const remaining =
-        images.filter(
-          (item) =>
-            item.id !==
-            image.id
-        )
-
-
-      if (
-        image.is_cover &&
-        remaining.length > 0
-      ) {
-        const nextImage =
-          remaining[0]
-
-
-        const {
-          error: nextCoverError
-        } =
-          await supabase
-            .from('room_type_images')
-            .update({
-              is_cover:
-                true,
-
-              display_order:
-                0
-            })
-            .eq(
-              'id',
-              nextImage.id
-            )
-            .eq(
-              'room_type_id',
-              roomId
-            )
-
-
-        if (nextCoverError) {
-          throw nextCoverError
-        }
-      }
-
 
       await refreshPhotoState()
 

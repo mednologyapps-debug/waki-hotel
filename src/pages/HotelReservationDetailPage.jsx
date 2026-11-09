@@ -2399,9 +2399,11 @@ export default function HotelReservationDetailPage() {
 
         await supabase.rpc(
 
-          'hotel_verify_reservation_access',
+          'hotel_verify_reservation_for_detail',
 
           {
+
+            target_reservation_id: reservationId,
 
             target_qr_token:
 
@@ -2457,15 +2459,14 @@ export default function HotelReservationDetailPage() {
 
 
 
-      setErrorMessage(
-
-        error?.message ||
-
-        'No pudimos validar este código QR.'
-
-      )
-
-
+      const message = error?.message || ''
+      const accessErrors = {
+        QR_RESERVATION_MISMATCH: 'Este QR corresponde a otra reserva. Abre la reserva correcta para registrar su ingreso.',
+        RESERVATION_NOT_STARTED: 'El horario reservado todavía no empieza.',
+        RESERVATION_ALREADY_ENDED: 'El horario reservado ya terminó.',
+        HOTEL_NOT_OPERATIONAL: 'El hotel no está habilitado para registrar ingresos.'
+      }
+      setErrorMessage(accessErrors[message] || message || 'No pudimos validar este código QR.')
 
     } finally {
 

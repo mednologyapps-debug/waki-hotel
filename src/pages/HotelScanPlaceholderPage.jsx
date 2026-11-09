@@ -58,6 +58,11 @@ const STATUS_COPY = {
       'El horario de esta reserva ya terminó y no puede registrarse un nuevo acceso.'
   },
 
+  not_started: {
+    title: 'La reserva aún no empieza',
+    message: 'El ingreso se puede registrar desde la hora de inicio de la reserva.'
+  },
+
   not_paid: {
     title: 'Pago pendiente',
     message:
@@ -714,6 +719,14 @@ export default function HotelScanPlaceholderPage() {
   ) {
     const message =
       error?.message || ''
+
+    if (message === 'RESERVATION_NOT_STARTED') {
+      return 'El horario reservado todavía no empieza.'
+    }
+
+    if (message === 'HOTEL_NOT_OPERATIONAL') {
+      return 'El hotel no está habilitado para registrar ingresos.'
+    }
 
     if (
       message.includes(

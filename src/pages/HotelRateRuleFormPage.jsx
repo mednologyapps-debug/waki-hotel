@@ -102,6 +102,7 @@ export default function HotelRateRuleFormPage({
       start_time: '18:00',
       end_time: '23:59',
       price: '',
+      priority: 10,
       is_active: true
     })
 
@@ -277,6 +278,7 @@ export default function HotelRateRuleFormPage({
               start_time,
               end_time,
               price,
+              priority,
               is_active
             `)
             .eq(
@@ -337,6 +339,8 @@ export default function HotelRateRuleFormPage({
 
           price:
             ruleData.price,
+
+          priority: ruleData.priority ?? 10,
 
           is_active:
             ruleData.is_active !== false
@@ -556,6 +560,14 @@ export default function HotelRateRuleFormPage({
       }
 
 
+      const priority = Number(form.priority)
+      if (form.priority === '' || !Number.isInteger(priority) || priority < 0 || priority > 32767) {
+        throw new Error('Ingresa una prioridad entera entre 0 y 32767.')
+      }
+      if (form.use_time && form.start_time === form.end_time) {
+        throw new Error('El inicio y el fin deben ser distintos. Para todo el día, desactiva el horario.')
+      }
+
       const payload = {
         rate_plan_id:
           rateId,
@@ -585,8 +597,7 @@ export default function HotelRateRuleFormPage({
         valid_until:
           null,
 
-        priority:
-          10,
+        priority,
 
         is_active:
           Boolean(
@@ -617,6 +628,8 @@ export default function HotelRateRuleFormPage({
 
               price:
                 payload.price,
+
+              priority: payload.priority,
 
               is_active:
                 payload.is_active
@@ -952,6 +965,19 @@ export default function HotelRateRuleFormPage({
 
               </label>
 
+              <label className="room-form-field room-form-field--full">
+                <span>Prioridad</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="32767"
+                  step="1"
+                  required
+                  value={form.priority}
+                  onChange={event => updateField('priority', event.target.value)}
+                />
+                <small>Si coinciden dos reglas, gana la de mayor prioridad. En empate se aplica la más reciente.</small>
+              </label>
             </div>
 
 
