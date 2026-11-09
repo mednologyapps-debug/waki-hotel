@@ -784,7 +784,7 @@ export default function HotelRatesPage() {
       />
 
 
-      <main className="hotel-dashboard">
+      <main className="hotel-dashboard hotel-rate-readable">
 
 
         <header className="hotel-dashboard-header">

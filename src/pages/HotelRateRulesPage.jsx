@@ -581,7 +581,7 @@ export default function HotelRateRulesPage() {
       />
 
 
-      <main className="hotel-dashboard">
+      <main className="hotel-dashboard hotel-rate-readable">
 
         <button
           type="button"

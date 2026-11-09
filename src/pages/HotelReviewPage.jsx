@@ -57,6 +57,7 @@ export default function HotelReviewPage() {
   const [hotelId, setHotelId] =
     useState(null)
 
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [dossierReady, setDossierReady] =
     useState(false)
 
@@ -519,7 +520,7 @@ export default function HotelReviewPage() {
 
       } else {
         setErrorMessage(
-          error?.message?.includes('AFFILIATION_DOSSIER_INCOMPLETE') ? 'Completa tu cuenta bancaria y adjunta el contrato firmado antes de enviar el hotel.' : error?.message?.includes('HOTEL_LEGAL_ACCEPTANCE_REQUIRED') ? 'Primero guarda la aceptación de los términos para hoteles.' : 'No pudimos enviar el hotel a revisión. Inténtalo nuevamente.'
+          error?.message?.includes('AFFILIATION_DOSSIER_INCOMPLETE') ? 'Guarda tu cuenta bancaria y acepta el contrato de afiliación antes de enviar el hotel.' : error?.message?.includes('HOTEL_LEGAL_ACCEPTANCE_REQUIRED') ? 'Marca la casilla de términos para hoteles y espera la confirmación.' : 'No pudimos enviar el hotel a revisión. Inténtalo nuevamente.'
         )
       }
 
@@ -1269,7 +1270,7 @@ export default function HotelReviewPage() {
 
         {hotelId && <HotelAffiliationDossier hotelId={hotelId} approved={isApproved} onReadyChange={setDossierReady} />}
 
-        {!isApproved && hotelId && <HotelLegalAcceptance hotelId={hotelId} />}
+        {!isApproved && hotelId && <HotelLegalAcceptance hotelId={hotelId} onAccepted={setTermsAccepted} />}
 
         {isApproved ? null : isPendingReview ? (
 
@@ -1336,7 +1337,8 @@ export default function HotelReviewPage() {
               disabled={
                 submitting ||
                 !isReady ||
-                !dossierReady
+                !dossierReady ||
+                !termsAccepted
               }
               onClick={
                 handleSubmitForReview

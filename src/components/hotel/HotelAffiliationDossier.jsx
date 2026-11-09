@@ -1,4 +1,4 @@
-import { Building2, CheckCircle2, Clock3, CreditCard, FileText, UploadCloud, ExternalLink } from 'lucide-react'
+import { CheckCircle2, Clock3, CreditCard, FileText, ExternalLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
@@ -7,20 +7,26 @@ const INITIAL = {
   cci: '', account_holder: '', holder_ruc: ''
 }
 const BUCKET = 'hotel-affiliations'
-const LIMIT = 10 * 1024 * 1024
 
 export default function HotelAffiliationDossier({ hotelId, approved = false, onReadyChange }) {
   const [form, setForm] = useState(INITIAL)
   const [dossier, setDossier] = useState(null)
+  const [offer, setOffer] = useState(null)
+  const [openedPath, setOpenedPath] = useState(null)
   const [busy, setBusy] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   async function load() {
     if (!hotelId) return
-    const { data, error: issue } = await supabase.rpc('hotel_dossier_control', { p_hotel: hotelId })
+    const [{ data, error: issue }, contract] = await Promise.all([
+      supabase.rpc('hotel_dossier_control', { p_hotel: hotelId }),
+      supabase.rpc('hotel_contract_offer', { p_hotel: hotelId })
+    ])
     if (issue) { setError('No se pudo obtener el expediente de afiliación.'); return }
     setDossier(data)
+    setOffer(contract.data)
+    if (contract.error) setError('No se pudo consultar el contrato de afiliación.')
     setForm({
       bank_name: data.bank_name || '', account_type: data.account_type || 'corriente',
       account_number: data.account_number || '', cci: data.cci || '',
@@ -51,45 +57,36 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
     } finally { setBusy('') }
   }
 
-  async function upload(file, kind) {
-    if (!file) return
-    if (file.type !== 'application/pdf' || file.size > LIMIT || file.size === 0) {
-      setError('Adjunta un PDF válido de hasta 10 MB.')
-      return
-    }
-    setBusy(kind); setError(''); setMessage('')
+  async function acceptContract() {
+    if (!offer?.document_path || openedPath !== offer.document_path || busy) return
+    setBusy('contract'); setError(''); setMessage('')
     try {
-      const folder = kind === 'contract' ? 'contracts' : 'bank'
-      const path = hotelId + '/' + folder + '/' + crypto.randomUUID() + '.pdf'
-      const { error: uploadIssue } = await supabase.storage.from(BUCKET).upload(path, file, {
-        contentType: 'application/pdf', upsert: false, cacheControl: '0'
+      const { error: issue } = await supabase.rpc('hotel_contract_offer', {
+        p_hotel: hotelId, p_action: 'accept', p_path: offer.document_path
       })
-      if (uploadIssue) throw uploadIssue
-      const { error: attachIssue } = await supabase.rpc('hotel_dossier_control', {
-        p_hotel: hotelId,
-        p_action: kind === 'contract' ? 'attach_contract' : 'attach_bank_document',
-        p_data: { path }
-      })
-      if (attachIssue) throw attachIssue
+      if (issue) throw issue
       await load()
-      setMessage(kind === 'contract'
-        ? 'Contrato firmado recibido. WAKI revisará el documento.'
-        : 'Constancia bancaria recibida. WAKI revisará el documento.')
-    } catch {
-      setError('No se pudo registrar el PDF. Vuelve a intentarlo sin reemplazar archivos existentes.')
+      setMessage('Tu aceptación del contrato quedó registrada.')
+    } catch (issue) {
+      setError(issue?.message === 'CONTRACT_VERSION_CHANGED'
+        ? 'WAKI actualizó el contrato. Vuelve a abrir el PDF y revísalo.'
+        : 'No se pudo registrar la aceptación. Inténtalo nuevamente.')
+      if (issue?.message === 'CONTRACT_VERSION_CHANGED') await load()
     } finally { setBusy('') }
   }
 
   async function view(path) {
     const tab = window.open('about:blank', '_blank')
+    if (tab) tab.opener = null
     const { data, error: issue } = await supabase.storage.from(BUCKET).createSignedUrl(path, 120)
     if (issue || !data?.signedUrl) {
       tab?.close()
       setError('No se pudo abrir el archivo privado.')
       return
     }
-    if (tab) tab.location.replace(data.signedUrl)
-    else window.location.assign(data.signedUrl)
+    if (!tab) { setError('Permite las ventanas emergentes para abrir el contrato.'); return }
+    tab.location.replace(data.signedUrl)
+    setOpenedPath(path)
   }
 
   if (!hotelId) return null
@@ -185,54 +182,32 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
       <div className="waki-dossier__files">
         <div className="waki-dossier__section-title">
           <FileText size={17}/>
-          <h4>Documentos de afiliación</h4>
+          <h4>Contrato de afiliación</h4>
         </div>
-        <div className="waki-dossier__documents">
-          <div className="waki-dossier__document">
-            <div className="waki-dossier__document-icon"><FileText size={21}/></div>
-            <strong>Contrato firmado</strong>
-            <p>Adjunta el contrato en PDF (máximo 10 MB).</p>
+        <div className="waki-dossier__document">
+          {offer?.accepted_at ? (
+            <p role="status">Aceptación registrada el {new Date(offer.accepted_at).toLocaleString('es-PE', { timeZone: 'America/Lima' })}.</p>
+          ) : offer?.document_path ? (
+            <p>Abre el PDF, revisa las condiciones y confirma tu aceptación.</p>
+          ) : dossier?.signed_contract_path ? (
+            <p>Tu expediente ya contiene un contrato registrado.</p>
+          ) : (
+            <p>WAKI todavía debe publicar el PDF para tu hotel. Podrás aceptarlo aquí cuando esté disponible.</p>
+          )}
+          {(offer?.document_path || dossier?.signed_contract_path) && (
             <div className="waki-dossier__document-actions">
-              {!readonly && (
-                <label className="waki-dossier__upload">
-                  <UploadCloud size={15}/>{busy === 'contract' ? 'Subiendo...' : 'Subir PDF'}
-                  <input type="file" accept="application/pdf,.pdf" disabled={Boolean(busy)}
-                    onChange={e => { void upload(e.target.files?.[0], 'contract'); e.target.value = '' }} />
-                </label>
-              )}
-              {dossier?.signed_contract_path && (
-                <button type="button" onClick={() => void view(dossier.signed_contract_path)}>
-                  <ExternalLink size={15}/> Ver documento
+              <button type="button" onClick={() => void view(offer?.document_path || dossier.signed_contract_path)}>
+                <ExternalLink size={15}/> Abrir contrato PDF
+              </button>
+              {!readonly && offer?.document_path && !offer.accepted_at && (
+                <button type="button" className="hotel-setup-primary-button" onClick={() => void acceptContract()}
+                  disabled={Boolean(busy) || openedPath !== offer.document_path}>
+                  {busy === 'contract' ? 'Registrando…' : 'Acepto el contrato'}
                 </button>
               )}
-              {!dossier?.signed_contract_path && readonly && <span>Sin documento cargado</span>}
             </div>
-          </div>
-          <div className="waki-dossier__document">
-            <div className="waki-dossier__document-icon"><Building2 size={21}/></div>
-            <strong>Constancia bancaria</strong>
-            <p>Documento opcional que ayuda a verificar la cuenta.</p>
-            <div className="waki-dossier__document-actions">
-              {!readonly && (
-                <label className="waki-dossier__upload">
-                  <UploadCloud size={15}/>{busy === 'bank' ? 'Subiendo...' : 'Subir PDF'}
-                  <input type="file" accept="application/pdf,.pdf" disabled={Boolean(busy)}
-                    onChange={e => { void upload(e.target.files?.[0], 'bank'); e.target.value = '' }} />
-                </label>
-              )}
-              {dossier?.bank_document_path && (
-                <button type="button" onClick={() => void view(dossier.bank_document_path)}>
-                  <ExternalLink size={15}/> Ver documento
-                </button>
-              )}
-              {!dossier?.bank_document_path && readonly && <span>Sin documento cargado</span>}
-            </div>
-          </div>
+          )}
         </div>
-        {!readonly && <p className="waki-dossier__footnote">
-          Para solicitar la aprobación, guarda tu cuenta bancaria y adjunta el contrato firmado.
-          WAKI verificará ambos antes de aprobar el establecimiento.
-        </p>}
       </div>
     </section>
   )

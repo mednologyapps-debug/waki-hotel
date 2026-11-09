@@ -309,7 +309,7 @@ export default function HotelOnboardingGuide({
             'Habitaciones',
 
           description:
-            'Agrega las habitaciones que publicarás en WAKI.',
+            'Agrega los tipos de habitación y registra al menos una unidad física activa.',
 
           icon:
             BedDouble,

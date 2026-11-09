@@ -966,3 +966,30 @@
   }
 
 }
+/* Legibilidad en las pantallas de tarifas, incluidas reglas y formularios. */
+.hotel-rate-readable :is(p, label, input, select, button, small, th, td) {
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.hotel-rate-readable :is(input, select) {
+  font-size: 1rem;
+}
+
+.hotel-rate-readable :is(p, small, label) {
+  color: #574a69;
+}
+
+.hotel-rate-readable .hotel-rate-row__price strong {
+  font-size: 1.125rem;
+}
+
+.hotel-setup-profile .hotel-setup-form-card :is(label > span, small),
+.hotel-setup-profile .hotel-setup-form-card button {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.hotel-setup-profile .hotel-setup-form-card :is(input, textarea, select) {
+  font-size: 1rem;
+}

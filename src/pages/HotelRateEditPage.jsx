@@ -392,7 +392,7 @@ export default function HotelRateEditPage() {
       />
 
 
-      <main className="hotel-dashboard">
+      <main className="hotel-dashboard hotel-rate-readable">
 
         <button
           type="button"

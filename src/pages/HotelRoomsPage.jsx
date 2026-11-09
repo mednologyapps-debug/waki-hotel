@@ -1,3 +1,4 @@
+import HotelServices from '../components/hotel/HotelServices'
 import {
   BedDouble,
   Building2,
@@ -181,6 +182,7 @@ export default function HotelRoomsPage() {
             district,
             province,
             approval_status,
+            featured_services,
             is_active
           `)
           .eq(
@@ -619,6 +621,11 @@ export default function HotelRoomsPage() {
             RESUMEN
             ================================================= */}
 
+        {firstActiveRoom && hotel?.approval_status !== 'approved' && (
+          <p className="hotel-dashboard-success">
+            Registra tus habitaciones físicas en <strong>Unidades</strong>, dentro de cada tipo de habitación. Para aprobar el hotel debe haber al menos una unidad activa.
+          </p>
+        )}
         <section className="hotel-rooms-intro">
 
           <div className="hotel-rooms-intro__icon">
@@ -1091,6 +1098,7 @@ export default function HotelRoomsPage() {
 
         )}
 
+        {hotel && <HotelServices key={hotel.id} hotel={hotel} />}
       </main>
 
     </div>

@@ -1,4 +1,3 @@
-import HotelServices from '../components/hotel/HotelServices'
 import {
   Building2,
   Mail,
@@ -736,7 +735,7 @@ export default function HotelProfilePage() {
           CONTENIDO
           ===================================================== */}
 
-      <main className="hotel-dashboard hotel-setup-page">
+      <main className="hotel-dashboard hotel-setup-page hotel-setup-profile">
 
 
         {/* =================================================
@@ -748,13 +747,13 @@ export default function HotelProfilePage() {
           <div>
 
             <h1>
-              {hotel?.approval_status === 'approved' ? 'Mi hotel' : 'Configura tu hotel'}
+              {hotel?.approval_status === 'approved' ? 'Mi hotel' : 'Datos de tu hotel'}
             </h1>
 
             <p>
               {hotel?.approval_status === 'approved'
                 ? 'Actualiza la información que ven tus huéspedes.'
-                : 'Te guiamos paso a paso para que tu hotel esté listo en WAKI.'}
+                : 'Completa los datos de tu sede y confirma su ubicación para continuar.'}
             </p>
 
           </div>
@@ -1081,11 +1080,6 @@ export default function HotelProfilePage() {
                   ? 'Editar ubicación en mapa'
                   : 'Seleccionar ubicación en mapa'}
               </button>
-              {form.latitude != null && form.longitude != null && (
-                <span className="hotel-location-action__confirmed">
-                  Ubicación seleccionada · {Number(form.latitude).toFixed(5)}, {Number(form.longitude).toFixed(5)}
-                </span>
-              )}
             </div>
 
             {/* =============================================
@@ -1352,7 +1346,6 @@ export default function HotelProfilePage() {
           </div>
 
         </form>
-        {hotel&&<HotelServices key={hotel.id} hotel={hotel}/>}
 
         {mapOpen && (
           <div className="hotel-map-dialog__overlay"

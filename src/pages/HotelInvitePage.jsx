@@ -48,6 +48,7 @@ export default function HotelInvitePage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [confirmedSession, setConfirmedSession] = useState(false)
 
   const [legalName, setLegalName] = useState('')
   const [ruc, setRuc] = useState('')
@@ -127,8 +128,6 @@ export default function HotelInvitePage() {
       pendingData = null
     }
 
-    if (!pendingData) return
-
     const {
       data: { session }
     } = await supabase.auth.getSession()
@@ -142,8 +141,7 @@ export default function HotelInvitePage() {
       inviteData.contact_email?.trim()?.toLowerCase()
 
     if (!sessionEmail || sessionEmail !== inviteEmail) {
-      await supabase.auth.signOut()
-
+      if (!pendingData) return
       setErrorMessage(
         'La sesión activa no corresponde al correo de esta invitación.'
       )
@@ -151,7 +149,19 @@ export default function HotelInvitePage() {
       return
     }
 
-    await claimInvite(pendingData, inviteData)
+    if (!session.user.email_confirmed_at) return
+    setConfirmedSession(true)
+    if (!pendingData) {
+      setShowForm(true)
+      return
+    }
+    setAwaitingEmailConfirmation(true)
+    try {
+      await claimInvite(pendingData, inviteData)
+    } catch {
+      setAwaitingEmailConfirmation(false)
+      setShowForm(true)
+    }
   }
 
   async function claimInvite(claimData, currentInvite = invite) {
@@ -184,14 +194,7 @@ export default function HotelInvitePage() {
         window.localStorage.removeItem(pendingClaimKey)
       }
 
-      setSuccessMessage(
-        'Tu acceso WAKI Hotel fue creado. Ingresa al Portal Hotel con el correo y la contraseña registrados.'
-      )
-
-      // Activation and hotel dashboard now live on the same secure origin.
-      window.setTimeout(() => {
-        navigate('/dashboard', { replace: true })
-      }, 1100)
+      navigate('/mi-hotel', { replace: true })
 
       return data
     } catch (error) {
@@ -292,14 +295,14 @@ export default function HotelInvitePage() {
       return
     }
 
-    if (password.length < 8) {
+    if (!confirmedSession && password.length < 8) {
       setErrorMessage(
         'La contraseña debe tener al menos 8 caracteres.'
       )
       return
     }
 
-    if (password !== confirmPassword) {
+    if (!confirmedSession && password !== confirmPassword) {
       setErrorMessage('Las contraseñas no coinciden.')
       return
     }
@@ -343,14 +346,19 @@ export default function HotelInvitePage() {
         }
       }
 
+      if (confirmedSession) {
+        setConfirmedSession(false)
+        setErrorMessage('Tu sesión venció. Ingresa tu contraseña para continuar.')
+        return
+      }
+
       /*
        * Primero intentamos iniciar sesión.
        * Si el correo ya existe y la contraseña es correcta,
        * vinculamos la invitación directamente y NO hacemos signup.
        */
       const {
-        data: loginData,
-        error: loginError
+        data: loginData
       } = await supabase.auth.signInWithPassword({
         email: invite.contact_email,
         password
@@ -417,7 +425,7 @@ export default function HotelInvitePage() {
       setAwaitingEmailConfirmation(true)
 
       setSuccessMessage(
-        `Te enviamos un correo a ${invite.contact_email}. Confirma tu correo y volverás a esta invitación para completar la activación.`
+        `Te enviamos un correo a ${invite.contact_email}. Confirma tu correo para continuar con la configuración de tu hotel.`
       )
     } catch (error) {
       console.error('Error creando acceso:', error)
@@ -538,7 +546,7 @@ export default function HotelInvitePage() {
           <>
             <div className="hotel-invite-heading">
               <h1>
-                Crea tu acceso
+                {confirmedSession ? 'Completa los datos del hotel' : 'Crea tu acceso'}
               </h1>
 
               <p>
@@ -649,6 +657,8 @@ export default function HotelInvitePage() {
                 </label>
               </div>
 
+              {!confirmedSession && (
+                <>
               <label className="hotel-invite-field">
                 <span>
                   Contraseña
@@ -753,6 +763,9 @@ export default function HotelInvitePage() {
                 </div>
               </label>
 
+                </>
+              )}
+
               {errorMessage && (
                 <div className="hotel-invite-inline-error">
                   {errorMessage}
@@ -772,7 +785,7 @@ export default function HotelInvitePage() {
               >
                 {submitting
                   ? 'Creando acceso...'
-                  : 'Crear acceso'}
+                  : confirmedSession ? 'Continuar al portal' : 'Crear acceso'}
               </button>
             </form>
           </>

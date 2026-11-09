@@ -14,108 +14,40 @@ let googleMapsPromise = null
 
 
 function loadGoogleMaps() {
-  if (
-    window.google
-      ?.maps
-      ?.importLibrary
-  ) {
-    return Promise.resolve(
-      window.google
-    )
-  }
+  if (googleMapsPromise) return googleMapsPromise
+  if (window.google?.maps?.importLibrary) return Promise.resolve(window.google)
 
-  if (googleMapsPromise) {
-    return googleMapsPromise
-  }
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  if (!apiKey) return Promise.reject(new Error('MAPS_KEY_MISSING'))
 
-  const apiKey =
-    import.meta.env
-      .VITE_GOOGLE_MAPS_API_KEY
-
-  if (!apiKey) {
-    return Promise.reject(
-      new Error(
-        'El mapa no está habilitado todavía. Contacta al equipo WAKI para configurar la ubicación.'
-      )
-    )
-  }
-
-  googleMapsPromise =
-    new Promise(
-      (resolve, reject) => {
-        const existingScript =
-          document.querySelector(
-            'script[data-waki-google-maps="true"]'
-          )
-
-        if (existingScript) {
-          existingScript.addEventListener(
-            'load',
-            () => resolve(
-              window.google
-            ),
-            {
-              once: true
-            }
-          )
-
-          existingScript.addEventListener(
-            'error',
-            () => reject(
-              new Error(
-                'No pudimos cargar Google Maps.'
-              )
-            ),
-            {
-              once: true
-            }
-          )
-
-          return
-        }
-
-        const script =
-          document.createElement(
-            'script'
-          )
-
-        script.src =
-          'https://maps.googleapis.com/maps/api/js' +
-          '?key=' +
-          encodeURIComponent(
-            apiKey
-          ) +
-          '&v=weekly' +
-          '&loading=async'
-
-        script.async =
-          true
-
-        script.defer =
-          true
-
-        script.dataset
-          .wakiGoogleMaps =
-          'true'
-
-        script.onload =
-          () => resolve(
-            window.google
-          )
-
-        script.onerror =
-          () => reject(
-            new Error(
-              'No pudimos cargar Google Maps.'
-            )
-          )
-
-        document.head.appendChild(
-          script
-        )
-      }
-    )
-
+  googleMapsPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    const callback = 'wakiGoogleMapsReady'
+    const timeout = window.setTimeout(fail, 15000)
+    function cleanup() {
+      window.clearTimeout(timeout)
+      delete window[callback]
+    }
+    function fail() {
+      cleanup()
+      script.remove()
+      reject(new Error('MAPS_LOAD_FAILED'))
+    }
+    window[callback] = () => {
+      if (!window.google?.maps?.importLibrary) return fail()
+      cleanup()
+      resolve(window.google)
+    }
+    script.src = 'https://maps.googleapis.com/maps/api/js?' + new URLSearchParams({
+      key: apiKey, v: 'weekly', loading: 'async', callback, language: 'es', region: 'PE'
+    })
+    script.async = true
+    script.onerror = fail
+    document.head.appendChild(script)
+  }).catch(error => {
+    googleMapsPromise = null
+    throw error
+  })
   return googleMapsPromise
 }
 
@@ -124,17 +56,9 @@ function findAddressPart(
   components,
   types
 ) {
-  const component =
-    components?.find(
-      (item) =>
-        types.some(
-          (type) =>
-            item.types
-              ?.includes(
-                type
-              )
-        )
-    )
+  const component = types
+    .map(type => components?.find(item => item.types?.includes(type)))
+    .find(Boolean)
 
   return component?.longText ||
     component?.long_name ||
@@ -163,6 +87,8 @@ export default function HotelLocationPicker({
   const autocompleteRef =
     useRef(null)
 
+  const [attempt, setAttempt] = useState(0)
+  const [initializationFailed, setInitializationFailed] = useState(false)
   const [loading, setLoading] =
     useState(true)
 
@@ -177,6 +103,7 @@ export default function HotelLocationPicker({
     async function initialize() {
       try {
         setLoading(true)
+        setInitializationFailed(false)
         setErrorMessage('')
 
         const google =
@@ -206,7 +133,6 @@ export default function HotelLocationPicker({
               'places'
             )
 
-        const { Geocoder } = await google.maps.importLibrary('geocoding')
 
         const initialPosition =
           latitude != null &&
@@ -399,7 +325,7 @@ export default function HotelLocationPicker({
                     findAddressPart(
                       components,
                       [
-                        'administrative_area_level_2'
+                        'administrative_area_level_2', 'locality'
                       ]
                     ),
 
@@ -431,7 +357,7 @@ export default function HotelLocationPicker({
             }
           )
 
-        const geocoder = new Geocoder()
+        let geocoder
         let latestPin = 0
         map.addListener('click', async (event) => {
           if (!event.latLng) return
@@ -443,6 +369,10 @@ export default function HotelLocationPicker({
           setErrorMessage('')
           try {
             // Clicking the pin must update the ADDRESS, not just coordinates.
+            if (!geocoder) {
+              const { Geocoder } = await google.maps.importLibrary('geocoding')
+              geocoder = new Geocoder()
+            }
             const { results } = await geocoder.geocode({
               location: { lat: nextLatitude, lng: nextLongitude }
             })
@@ -474,6 +404,8 @@ export default function HotelLocationPicker({
       } catch (
         error
       ) {
+        if (cancelled) return
+        setInitializationFailed(true)
         console.error(
           'Error inicializando Google Maps:',
           error
@@ -497,7 +429,7 @@ export default function HotelLocationPicker({
       cancelled =
         true
     }
-  }, [])
+  }, [attempt])
 
 
   useEffect(() => {
@@ -612,6 +544,8 @@ export default function HotelLocationPicker({
         <div className="hotel-location-picker__error">
 
           {errorMessage}
+          {initializationFailed && <button type="button" className="hotel-setup-secondary-button"
+            onClick={() => setAttempt(value => value + 1)}>Reintentar mapa</button>}
 
         </div>
 

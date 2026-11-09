@@ -21,6 +21,7 @@ import {
 } from 'react'
 
 import {
+  Navigate,
   useNavigate
 } from 'react-router-dom'
 
@@ -580,6 +581,10 @@ export default function HotelDashboardPage() {
   /* =========================================
      LOADING
   ========================================= */
+
+  if (!loading && hotel?.approval_status === 'draft' && onboarding?.info_complete === false) {
+    return <Navigate to="/mi-hotel" replace />
+  }
 
   if (loading) {
     return (

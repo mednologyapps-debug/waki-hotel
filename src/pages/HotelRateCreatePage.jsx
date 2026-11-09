@@ -632,7 +632,7 @@ export default function HotelRateCreatePage() {
       />
 
 
-      <main className="hotel-dashboard">
+      <main className="hotel-dashboard hotel-rate-readable">
 
         {/* VOLVER */}
 
