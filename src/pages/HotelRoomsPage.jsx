@@ -623,7 +623,7 @@ export default function HotelRoomsPage() {
 
         {firstActiveRoom && hotel?.approval_status !== 'approved' && (
           <p className="hotel-dashboard-success">
-            Registra tus habitaciones físicas en <strong>Unidades</strong>, dentro de cada tipo de habitación. Para aprobar el hotel debe haber al menos una unidad activa.
+            Registra tus habitaciones físicas en <strong>Habitaciones físicas</strong>, dentro de cada tipo de habitación. Para aprobar el hotel debe haber al menos una unidad activa.
           </p>
         )}
         <section className="hotel-rooms-intro">
