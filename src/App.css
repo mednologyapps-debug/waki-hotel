@@ -993,3 +993,22 @@
 .hotel-setup-profile .hotel-setup-form-card :is(input, textarea, select) {
   font-size: 1rem;
 }
+
+.hotel-inventory-next {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  margin-block: 0 18px;
+  padding: 16px 20px;
+  border: 1px solid #e4d9f9;
+  border-radius: 14px;
+  background: #f7f2ff;
+  color: #3f2d58;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.hotel-inventory-next p {
+  margin: 0;
+  font-size: 0.9375rem;
+}

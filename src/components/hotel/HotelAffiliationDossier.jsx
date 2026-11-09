@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, CreditCard, FileText, ExternalLink } from 'lucide-react'
+import { Building2, CheckCircle2, Clock3, CreditCard, FileText, ExternalLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 

@@ -46,7 +46,6 @@ export default function HotelRoomCreatePage() {
     useState({
       name: '',
       description: '',
-      inventory_count: 1,
       max_guests: 2,
       bed_type: '',
       size_m2: '',
@@ -237,17 +236,6 @@ export default function HotelRoomCreatePage() {
 
       if (
         Number(
-          form.inventory_count
-        ) < 0
-      ) {
-        throw new Error(
-          'El inventario no puede ser negativo.'
-        )
-      }
-
-
-      if (
-        Number(
           form.max_guests
         ) < 1
       ) {
@@ -297,10 +285,7 @@ export default function HotelRoomCreatePage() {
           form.description.trim() ||
           null,
 
-        inventory_count:
-          Number(
-            form.inventory_count
-          ),
+        inventory_count: 0,
 
         max_guests:
           Number(
@@ -356,7 +341,7 @@ export default function HotelRoomCreatePage() {
 
 
       navigate(
-        `/habitaciones/${newRoom.id}/fotos`,
+        `/habitaciones/${newRoom.id}/unidades?configurar=1`,
         {
           replace: true
         }
@@ -575,37 +560,10 @@ export default function HotelRoomCreatePage() {
               </label>
 
 
-              <label className="room-form-field">
-
-                <span>
-                  Inventario
-                </span>
-
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={
-                    form.inventory_count
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      'inventory_count',
-                      event
-                        .target
-                        .value
-                    )
-                  }
-                />
-
-                <small>
-                  Cantidad disponible de este tipo.
-                </small>
-
-              </label>
-
+              <aside className="room-form-field--full hotel-inventory-next">
+                <strong>El siguiente paso es agregar los cuartos reales</strong>
+                <p>Si creas el tipo «Doble», después registra sus habitaciones, por ejemplo 201 y 202. WAKI calcula la disponibilidad con esas unidades.</p>
+              </aside>
 
               <label className="room-form-field">
 
@@ -900,7 +858,7 @@ export default function HotelRoomCreatePage() {
 
               {saving
                 ? 'Creando...'
-                : 'Crear habitación'}
+                : 'Guardar tipo y agregar cuartos'}
 
             </button>
 

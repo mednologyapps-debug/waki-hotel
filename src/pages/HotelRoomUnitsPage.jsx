@@ -22,7 +22,8 @@ import {
 
 import {
   useNavigate,
-  useParams
+  useParams,
+  useSearchParams
 } from 'react-router-dom'
 
 import HotelSidebar
@@ -81,6 +82,9 @@ function duplicateRoomUnitMessage() {
 export default function HotelRoomUnitsPage() {
   const navigate =
     useNavigate()
+
+  const [searchParams] = useSearchParams()
+  const guidedSetup = searchParams.get('configurar') === '1'
 
   const {
     roomId
@@ -1118,6 +1122,21 @@ export default function HotelRoomUnitsPage() {
         )}
 
 
+        {guidedSetup && (
+          <section className="hotel-inventory-next">
+            <strong>{counts.active ? 'Ya tienes habitaciones disponibles' : 'Agrega el primer cuarto de este tipo'}</strong>
+            <p>{counts.active
+              ? 'Puedes agregar más cuartos aquí o seguir con las fotos de este tipo de habitación.'
+              : 'Para empezar solo escribe el número o código de un cuarto real, por ejemplo 201.'}</p>
+            {counts.active > 0 && (
+              <button type="button" className="hotel-primary-button"
+                onClick={() => navigate(`/habitaciones/${roomId}/fotos`)}>
+                Continuar con fotos
+              </button>
+            )}
+          </section>
+        )}
+
         {/* AGREGAR */}
 
         <section className="hotel-room-unit-create">
@@ -1169,6 +1188,8 @@ export default function HotelRoomUnitsPage() {
                   form.unit_code
                 }
                 placeholder="Ej. 201"
+                required
+                autoFocus={guidedSetup && counts.active === 0}
                 disabled={
                   saving
                 }
@@ -1190,7 +1211,7 @@ export default function HotelRoomUnitsPage() {
             <label>
 
               <span>
-                Nombre interno
+                Nombre interno (opcional)
               </span>
 
               <input
@@ -1220,7 +1241,7 @@ export default function HotelRoomUnitsPage() {
             <label>
 
               <span>
-                Piso
+                Piso (opcional)
               </span>
 
               <input

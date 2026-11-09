@@ -230,6 +230,8 @@ export default function HotelRoomsPage() {
             is_active,
             display_order,
 
+            room_units (is_active),
+
             room_type_images (
               id,
               image_url,
@@ -384,6 +386,8 @@ export default function HotelRoomsPage() {
      CTA DEL ONBOARDING
      ========================================================= */
 
+  const roomWithoutUnits = activeRooms.find(room => !room.room_units?.some(unit => unit.is_active))
+
   const onboardingAction =
     useMemo(
       () => {
@@ -417,6 +421,8 @@ export default function HotelRoomsPage() {
           return null
         }
 
+
+        if (roomWithoutUnits) return null
 
         /*
           PASO 3:
@@ -488,6 +494,7 @@ export default function HotelRoomsPage() {
       [
         hotel,
         activeRooms,
+        roomWithoutUnits,
         firstRoomWithoutPhotos,
         firstRoomWithoutRates
       ]
@@ -621,10 +628,15 @@ export default function HotelRoomsPage() {
             RESUMEN
             ================================================= */}
 
-        {firstActiveRoom && hotel?.approval_status !== 'approved' && (
-          <p className="hotel-dashboard-success">
-            Registra tus habitaciones físicas en <strong>Habitaciones físicas</strong>, dentro de cada tipo de habitación. Para aprobar el hotel debe haber al menos una unidad activa.
-          </p>
+        {roomWithoutUnits && hotel?.approval_status !== 'approved' && (
+          <section className="hotel-inventory-next">
+            <strong>Faltan los cuartos reales de {roomWithoutUnits.name}</strong>
+            <p>Registra cada cuarto con su número o código para que WAKI pueda asignarlo a una reserva.</p>
+            <button type="button" className="hotel-primary-button"
+              onClick={() => navigate(`/habitaciones/${roomWithoutUnits.id}/unidades?configurar=1`)}>
+              Agregar habitaciones físicas
+            </button>
+          </section>
         )}
         <section className="hotel-rooms-intro">
 
