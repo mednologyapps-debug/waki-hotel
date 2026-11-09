@@ -12,6 +12,7 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
   const [form, setForm] = useState(INITIAL)
   const [dossier, setDossier] = useState(null)
   const [offer, setOffer] = useState(null)
+  const [preview, setPreview] = useState(null)
   const [openedPath, setOpenedPath] = useState(null)
   const [busy, setBusy] = useState('')
   const [message, setMessage] = useState('')
@@ -76,17 +77,17 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
   }
 
   async function view(path) {
-    const tab = window.open('about:blank', '_blank')
-    if (tab) tab.opener = null
-    const { data, error: issue } = await supabase.storage.from(BUCKET).createSignedUrl(path, 120)
-    if (issue || !data?.signedUrl) {
-      tab?.close()
-      setError('No se pudo abrir el archivo privado.')
-      return
-    }
-    if (!tab) { setError('Permite las ventanas emergentes para abrir el contrato.'); return }
-    tab.location.replace(data.signedUrl)
-    setOpenedPath(path)
+    setError('')
+    setOpenedPath(null)
+    setPreview(null)
+    setBusy('preview')
+    try {
+      const { data, error: issue } = await supabase.storage.from(BUCKET).createSignedUrl(path, 120)
+      if (issue || !data?.signedUrl) throw issue || new Error('Missing PDF URL')
+      setPreview({ path, url: data.signedUrl })
+    } catch {
+      setError('No se pudo abrir el archivo privado. Inténtalo nuevamente.')
+    } finally { setBusy('') }
   }
 
   if (!hotelId) return null
@@ -194,9 +195,17 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
           ) : (
             <p>WAKI todavía debe publicar el PDF para tu hotel. Podrás aceptarlo aquí cuando esté disponible.</p>
           )}
+          {preview && preview.path === (offer?.document_path || dossier?.signed_contract_path) && (
+            <div>
+              <iframe key={preview.url} src={preview.url} title="Contrato de afiliación de WAKI"
+                width="100%" height="560" referrerPolicy="no-referrer"
+                onLoad={() => setOpenedPath(preview.path)} />
+              <a href={preview.url} target="_blank" rel="noopener noreferrer">Abrir PDF en otra pestaña</a>
+            </div>
+          )}
           {(offer?.document_path || dossier?.signed_contract_path) && (
             <div className="waki-dossier__document-actions">
-              <button type="button" onClick={() => void view(offer?.document_path || dossier.signed_contract_path)}>
+              <button type="button" disabled={Boolean(busy)} onClick={() => void view(offer?.document_path || dossier.signed_contract_path)}>
                 <ExternalLink size={15}/> Abrir contrato PDF
               </button>
               {!readonly && offer?.document_path && !offer.accepted_at && (
