@@ -39,6 +39,20 @@ function onlyNumbers(value) {
   return String(value || '').replace(/\D/g, '')
 }
 
+const inviteErrors = {
+  EMAIL_VERIFICATION_REQUIRED: 'No pudimos verificar tu correo con esta sesión. Vuelve a ingresar tu contraseña para continuar. Si estás creando tu acceso, confirma el correo de WAKI.',
+  RUC_ALREADY_REGISTERED: 'Este RUC ya se encuentra registrado en WAKI.',
+  INVITE_EMAIL_MISMATCH: 'Ingresa con el mismo correo al que se envió esta invitación.',
+  INVITE_ALREADY_CLAIMED: 'Esta invitación ya fue utilizada.',
+  INVITE_EXPIRED: 'Esta invitación venció. Solicita un nuevo enlace a tu asesor WAKI.',
+  INVITE_NOT_FOUND: 'No encontramos esta invitación. Solicita un nuevo enlace a tu asesor WAKI.',
+  over_email_send_rate_limit: 'Espera un momento antes de volver a solicitar el correo.'
+}
+
+function describeInviteError(error, fallback) {
+  return inviteErrors[error?.code] || inviteErrors[error?.message] || fallback
+}
+
 export default function HotelInvitePage() {
   const { token } = useParams()
   const navigate = useNavigate()
@@ -104,10 +118,7 @@ export default function HotelInvitePage() {
     } catch (error) {
       console.error('Error cargando invitación:', error)
 
-      setErrorMessage(
-        error?.message ||
-        'No pudimos cargar esta invitación.'
-      )
+      setErrorMessage(describeInviteError(error, 'No pudimos cargar esta invitación. Vuelve a intentarlo.'))
     } finally {
       setLoading(false)
     }
@@ -149,7 +160,14 @@ export default function HotelInvitePage() {
       return
     }
 
-    if (!session.user.email_confirmed_at) return
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (['user_not_found', 'session_not_found'].includes(error?.code)) {
+      await supabase.auth.signOut({ scope: 'local' })
+      setShowForm(true)
+      setErrorMessage(inviteErrors.EMAIL_VERIFICATION_REQUIRED)
+      return
+    }
+    if (!user?.email_confirmed_at || user.email?.trim().toLowerCase() !== inviteEmail) return
     setConfirmedSession(true)
     if (!pendingData) {
       setShowForm(true)
@@ -200,31 +218,14 @@ export default function HotelInvitePage() {
     } catch (error) {
       console.error('Error reclamando invitación:', error)
 
-      let message =
-        error?.message ||
-        'No pudimos activar el acceso del hotel.'
-
-      if (message.includes('RUC_ALREADY_REGISTERED')) {
-        message =
-          'Este RUC ya se encuentra registrado en WAKI.'
+      if (error?.message === 'EMAIL_VERIFICATION_REQUIRED') {
+        await supabase.auth.signOut({ scope: 'local' })
+        setConfirmedSession(false)
+        setAwaitingEmailConfirmation(false)
+        setShowForm(true)
       }
 
-      if (message.includes('INVITE_EMAIL_MISMATCH')) {
-        message =
-          'Debes activar esta invitación usando el mismo correo al que fue enviada.'
-      }
-
-      if (message.includes('INVITE_ALREADY_CLAIMED')) {
-        message =
-          'Esta invitación ya fue utilizada.'
-      }
-
-      if (message.includes('INVITE_EXPIRED')) {
-        message =
-          'Esta invitación venció. Solicita un nuevo enlace a tu asesor WAKI.'
-      }
-
-      setErrorMessage(message)
+      setErrorMessage(describeInviteError(error, 'No pudimos activar el acceso del hotel. Vuelve a intentarlo.'))
       throw error
     } finally {
       setSubmitting(false)
@@ -260,10 +261,7 @@ export default function HotelInvitePage() {
         error
       )
 
-      setErrorMessage(
-        error?.message ||
-        'No pudimos reenviar el correo de confirmación.'
-      )
+      setErrorMessage(describeInviteError(error, 'No pudimos reenviar el correo de confirmación. Vuelve a intentarlo.'))
     } finally {
       setResendingEmail(false)
     }
@@ -430,10 +428,7 @@ export default function HotelInvitePage() {
     } catch (error) {
       console.error('Error creando acceso:', error)
 
-      setErrorMessage(
-        error?.message ||
-        'No pudimos crear el acceso.'
-      )
+      setErrorMessage((message) => message || describeInviteError(error, 'No pudimos crear el acceso. Vuelve a intentarlo.'))
     } finally {
       setSubmitting(false)
     }
