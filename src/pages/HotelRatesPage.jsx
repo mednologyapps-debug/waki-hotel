@@ -60,6 +60,70 @@ export default function HotelRatesPage() {
   const [rooms, setRooms] =
     useState([])
 
+  const [copyTarget, setCopyTarget] = useState(null)
+  const [copySource, setCopySource] = useState('')
+  const [copyRates, setCopyRates] = useState([])
+  const [copySaving, setCopySaving] = useState(false)
+  const [copyError, setCopyError] = useState('')
+
+  function selectCopySource(sourceId) {
+    setCopySource(sourceId)
+    setCopyError('')
+    const source = rooms.find((room) => room.id === sourceId)
+    setCopyRates((source?.rate_plans || [])
+      .filter((rate) => rate.is_active)
+      .map((rate) => ({ ...rate, base_price: String(rate.base_price) })))
+  }
+
+  async function saveCopiedRates(event) {
+    event.preventDefault()
+    if (copySaving || !copyTarget || !copyRates.length) return
+    setCopySaving(true)
+    setCopyError('')
+
+    try {
+      const { data: existing, error: readError } = await supabase.from('rate_plans')
+        .select('duration_minutes,display_order').eq('room_type_id', copyTarget)
+      if (readError) throw readError
+
+      const durations = new Set(existing.map((rate) => rate.duration_minutes))
+      const firstOrder = Math.max(0, ...existing.map((rate) => rate.display_order || 0))
+      const rows = []
+      for (const rate of copyRates) {
+        if (durations.has(rate.duration_minutes)) {
+          setCopyError('El destino ya tiene una tarifa con esa duración o está repetida en la selección. Quita esa tarifa de la copia para continuar.')
+          return
+        }
+        const price = Number(rate.base_price)
+        if (!Number.isFinite(price) || price <= 0) {
+          setCopyError('Ingresa un precio mayor a cero para cada tarifa.')
+          return
+        }
+        durations.add(rate.duration_minutes)
+        rows.push({
+          room_type_id: copyTarget,
+          name: rate.name,
+          duration_minutes: rate.duration_minutes,
+          base_price: price,
+          currency: rate.currency,
+          is_active: true,
+          display_order: firstOrder + rows.length + 1
+        })
+      }
+
+      const { error } = await supabase.from('rate_plans').insert(rows)
+      if (error) throw error
+      setCopyTarget(null)
+      setSuccessMessage(rows.length === 1 ? 'Se copió una tarifa.' : `Se copiaron ${rows.length} tarifas.`)
+      await loadRates()
+    } catch (error) {
+      console.error('Error al copiar tarifas:', error)
+      setCopyError('No pudimos copiar las tarifas. Vuelve a intentarlo.')
+    } finally {
+      setCopySaving(false)
+    }
+  }
+
 
   useEffect(() => {
     loadRates()
@@ -1031,6 +1095,69 @@ export default function HotelRatesPage() {
 
                     </div>
 
+
+                    {rooms.some((source) => source.id !== room.id && source.rate_plans.some((rate) => rate.is_active)) && (
+                      <button
+                        type="button"
+                        className="hotel-primary-button"
+                        disabled={copySaving}
+                        aria-expanded={copyTarget === room.id}
+                        onClick={() => {
+                          setCopyTarget(copyTarget === room.id ? null : room.id)
+                          selectCopySource('')
+                        }}
+                      >
+                        Copiar tarifas de otra habitación
+                      </button>
+                    )}
+
+                    {copyTarget === room.id && (
+                      <form className="hotel-rate-list" onSubmit={saveCopiedRates}>
+                        <label>
+                          Habitación de origen{' '}
+                          <select value={copySource} disabled={copySaving} onChange={(event) => selectCopySource(event.target.value)}>
+                            <option value="">Selecciona una habitación</option>
+                            {rooms.filter((source) => source.id !== room.id && source.rate_plans.some((rate) => rate.is_active))
+                              .map((source) => <option key={source.id} value={source.id}>{source.name}</option>)}
+                          </select>
+                        </label>
+                        <p>Se copian las tarifas base activas. Podrás configurar las reglas de días y horarios en el destino.</p>
+                        {copyRates.map((rate) => (
+                          <div className="hotel-rate-row" key={rate.id}>
+                            <div>
+                              <strong>{rate.name} · {rate.duration_minutes} min</strong>
+                              {rates.some((existing) => existing.duration_minutes === rate.duration_minutes) && (
+                                <p>El destino ya tiene esta duración.</p>
+                              )}
+                            </div>
+                            <label>
+                              Precio ({rate.currency}){' '}
+                              <input
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                required
+                                value={rate.base_price}
+                                disabled={copySaving}
+                                onChange={(event) => setCopyRates((items) => items.map((item) =>
+                                  item.id === rate.id ? { ...item, base_price: event.target.value } : item))}
+                              />
+                            </label>
+                            <button type="button" disabled={copySaving} onClick={() =>
+                              setCopyRates((items) => items.filter((item) => item.id !== rate.id))}>
+                              Quitar
+                            </button>
+                          </div>
+                        ))}
+                        {copyError && <p role="alert">{copyError}</p>}
+                        <div>
+                          <button className="hotel-primary-button" type="submit" disabled={copySaving || !copyRates.length}>
+                            {copySaving ? 'Copiando…' : 'Guardar tarifas copiadas'}
+                          </button>{' '}
+                          <button type="button" disabled={copySaving} onClick={() => setCopyTarget(null)}>Cancelar</button>
+                        </div>
+                      </form>
+                    )}
 
                     {rates.length === 0 ? (
 
