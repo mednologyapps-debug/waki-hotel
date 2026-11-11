@@ -106,9 +106,11 @@ export default function HotelInvitePage() {
 
       setInvite(data)
 
-      if (data?.hotel_name && !legalName) {
-        setLegalName(data.hotel_name)
+      if ((data?.legal_name || data?.hotel_name) && !legalName) {
+        setLegalName(data.legal_name || data.hotel_name)
       }
+
+      if (data?.ruc && !ruc) setRuc(data.ruc)
 
       if (data?.contact_phone && !phone) {
         setPhone(data.contact_phone)
@@ -548,6 +550,15 @@ export default function HotelInvitePage() {
                 Completa los datos legales mínimos
                 para activar el portal de tu hotel.
               </p>
+              {invite?.source === 'quick' && invite?.plan_code && (
+                <div className="hotel-invite-plan-summary" role="note">
+                  <strong>Plan acordado: {invite.plan_code === 'socio' ? 'Socio WAKI' : 'Flexible'}</strong>
+                  <span>{invite.plan_code === 'socio'
+                    ? 'Comisión 8 % + IGV y S/ 99 + IGV al mes.'
+                    : 'Comisión 12 % + IGV, sin cuota mensual.'}</span>
+                  <small>Podrás revisar y aceptar el contrato PDF dentro de WAKI.</small>
+                </div>
+              )}
             </div>
 
             <form

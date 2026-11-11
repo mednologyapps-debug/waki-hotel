@@ -61,6 +61,23 @@
   line-height: 1.55;
 }
 
+.hotel-invite-plan-summary {
+  display: grid;
+  gap: 5px;
+  margin: 18px 0 22px;
+  padding: 14px 16px;
+  border: 1px solid #dfd2fa;
+  border-radius: 12px;
+  background: #faf7ff;
+  color: #4c3477;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.hotel-invite-plan-summary small {
+  color: #786c89;
+  font-size: 12px;
+}
+
 .hotel-invite-hotel {
   margin-top: 28px;
   padding: 18px;

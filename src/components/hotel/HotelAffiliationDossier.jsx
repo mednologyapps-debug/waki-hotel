@@ -1,5 +1,5 @@
 import { Building2, CheckCircle2, Clock3, CreditCard, FileText, ExternalLink } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const INITIAL = {
@@ -14,9 +14,11 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
   const [offer, setOffer] = useState(null)
   const [preview, setPreview] = useState(null)
   const [openedPath, setOpenedPath] = useState(null)
+  const [generatingContract, setGeneratingContract] = useState(false)
   const [busy, setBusy] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const autoOfferRequested = useRef(null)
 
   async function load() {
     if (!hotelId) return
@@ -28,6 +30,19 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
     setDossier(data)
     setOffer(contract.data)
     if (contract.error) setError('No se pudo consultar el contrato de afiliación.')
+    if (!approved && !contract.data?.document_path && !data.signed_contract_path && autoOfferRequested.current !== hotelId) {
+      autoOfferRequested.current = hotelId
+      setGeneratingContract(true)
+      const { error: generationError } = await supabase.functions.invoke('hotel-contract-offer', { body: { hotel_id: hotelId } })
+      setGeneratingContract(false)
+      if (generationError) {
+        setError('No se pudo preparar el contrato. Revisa que la invitación tenga razón social, RUC y plan comercial, o contacta a WAKI.')
+      } else {
+        const { data: refreshedOffer, error: refreshError } = await supabase.rpc('hotel_contract_offer', { p_hotel: hotelId })
+        if (refreshError) setError('El contrato se generó, pero no pudimos mostrarlo. Actualiza esta página.')
+        else setOffer(refreshedOffer)
+      }
+    }
     setForm({
       bank_name: data.bank_name || '', account_type: data.account_type || 'corriente',
       account_number: data.account_number || '', cci: data.cci || '',
@@ -193,7 +208,7 @@ export default function HotelAffiliationDossier({ hotelId, approved = false, onR
           ) : dossier?.signed_contract_path ? (
             <p>Tu expediente ya contiene un contrato registrado.</p>
           ) : (
-            <p>WAKI todavía debe publicar el PDF para tu hotel. Podrás aceptarlo aquí cuando esté disponible.</p>
+            <p>{generatingContract ? 'Estamos preparando el PDF de afiliación con los datos de tu hotel y el plan acordado…' : 'El contrato PDF se preparará automáticamente con la razón social, RUC y plan acordados.'}</p>
           )}
           {preview && preview.path === (offer?.document_path || dossier?.signed_contract_path) && (
             <div>
